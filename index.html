@@ -2214,6 +2214,33 @@
   </div>
 </div>
 
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getDatabase, ref, set, push, onValue, remove } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyBfxSMeAWZaLcrbiGqG9uv8wYyW_H9-sQ8",
+  authDomain: "colorplastic-87a1c.firebaseapp.com",
+  databaseURL: "https://colorplastic-87a1c-default-rtdb.europe-west1.firebasedatabase.app",
+  projectId: "colorplastic-87a1c",
+  storageBucket: "colorplastic-87a1c.firebasestorage.app",
+  messagingSenderId: "283651673468",
+  appId: "1:283651673468:web:07da20b37db6bd3857a8f9"
+};
+
+const firebaseApp = initializeApp(firebaseConfig);
+const db = getDatabase(firebaseApp);
+
+window.fbDb = db;
+window.fbRef = ref;
+window.fbSet = set;
+window.fbPush = push;
+window.fbOnValue = onValue;
+window.fbRemove = remove;
+window.firebaseReady = true;
+window.dispatchEvent(new Event('firebaseReady'));
+</script>
+
 <script>
 // ══════════════════════════════════════════
 //  STATE
@@ -2231,9 +2258,9 @@ const ROLES = {
   udrzba:     { pin: '6666', label: 'Údržba',     short: 'Údržba' },
 };
 
-// Shared in-memory data (simulates real-time backend)
+// In-memory cache — synced with Firebase
 const appData = {
-  requests: [
+  requests: [ // loaded from Firebase
     { id: 1, time: timeAgo(35), material: 'PP Natural', qty: 250, machine: 'Engel duo 300T', priority: 'normal', status: 'delivered', worker: 'Seřizovač', resolvedTime: timeAgo(20) },
     { id: 2, time: timeAgo(18), material: 'ABS Černý', qty: 180, machine: 'Engel duo 550T', priority: 'urgent', status: 'ready', worker: 'Seřizovač', resolvedTime: timeAgo(5) },
     { id: 3, time: timeAgo(8), material: 'PE-HD Natural', qty: 400, machine: 'Engel duo 1700T', priority: 'normal', status: 'pending', worker: 'Seřizovač', resolvedTime: null },
@@ -2273,6 +2300,112 @@ function timeAgo(minutesAgo) {
 function nowTime() {
   return new Date().toTimeString().slice(0,5);
 }
+
+
+// ══════════════════════════════════════════
+//  FIREBASE SYNC
+// ══════════════════════════════════════════
+
+function fbSave(path, data) {
+  if (!window.firebaseReady) return;
+  window.fbSet(window.fbRef(window.fbDb, path), data)
+    .catch(e => console.error('FB save error:', e));
+}
+
+function fbPushItem(path, data) {
+  if (!window.firebaseReady) return null;
+  return window.fbPush(window.fbRef(window.fbDb, path), data);
+}
+
+function fbListen(path, callback) {
+  if (!window.firebaseReady) {
+    window.addEventListener('firebaseReady', () => fbListen(path, callback));
+    return;
+  }
+  window.fbOnValue(window.fbRef(window.fbDb, path), snap => {
+    callback(snap.val());
+  });
+}
+
+function initFirebaseListeners() {
+  // REQUESTS
+  fbListen('requests', val => {
+    if (val) {
+      appData.requests = Object.entries(val).map(([k,v]) => ({...v, fbKey: k}));
+    } else {
+      appData.requests = [];
+    }
+    refreshCurrentPage();
+  });
+
+  // SCRAP
+  fbListen('scrap', val => {
+    if (val) {
+      appData.scrap = Object.entries(val).map(([k,v]) => ({...v, fbKey: k})).reverse();
+    } else {
+      appData.scrap = [];
+    }
+    refreshCurrentPage();
+  });
+
+  // SKLAD ALERTS
+  fbListen('skladAlerts', val => {
+    if (val) {
+      appData.skladAlerts = Object.entries(val).map(([k,v]) => ({...v, fbKey: k}));
+    } else {
+      appData.skladAlerts = [];
+    }
+    refreshCurrentPage();
+  });
+
+  // HISTORY LOG
+  fbListen('historyLog', val => {
+    if (val) {
+      appData.historyLog = Object.entries(val).map(([k,v]) => ({...v, fbKey: k}))
+        .sort((a,b) => (b.timestamp||0) - (a.timestamp||0));
+    } else {
+      appData.historyLog = [];
+    }
+    refreshCurrentPage();
+  });
+
+  // PRODUCTION
+  fbListen('production', val => {
+    if (val) {
+      appData.production = Object.entries(val).map(([k,v]) => ({...v, fbKey: k}));
+    } else {
+      // Init production if empty
+      appData.production.forEach((p, i) => {
+        fbSave('production/' + i, p);
+      });
+    }
+    refreshCurrentPage();
+  });
+
+  // FORMA CHANGES
+  fbListen('formaChanges', val => {
+    if (val) {
+      appData.formaChanges = Object.entries(val).map(([k,v]) => ({...v, fbKey: k})).reverse();
+    } else {
+      appData.formaChanges = [];
+    }
+    refreshCurrentPage();
+  });
+}
+
+function refreshCurrentPage() {
+  const activeBtn = document.querySelector('.nav-btn.active');
+  if (activeBtn) {
+    renderPage(activeBtn.dataset.page);
+    updateNavBadges();
+  }
+}
+
+function addToHistory(entry) {
+  entry.timestamp = Date.now();
+  fbPushItem('historyLog', entry);
+}
+
 
 // ══════════════════════════════════════════
 //  LOGIN
@@ -2378,6 +2511,9 @@ function initApp() {
 
   // Show first page
   switchPage(NAV_CONFIG[role][0].id);
+  // Start Firebase listeners
+  if (window.firebaseReady) initFirebaseListeners();
+  else window.addEventListener('firebaseReady', initFirebaseListeners);
 
   // Clock
   setInterval(() => {
@@ -2684,13 +2820,17 @@ function saveProdStatus() {
   prod.material = matVal || null;
   prod.running = !!formaNum;
   prod.updatedAt = nowTime();
+  // Save production to Firebase
+  const prodIdx = appData.production.findIndex(p => p.machine === currentProdMachine);
+  if (prod.fbKey) fbSave('production/' + prod.fbKey, prod);
+  else fbSave('production/' + prodIdx, prod);
 
   // Log to history
   if (!appData.historyLog) appData.historyLog = [];
   const changeText = formaNum
     ? 'Aktualizace výroby: <strong>' + currentProdMachine + '</strong> · forma č. ' + formaNum + (matVal ? ' · ' + matVal : '')
     : 'Lis zastaven: <strong>' + currentProdMachine + '</strong>' + (oldForma ? ' · forma č. ' + oldForma + ' sundána' : '');
-  appData.historyLog.unshift({
+  addToHistory({
     id: appData.nextId++,
     time: nowTime(),
     type: 'prod',
@@ -2768,12 +2908,13 @@ function submitFormaChange() {
     return;
   }
 
-  appData.formaChanges.unshift({
+  const formaData = {
     id: appData.nextId++,
     machine, changeTime, formOff, formOn, material, needsDry, note,
     issuedAt: nowTime(),
     active: true,
-  });
+  };
+  fbPushItem('formaChanges', formaData);
 
   // reset form
   document.getElementById('formy-machine').value = '';
@@ -2849,7 +2990,7 @@ function acknowledgeAlert(alertId) {
 
   // Add to history log
   if (!appData.historyLog) appData.historyLog = [];
-  appData.historyLog.unshift({
+  addToHistory({
     id: appData.nextId++,
     time: nowTime(),
     type: 'unavailable',
@@ -3071,7 +3212,7 @@ function submitScrap() {
     worker: 'Seřizovač',
   };
 
-  appData.scrap.unshift(newScrap);
+  fbPushItem('scrap', newScrap);
 
   document.getElementById('scrap-material').value = '';
   document.getElementById('scrap-weight').value = '';
@@ -3106,6 +3247,7 @@ function respondRequest(action) {
   req.status = action === 'ready' ? 'ready' : 'unavailable';
   req.resolvedTime = nowTime();
   req.skladNote = document.getElementById('modal-note').value.trim();
+  if (req.fbKey) fbSave('requests/' + req.fbKey, req);
 
   // Log to history
   if (!appData.historyLog) appData.historyLog = [];
@@ -3115,14 +3257,15 @@ function respondRequest(action) {
   // If unavailable, add to global alerts visible to everyone
   if (action === 'unavailable') {
     if (!appData.skladAlerts) appData.skladAlerts = [];
-    appData.skladAlerts.unshift({
+    const alertData = {
       id: appData.nextId++,
       material: req.material,
       qty: req.qty,
       machine: req.machine,
       time: nowTime(),
       note: req.skladNote,
-    });
+    };
+    fbPushItem('skladAlerts', alertData);
   }
 
   closeModal();
@@ -3144,7 +3287,7 @@ function respondRequest(action) {
     });
     // Přidat do historie
     if (!appData.historyLog) appData.historyLog = [];
-    appData.historyLog.unshift({
+    addToHistory({
       id: appData.nextId++,
       time: nowTime(),
       type: 'unavailable',
