@@ -1125,19 +1125,26 @@ function renderRepTables() {
 function renderFormy() {
   var el = document.getElementById('formy-list'); if (!el) return;
   if (!D.formaChanges.length) {
-    el.innerHTML='<div style="text-align:center;padding:40px;color:var(--text3)">Žádná aktivní oznámení</div>'; return;
+    el.innerHTML='<div style="text-align:center;padding:40px;color:var(--text3)">Zadna aktivni oznameni</div>'; return;
   }
-  el.innerHTML = D.formaChanges.map(function(f){
-    return '<div class="card cpad" style="margin-bottom:12px">' +
-      '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">' +
-        '<span style="font-family:\'Barlow Condensed\',sans-serif;font-size:18px;font-weight:700">🏭 '+f.machine+'</span>' +
-        '<span style="font-family:\'JetBrains Mono\',monospace;font-size:17px;color:#ff6b6b">⏰ '+f.changeTime+'</span>' +
-      '</div>' +
-      '<div style="font-size:13px;color:var(--text2)">Sundat <strong style="color:#ff4545">č. '+f.formOff+'</strong> → Nasadit <strong style="color:var(--green-text)">č. '+f.formOn+'</strong>'+(f.mat?' · '+f.mat:'')+'</div>' +
-      (f.dry?'<div style="margin-top:7px;display:inline-flex;align-items:center;gap:4px;background:var(--orange-dim);border:1px solid rgba(255,156,0,.3);border-radius:4px;padding:2px 8px;font-size:11px;font-weight:700;color:var(--orange)">🔥 Nutno nasušit</div>':'')+
-      (f.note?'<div style="font-size:12px;color:var(--text3);margin-top:7px;padding-top:7px;border-top:1px solid var(--border)">'+f.note+'</div>':'')+
-    '</div>';
-  }).join('');
+  var html = '';
+  D.formaChanges.forEach(function(f) {
+    var k = f.fbKey || '';
+    html += '<div class="card cpad" style="margin-bottom:12px">';
+    html += '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">';
+    html += '<span style="font-family:\'Barlow Condensed\',sans-serif;font-size:18px;font-weight:700">🏭 ' + f.machine + '</span>';
+    html += '<div style="display:flex;align-items:center;gap:10px">';
+    html += '<span style="font-family:\'JetBrains Mono\',monospace;font-size:17px;color:#ff6b6b">⏰ ' + f.changeTime + '</span>';
+    if (role === 'vedouci') {
+      html += '<button class="btn bg bsm" style="color:#ff4545;border-color:rgba(255,69,69,.3)" data-k="' + k + '" onclick="deleteForma(this.dataset.k)">✕ Zrušit</button>';
+    }
+    html += '</div></div>';
+    html += '<div style="font-size:13px;color:var(--text2)">Sundat <strong style="color:#ff4545">c. ' + f.formOff + '</strong> &rarr; Nasadit <strong style="color:var(--green-text)">c. ' + f.formOn + '</strong>' + (f.mat ? ' &middot; ' + f.mat : '') + '</div>';
+    if (f.dry) html += '<div style="margin-top:7px;display:inline-flex;align-items:center;gap:4px;background:var(--orange-dim);border:1px solid rgba(255,156,0,.3);border-radius:4px;padding:2px 8px;font-size:11px;font-weight:700;color:var(--orange)">Nutno nasu&#353;it</div>';
+    if (f.note) html += '<div style="font-size:12px;color:var(--text3);margin-top:7px;padding-top:7px;border-top:1px solid var(--border)">' + f.note + '</div>';
+    html += '</div>';
+  });
+  el.innerHTML = html;
 }
 
 function renderObjednavky() {
