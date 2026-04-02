@@ -246,7 +246,7 @@ tbody td{padding:11px 14px;font-size:13px;}
         <div class="rb" onclick="selRole('technolog')" id="rb-technolog"><div class="ri">🔬</div><span class="rn">Technolog</span><span class="rp">5555</span></div>
         <div class="rb" onclick="selRole('udrzba')" id="rb-udrzba"><div class="ri">🔩</div><span class="rn">Údržba</span><span class="rp">6666</span></div>
       </div>
-      <input type="password" class="pin" id="pin" maxlength="4" placeholder="••••" onkeydown="if(event.key==='Enter')doLogin()">
+      <input type="password" class="pin" id="pin" maxlength="4" placeholder="••••" autocomplete="off" onkeydown="if(event.key==='Enter')doLogin()">
       <button class="lbtn" onclick="doLogin()">Přihlásit se →</button>
       <div class="lerr" id="lerr">Nesprávný PIN nebo nevybraná role</div>
     </div>
@@ -1385,6 +1385,9 @@ function toast(type, title, msg) {
   c.appendChild(t);
   setTimeout(function(){ t.style.opacity='0'; t.style.transform='translateX(14px)'; t.style.transition='all .3s'; setTimeout(function(){ t.remove(); },300); },3500);
 }
+
+// Clear PIN on load
+document.getElementById('pin').value='';
 
 // Clock
 setInterval(function(){
