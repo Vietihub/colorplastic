@@ -2223,6 +2223,7 @@
 // ══════════════════════════════════════════
 var db = null;
 function initFirebase() {
+  console.log('initFirebase called, firebase type:', typeof firebase);
   if (typeof firebase === 'undefined') {
     console.error('Firebase SDK not loaded');
     return false;
@@ -2239,6 +2240,7 @@ function initFirebase() {
     });
   }
   db = firebase.database();
+  console.log('Firebase DB initialized:', db ? 'OK' : 'FAILED');
   return true;
 }
 
@@ -2248,8 +2250,9 @@ function fbSave(path, data) {
 }
 
 function fbPushItem(path, data) {
-  if (!db) return;
-  db.ref(path).push(data).catch(e => console.error('FB push:', e));
+  console.log('fbPushItem:', path, data);
+  if (!db) { console.error('db is null!'); return; }
+  db.ref(path).push(data).then(() => console.log('Push OK:', path)).catch(e => console.error('FB push:', e));
 }
 
 function fbListen(path, callback) {
