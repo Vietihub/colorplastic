@@ -1470,6 +1470,7 @@
         <div class="live-dot">Aktualizováno live</div>
       </div>
 
+      <div id="dovolene-banner-dashboard"></div>
       <div id="unavail-banner-dashboard"></div>
       <div id="forma-banner-dashboard"></div>
 
@@ -2398,6 +2399,100 @@
       </div>
     </div>
 
+
+    <!-- ════════════ DOVOLENÉ Mistr ════════════ -->
+    <div class="page" id="page-dovolene">
+      <div class="section-header">
+        <div>
+          <div class="section-title">Dovolené</div>
+          <div class="section-subtitle">Nahlásit žádost o dovolenou pro zaměstnance</div>
+        </div>
+      </div>
+      <div class="two-col">
+        <div>
+          <div class="form-card">
+            <div class="form-card-title">Nová žádost o dovolenou</div>
+            <div class="form-grid">
+              <div class="form-row">
+                <div class="form-group">
+                  <label class="form-label">Jméno zaměstnance</label>
+                  <input type="text" class="form-input" id="dov-name" placeholder="Jméno a příjmení">
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Pozice</label>
+                  <select class="form-select" id="dov-role">
+                    <option>Operátor</option>
+                    <option>Seřizovač</option>
+                    <option>Mistr</option>
+                    <option>Technolog</option>
+                    <option>Údržba</option>
+                    <option>Jiné</option>
+                  </select>
+                </div>
+              </div>
+              <div class="form-row">
+                <div class="form-group">
+                  <label class="form-label">Od</label>
+                  <input type="date" class="form-input" id="dov-from">
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Do</label>
+                  <input type="date" class="form-input" id="dov-to">
+                </div>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Poznámka</label>
+                <textarea class="form-textarea" id="dov-note" placeholder="Důvod, náhrada..." style="min-height:70px"></textarea>
+              </div>
+              <button class="btn btn-green" onclick="submitDovolena()" style="width:100%">
+                🏖 Odeslat žádost vedoucímu
+              </button>
+            </div>
+          </div>
+        </div>
+        <div>
+          <div class="table-card">
+            <div class="table-card-header">
+              <div class="table-card-title">Přehled žádostí</div>
+              <div class="live-dot">Live</div>
+            </div>
+            <div class="table-scroll">
+              <table>
+                <thead>
+                  <tr><th>Zaměstnanec</th><th>Pozice</th><th>Od</th><th>Do</th><th>Stav</th></tr>
+                </thead>
+                <tbody id="dovolene-mistr-table"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ════════════ DOVOLENÉ Vedoucí ════════════ -->
+    <div class="page" id="page-dovolene-vedouci">
+      <div class="section-header">
+        <div>
+          <div class="section-title">Dovolené</div>
+          <div class="section-subtitle">Schválení a zamítnutí žádostí</div>
+        </div>
+      </div>
+      <div id="dovolene-pending-list"></div>
+      <div class="table-card">
+        <div class="table-card-header">
+          <div class="table-card-title">Historie žádostí</div>
+        </div>
+        <div class="table-scroll">
+          <table>
+            <thead>
+              <tr><th>Zaměstnanec</th><th>Pozice</th><th>Od</th><th>Do</th><th>Poznámka</th><th>Stav</th><th>Akce</th></tr>
+            </thead>
+            <tbody id="dovolene-vedouci-table"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
   </div><!-- end main-content -->
 </div><!-- end app -->
 
@@ -2624,6 +2719,7 @@ const appData = {
     'Palety dřevěné',
   ],
   objednavky: [],
+  dovolene: [],
   materialy: [
     { id: 'm1', name: 'PP Natural',          type: 'Polypropylen',    tempMin: 200, tempMax: 240, dryTemp: null, dryTime: null, dryNeeded: false, note: '' },
     { id: 'm2', name: 'PP Bílý',             type: 'Polypropylen',    tempMin: 200, tempMax: 240, dryTemp: null, dryTime: null, dryNeeded: false, note: '' },
@@ -2724,6 +2820,17 @@ function initFirebaseListeners() {
   fbListen('historyLog', processHistory);
   fbListen('production', processProduction);
   fbListen('formaChanges', processFormaChanges);
+  fbListen('dovolene', function(val) {
+    appData.dovolene = val ? Object.entries(val).map(([k,v]) => ({...v, fbKey: k})).reverse() : [];
+    updateNavBadges();
+    const activeBtn = document.querySelector('.nav-btn.active');
+    if (activeBtn && ['dovolene','dovolene-vedouci'].includes(activeBtn.dataset.page)) {
+      renderPage(activeBtn.dataset.page);
+    }
+    // Show notification banner for vedouci
+    refreshDovoleneBanner();
+  });
+
   fbListen('materialy', function(val) {
     if (val) {
       appData.materialy = Object.entries(val).map(([k,v]) => ({...v, fbKey: k}));
@@ -2812,9 +2919,11 @@ const NAV_CONFIG = {
     { id: 'scrap-report', label: 'Scrap & Reporting', icon: '♻️' },
     { id: 'formy', label: 'Změny forem', icon: '🔔' },
     { id: 'objednavky-vedouci', label: 'Objednávky materiálu', icon: '🛒' },
+    { id: 'dovolene-vedouci', label: 'Dovolené', icon: '🏖' },
   ],
   mistr: [
     { id: 'dashboard', label: 'Přehled', icon: '📊' },
+    { id: 'dovolene', label: 'Dovolené', icon: '🏖' },
     { id: 'objednavky', label: 'Objednávky materiálu', icon: '🛒' },
     { id: 'scrap', label: 'Scrap', icon: '♻️' },
   ],
@@ -2859,6 +2968,10 @@ function initApp() {
     if (item.id === 'formy') {
       const fc = appData.formaChanges ? appData.formaChanges.length : 0;
       if (fc > 0) btn.innerHTML += `<span class="badge" style="background:var(--orange)">${fc}</span>`;
+    }
+    if (item.id === 'dovolene-vedouci') {
+      const dc = appData.dovolene ? appData.dovolene.filter(d => d.status === 'pending').length : 0;
+      if (dc > 0) btn.innerHTML += `<span class="badge" style="background:#4a9eff">${dc}</span>`;
     }
     if (item.id === 'objednavky-sklad') {
       const oc = appData.objednavky ? appData.objednavky.filter(o => o.status === 'pending').length : 0;
@@ -2913,6 +3026,8 @@ function renderPage(pageId) {
     case 'objednavky-vedouci': renderObjednavkyVedouci(); break;
     case 'materialy':           renderMaterialy(); break;
     case 'scrap-report':        renderScrapReport(); break;
+    case 'dovolene':            renderDovolene(); break;
+    case 'dovolene-vedouci':   renderDovoleneVedouci(); break;
   }
   // Inject forma banners on all pages
   const bannerHTML = renderFormaBanner();
@@ -2931,6 +3046,7 @@ function renderPage(pageId) {
 // DASHBOARD
 function renderDashboard() {
   renderProductionGrid();
+  if (currentRole === 'vedouci') refreshDovoleneBanner();
   const pending = appData.requests.filter(r => r.status === 'pending').length;
   const totalScrapKg = appData.scrap.reduce((a,s) => a + s.weight, 0);
   const scrapCount = appData.scrap.length;
@@ -3925,6 +4041,189 @@ function saveMaterial() {
 
   closeMaterialModal();
   showToast('success', 'Uloženo', name + ' – parametry aktualizovány');
+}
+
+
+// ══════════════════════════════════════════
+//  DOVOLENÉ
+// ══════════════════════════════════════════
+
+function submitDovolena() {
+  const name = document.getElementById('dov-name').value.trim();
+  const role = document.getElementById('dov-role').value;
+  const from = document.getElementById('dov-from').value;
+  const to   = document.getElementById('dov-to').value;
+  const note = document.getElementById('dov-note').value.trim();
+
+  if (!name || !from || !to) {
+    showToast('error', 'Chyba', 'Vyplňte jméno a datum.');
+    return;
+  }
+  if (from > to) {
+    showToast('error', 'Chyba', 'Datum "Do" musí být po datu "Od".');
+    return;
+  }
+
+  const data = {
+    name, role, from, to, note,
+    status: 'pending',
+    submittedAt: nowTime(),
+    submittedBy: ROLES[currentRole].label,
+  };
+
+  fbPushItem('dovolene', data);
+
+  document.getElementById('dov-name').value = '';
+  document.getElementById('dov-from').value = '';
+  document.getElementById('dov-to').value = '';
+  document.getElementById('dov-note').value = '';
+
+  addToHistory({
+    time: nowTime(), type: 'dovolena', role: ROLES[currentRole].label,
+    icon: '🏖',
+    text: 'Žádost o dovolenou: <strong>' + name + '</strong> (' + role + ') · ' + formatDate(from) + ' – ' + formatDate(to),
+  });
+
+  showToast('success', 'Žádost odeslána', name + ' – vedoucí byl upozorněn');
+}
+
+function respondDovolena(fbKey, action) {
+  const d = appData.dovolene.find(x => x.fbKey === fbKey);
+  if (!d) return;
+  d.status = action; // 'approved' or 'rejected'
+  d.resolvedAt = nowTime();
+  d.resolvedBy = ROLES[currentRole].label;
+  fbSave('dovolene/' + fbKey, d);
+
+  addToHistory({
+    time: nowTime(), type: 'dovolena', role: ROLES[currentRole].label,
+    icon: action === 'approved' ? '✅' : '❌',
+    text: (action === 'approved' ? 'Schválena' : 'Zamítnuta') + ' dovolená: <strong>' + d.name + '</strong> · ' + formatDate(d.from) + ' – ' + formatDate(d.to),
+  });
+
+  showToast(action === 'approved' ? 'success' : 'error',
+    action === 'approved' ? 'Dovolená schválena' : 'Dovolená zamítnuta',
+    d.name + ' · ' + formatDate(d.from) + ' – ' + formatDate(d.to)
+  );
+
+  refreshDovoleneBanner();
+}
+
+function refreshDovoleneBanner() {
+  const el = document.getElementById('dovolene-banner-dashboard');
+  if (!el) return;
+  const pending = (appData.dovolene || []).filter(d => d.status === 'pending');
+  if (currentRole !== 'vedouci' || pending.length === 0) {
+    el.innerHTML = '';
+    return;
+  }
+  el.innerHTML = pending.map(d => `
+    <div style="background:linear-gradient(135deg,#0a1020,#101828);border:1px solid rgba(100,160,255,0.3);border-radius:8px;padding:16px 20px;margin-bottom:14px;position:relative;overflow:hidden;">
+      <div style="position:absolute;left:0;top:0;bottom:0;width:4px;background:#4a9eff"></div>
+      <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px">
+        <div style="display:flex;align-items:center;gap:14px">
+          <span style="font-size:24px">🏖</span>
+          <div>
+            <div style="font-size:14px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:#4a9eff">Žádost o dovolenou</div>
+            <div style="font-size:13px;color:var(--text);margin-top:3px">
+              <strong>${d.name}</strong> · ${d.role} · ${formatDate(d.from)} – ${formatDate(d.to)}
+              ${d.note ? ' · <span style="color:var(--text-dim)">' + d.note + '</span>' : ''}
+            </div>
+            <div style="font-size:11px;color:var(--text-dimmer);margin-top:3px">Podal ${d.submittedBy} v ${d.submittedAt}</div>
+          </div>
+        </div>
+        <div style="display:flex;gap:8px;flex-shrink:0">
+          <button class="btn btn-red btn-sm" onclick="respondDovolena('${d.fbKey}', 'rejected')">❌ Zamítnout</button>
+          <button class="btn btn-green btn-sm" onclick="respondDovolena('${d.fbKey}', 'approved')">✅ Schválit</button>
+        </div>
+      </div>
+    </div>
+  `).join('');
+}
+
+function renderDovolene() {
+  const tbody = document.getElementById('dovolene-mistr-table');
+  if (!tbody) return;
+  const all = appData.dovolene || [];
+  tbody.innerHTML = all.length ? all.map(d => `
+    <tr>
+      <td style="font-weight:600">${d.name}</td>
+      <td style="color:var(--text-dim);font-size:12px">${d.role}</td>
+      <td style="font-family:monospace;font-size:12px">${formatDate(d.from)}</td>
+      <td style="font-family:monospace;font-size:12px">${formatDate(d.to)}</td>
+      <td>${dovStatusBadge(d.status)}</td>
+    </tr>
+  `).join('') : '<tr><td colspan="5" style="text-align:center;color:var(--text-dimmer);padding:24px">Žádné žádosti</td></tr>';
+}
+
+function renderDovoleneVedouci() {
+  refreshDovoleneBanner();
+  const pending = (appData.dovolene || []).filter(d => d.status === 'pending');
+  const rest = (appData.dovolene || []).filter(d => d.status !== 'pending');
+
+  // Pending cards at top
+  const listEl = document.getElementById('dovolene-pending-list');
+  if (listEl) {
+    listEl.innerHTML = pending.length === 0
+      ? '<div style="background:var(--green-glow);border:1px solid rgba(232,0,30,0.15);border-radius:8px;padding:18px 22px;margin-bottom:20px;display:flex;align-items:center;gap:14px"><span style="font-size:22px">✅</span><div style="font-size:14px;font-weight:700;color:var(--green-text)">Žádné čekající žádosti</div></div>'
+      : pending.map(d => `
+        <div style="background:var(--card);border:1px solid rgba(100,160,255,0.25);border-radius:8px;padding:18px 22px;margin-bottom:14px;display:flex;align-items:center;gap:20px">
+          <div style="flex:1">
+            <div style="font-size:18px;font-weight:700;color:var(--text)">${d.name} <span style="font-size:13px;font-weight:400;color:var(--text-dim)">· ${d.role}</span></div>
+            <div style="font-size:13px;color:var(--text-dim);margin-top:5px">
+              📅 ${formatDate(d.from)} – ${formatDate(d.to)} · ${countDays(d.from, d.to)} dní
+              ${d.note ? ' · <em>' + d.note + '</em>' : ''}
+            </div>
+            <div style="font-size:11px;color:var(--text-dimmer);margin-top:4px">Podal ${d.submittedBy} v ${d.submittedAt}</div>
+          </div>
+          <div style="display:flex;gap:8px;flex-shrink:0">
+            <button class="btn btn-red btn-sm" onclick="respondDovolena('${d.fbKey}', 'rejected')">❌ Zamítnout</button>
+            <button class="btn btn-green btn-sm" onclick="respondDovolena('${d.fbKey}', 'approved')">✅ Schválit</button>
+          </div>
+        </div>
+      `).join('');
+  }
+
+  // History table
+  const tbody = document.getElementById('dovolene-vedouci-table');
+  if (tbody) {
+    tbody.innerHTML = rest.length ? rest.map(d => `
+      <tr>
+        <td style="font-weight:600">${d.name}</td>
+        <td style="color:var(--text-dim);font-size:12px">${d.role}</td>
+        <td style="font-family:monospace;font-size:12px">${formatDate(d.from)}</td>
+        <td style="font-family:monospace;font-size:12px">${formatDate(d.to)}</td>
+        <td style="font-size:12px;color:var(--text-dim)">${d.note || '–'}</td>
+        <td>${dovStatusBadge(d.status)}</td>
+        <td>
+          ${d.status === 'rejected'
+            ? `<button class="btn btn-ghost btn-sm" onclick="respondDovolena('${d.fbKey}', 'approved')">✅ Schválit</button>`
+            : d.status === 'approved'
+            ? `<button class="btn btn-ghost btn-sm" onclick="respondDovolena('${d.fbKey}', 'rejected')">❌ Zamítnout</button>`
+            : ''
+          }
+        </td>
+      </tr>
+    `).join('') : '<tr><td colspan="7" style="text-align:center;color:var(--text-dimmer);padding:24px">Žádná historie</td></tr>';
+  }
+}
+
+function dovStatusBadge(status) {
+  if (status === 'pending')  return '<span class="status status-pending">Čeká</span>';
+  if (status === 'approved') return '<span class="status status-ready">Schváleno</span>';
+  if (status === 'rejected') return '<span class="status status-unavailable">Zamítnuto</span>';
+  return status;
+}
+
+function formatDate(dateStr) {
+  if (!dateStr) return '–';
+  const d = new Date(dateStr);
+  return d.toLocaleDateString('cs-CZ', {day:'2-digit', month:'2-digit', year:'numeric'});
+}
+
+function countDays(from, to) {
+  const d1 = new Date(from), d2 = new Date(to);
+  return Math.round((d2 - d1) / 86400000) + 1;
 }
 
 // ══════════════════════════════════════════
