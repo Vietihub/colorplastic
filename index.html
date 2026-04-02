@@ -2350,11 +2350,18 @@ function initFirebaseListeners() {
 
   // SKLAD ALERTS
   fbListen('skladAlerts', val => {
+    console.log('Firebase skladAlerts update:', val);
     if (val) {
       appData.skladAlerts = Object.entries(val).map(([k,v]) => ({...v, fbKey: k}));
     } else {
       appData.skladAlerts = [];
     }
+    // Immediately push banners to ALL containers
+    const unavailHTML = renderUnavailBanner();
+    ['dashboard','req','scrap','prehled-ser','prehled-sklad','prehled-tech','prehled-udrzba'].forEach(function(id) {
+      const el = document.getElementById('unavail-banner-' + id);
+      if (el) el.innerHTML = unavailHTML;
+    });
     refreshCurrentPage();
   });
 
@@ -2389,6 +2396,12 @@ function initFirebaseListeners() {
     } else {
       appData.formaChanges = [];
     }
+    // Immediately push forma banners to ALL containers
+    const formaHTML = renderFormaBanner();
+    ['dashboard','sklad','req','scrap','prehled-ser','prehled-sklad','prehled-tech','prehled-udrzba'].forEach(function(id) {
+      const el = document.getElementById('forma-banner-' + id);
+      if (el) el.innerHTML = formaHTML;
+    });
     refreshCurrentPage();
   });
 }
@@ -2399,6 +2412,25 @@ function refreshCurrentPage() {
     renderPage(activeBtn.dataset.page);
     updateNavBadges();
   }
+  // Always push banners to ALL containers so every role sees them immediately
+  refreshAllBanners();
+}
+
+function refreshAllBanners() {
+  const unavailHTML = renderUnavailBanner();
+  const formaHTML = renderFormaBanner();
+  const allPages = ['dashboard','scrap','req','prehled-ser','prehled-sklad','prehled-tech','prehled-udrzba','sklad'];
+  allPages.forEach(function(id) {
+    const u = document.getElementById('unavail-banner-' + id);
+    if (u) u.innerHTML = unavailHTML;
+    const f = document.getElementById('forma-banner-' + id);
+    if (f) f.innerHTML = formaHTML;
+  });
+  // Also update history tables
+  ['dashboard-history','prehled-ser-history','prehled-sklad-history','prehled-tech-history','prehled-udrzba-history'].forEach(function(id) {
+    const el = document.getElementById(id);
+    if (el) el.innerHTML = renderHistoryLog();
+  });
 }
 
 function addToHistory(entry) {
@@ -3015,90 +3047,49 @@ function acknowledgeAlert(alertId) {
   showToast('success', 'Potvrzeno', 'Zpráva potvrzena – zmizela jen u Vás.');
 }
 
+function dismissUnavailAlert(btn) {
+  const alertId = btn.dataset.key;
+  const alert = appData.skladAlerts.find(a => String(a.id) === String(alertId) || a.fbKey === alertId);
+  if (!alert) return;
+  if (!alert.dismissedBy) alert.dismissedBy = [];
+  if (!alert.dismissedBy.includes(currentRole)) {
+    alert.dismissedBy.push(currentRole);
+  }
+  if (alert.fbKey) fbSave('skladAlerts/' + alert.fbKey, alert);
+  // Okamžitě překreslit bannery
+  const unavailHTML = renderUnavailBanner();
+  ['dashboard','req','scrap','prehled-ser','prehled-sklad','prehled-tech','prehled-udrzba'].forEach(function(id) {
+    const el = document.getElementById('unavail-banner-' + id);
+    if (el) el.innerHTML = unavailHTML;
+  });
+}
+
 function renderUnavailBanner() {
   if (!appData.skladAlerts || appData.skladAlerts.length === 0) return '';
+  // Sklad je odesílatel — nevidí banner
+  if (currentRole === 'sklad') return '';
+
   return appData.skladAlerts.map(function(a) {
-    // Skrýt banner pro roli která potvrdila přečtení
     const dismissed = a.dismissedBy || [];
+    // Skrýt jen pokud tato role zavřela banner
     if (dismissed.includes(currentRole)) return '';
-
-    const isSklad = currentRole === 'sklad';
-    const acks = a.acks || [];
-
-    const ackListHTML = isSklad && acks.length > 0
-      ? '<div style="margin-top:10px;padding-top:10px;border-top:1px solid rgba(255,255,255,0.06)">' +
-        '<div style="font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--text-dimmer);margin-bottom:6px">Potvrzeno přečtení:</div>' +
-        acks.map(function(ac) {
-          return '<span style="display:inline-flex;align-items:center;gap:5px;margin-right:8px;margin-bottom:4px;background:rgba(57,211,83,0.1);border:1px solid rgba(57,211,83,0.2);border-radius:4px;padding:3px 9px;font-size:12px;font-weight:600;color:var(--green-text)">✔ ' + ac.label + ' · ' + ac.time + '</span>';
-        }).join('') + '</div>'
-      : (isSklad && acks.length === 0
-          ? '<div style="margin-top:8px;font-size:12px;color:var(--text-dimmer)">⏳ Nikdo zatím nepotvrdil přečtení</div>'
-          : '');
-
-    const ackBtn = !isSklad
-      ? '<button class="btn btn-red btn-sm" style="margin-top:12px" onclick="acknowledgeAlert(' + a.id + ')">✔ Přečteno – potvrdit skladu</button>'
-      : '';
-
+    const key = a.fbKey || String(a.id);
     return '<div class="unavail-banner">' +
       '<div class="unavail-banner-header">' +
         '<span style="font-size:20px">⛔</span>' +
         '<div class="unavail-banner-title">Materiál nedostupný ve skladu</div>' +
-        '<span style="margin-left:auto;font-family:monospace;font-size:12px;color:var(--text-dimmer)">' + a.time + '</span>' +
+        '<div style="margin-left:auto;display:flex;align-items:center;gap:12px">' +
+          '<span style="font-family:monospace;font-size:12px;color:var(--text-dimmer)">' + a.time + '</span>' +
+          '<button onclick="dismissUnavailAlert(this)" data-key="' + key + '" style="background:none;border:none;color:var(--text-dimmer);cursor:pointer;font-size:18px;line-height:1;padding:0 2px" title="Zavřít">✕</button>' +
+        '</div>' +
       '</div>' +
       '<div class="unavail-banner-body"><strong>' + a.material + '</strong> · ' + a.qty + ' kg · ' + a.machine + '</div>' +
       (a.note ? '<div class="unavail-banner-note">📝 ' + a.note + '</div>' : '') +
-      ackBtn +
-      ackListHTML +
       '<div class="unavail-banner-meta">Hlásí sklad</div>' +
     '</div>';
   }).join('');
 }
 
-
-function renderPrehledSer() {
-  renderProductionGrid();
-  const histEl = document.getElementById('prehled-ser-history');
-  if (histEl) histEl.innerHTML = renderHistoryLog();
-  const unavailHTML = renderUnavailBanner();
-  const el = document.getElementById('unavail-banner-prehled-ser');
-  if (el) el.innerHTML = unavailHTML;
-  const formaEl = document.getElementById('forma-banner-prehled-ser');
-  if (formaEl) formaEl.innerHTML = renderFormaBanner();
-}
-
-function renderPrehledSklad() {
-  renderProductionGrid();
-  const histEl = document.getElementById('prehled-sklad-history');
-  if (histEl) histEl.innerHTML = renderHistoryLog();
-  const unavailHTML = renderUnavailBanner();
-  const el = document.getElementById('unavail-banner-prehled-sklad');
-  if (el) el.innerHTML = unavailHTML;
-  const formaEl = document.getElementById('forma-banner-prehled-sklad');
-  if (formaEl) formaEl.innerHTML = renderFormaBanner();
-}
-
-
-function renderPrehledTech() {
-  renderProductionGrid();
-  const histEl = document.getElementById('prehled-tech-history');
-  if (histEl) histEl.innerHTML = renderHistoryLog();
-  const unavailHTML = renderUnavailBanner();
-  const u = document.getElementById('unavail-banner-prehled-tech');
-  if (u) u.innerHTML = unavailHTML;
-  const f = document.getElementById('forma-banner-prehled-tech');
-  if (f) f.innerHTML = renderFormaBanner();
-}
-
-function renderPrehledUdrzba() {
-  renderProductionGrid();
-  const histEl = document.getElementById('prehled-udrzba-history');
-  if (histEl) histEl.innerHTML = renderHistoryLog();
-  const unavailHTML = renderUnavailBanner();
-  const u = document.getElementById('unavail-banner-prehled-udrzba');
-  if (u) u.innerHTML = unavailHTML;
-  const f = document.getElementById('forma-banner-prehled-udrzba');
-  if (f) f.innerHTML = renderFormaBanner();
-}
 
 function renderHistoryLog() {
   if (!appData.historyLog || appData.historyLog.length === 0) {
@@ -3122,34 +3113,57 @@ function renderHistoryLog() {
   `).join('');
 }
 
-function renderFormaBanner() {
-  const active = appData.formaChanges;
-  if (active.length === 0) return '';
-
-  return active.map(f => `
-    <div style="background:linear-gradient(135deg,#1a1c1e,#22252a);border:1px solid rgba(255,156,0,0.3);border-radius:8px;padding:16px 20px;margin-bottom:14px;position:relative;overflow:hidden;">
-      <div style="position:absolute;left:0;top:0;bottom:0;width:4px;background:var(--orange)"></div>
-      <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px">
-        <div style="display:flex;align-items:center;gap:14px">
-          <span style="font-size:24px">🔔</span>
-          <div>
-            <div style="font-family:'Barlow Condensed',sans-serif;font-size:16px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--orange)">Plánovaná změna formy</div>
-            <div style="font-size:13px;color:var(--text);margin-top:3px">
-              <strong>${f.machine}</strong> · v <strong>${f.changeTime}</strong> · sundat <span style="color:var(--red);font-weight:700">#${f.formOff}</span> → nasadit <span style="color:var(--green-text);font-weight:700">#${f.formOn}</span>
-              ${f.material ? ` · materiál: <strong>${f.material}</strong>` : ''}
-            </div>
-            ${f.needsDry ? `<div style="display:inline-flex;align-items:center;gap:5px;margin-top:6px;background:var(--orange-dim);border:1px solid rgba(255,156,0,0.3);border-radius:4px;padding:3px 8px;font-size:11px;font-weight:700;color:var(--orange);text-transform:uppercase;letter-spacing:0.5px">🔥 Nutno nasušit materiál</div>` : ''}
-          </div>
-        </div>
-        <div style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--text-dimmer)">Vydal vedoucí · ${f.issuedAt}</div>
-      </div>
-    </div>
-  `).join('');
+function dismissFormaBanner(key) {
+  const forma = appData.formaChanges.find(f => String(f.id) === String(key) || f.fbKey === key);
+  if (!forma) return;
+  if (!forma.dismissedBy) forma.dismissedBy = [];
+  if (!forma.dismissedBy.includes(currentRole)) forma.dismissedBy.push(currentRole);
+  if (forma.fbKey) fbSave('formaChanges/' + forma.fbKey, forma);
+  const bannerHTML = renderFormaBanner();
+  ['dashboard','sklad','scrap','req','prehled-ser','prehled-sklad','prehled-tech','prehled-udrzba'].forEach(function(id) {
+    const el = document.getElementById('forma-banner-' + id);
+    if (el) el.innerHTML = bannerHTML;
+  });
 }
 
-// ══════════════════════════════════════════
-//  ACTIONS
-// ══════════════════════════════════════════
+
+function renderFormaBanner() {
+  const active = appData.formaChanges;
+  if (!active || active.length === 0) return '';
+  const isVedouci = currentRole === 'vedouci';
+
+  return active.map(function(f) {
+    const dismissed = f.dismissedBy || [];
+    if (dismissed.includes(currentRole)) return '';
+    const key = f.fbKey || String(f.id);
+
+    return '<div style="background:linear-gradient(135deg,#1a1c1e,#22252a);border:1px solid rgba(255,156,0,0.3);border-radius:8px;padding:16px 20px;margin-bottom:14px;position:relative;overflow:hidden;">' +
+      '<div style="position:absolute;left:0;top:0;bottom:0;width:4px;background:var(--orange)"></div>' +
+      '<div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px">' +
+        '<div style="display:flex;align-items:center;gap:14px">' +
+          '<span style="font-size:24px">🔔</span>' +
+          '<div>' +
+            '<div style="font-size:16px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--orange)">Plánovaná změna formy</div>' +
+            '<div style="font-size:13px;color:var(--text);margin-top:3px">' +
+              '<strong>' + f.machine + '</strong> · v <strong>' + f.changeTime + '</strong>' +
+              ' · sundat <span style="color:var(--red);font-weight:700">č. ' + f.formOff + '</span>' +
+              ' → nasadit <span style="color:var(--green-text);font-weight:700">č. ' + f.formOn + '</span>' +
+              (f.material ? ' · materiál: <strong>' + f.material + '</strong>' : '') +
+            '</div>' +
+            (f.needsDry ? '<div style="display:inline-flex;align-items:center;gap:5px;margin-top:6px;background:var(--orange-dim);border:1px solid rgba(255,156,0,0.3);border-radius:4px;padding:3px 8px;font-size:11px;font-weight:700;color:var(--orange);text-transform:uppercase">🔥 Nutno nasušit materiál</div>' : '') +
+          '</div>' +
+        '</div>' +
+        '<div style="display:flex;align-items:center;gap:12px">' +
+          '<div style="font-size:11px;color:var(--text-dimmer);font-family:monospace">Vydal vedoucí · ' + f.issuedAt + '</div>' +
+          (!isVedouci ? '<button onclick="dismissFormaBanner(this.dataset.key)" data-key="' + key + '" style="background:none;border:none;color:var(--text-dimmer);cursor:pointer;font-size:18px;line-height:1;padding:0 2px" title="Zavřít">✕</button>' : '') +
+        '</div>' +
+      '</div>' +
+    '</div>';
+  }).join('');
+}
+
+
+
 function submitRequest() {
   const material = document.getElementById('req-material').value;
   const qty = document.getElementById('req-quantity').value;
@@ -3406,6 +3420,22 @@ setInterval(() => {
   const el = document.getElementById('topbar-time');
   if (el) el.textContent = new Date().toTimeString().slice(0,8);
 }, 1000);
+
+function renderPrehledPage(pageId) {
+  renderProductionGrid();
+  const histEl = document.getElementById(pageId + '-history');
+  if (histEl) histEl.innerHTML = renderHistoryLog();
+  const u = document.getElementById('unavail-banner-' + pageId);
+  if (u) u.innerHTML = renderUnavailBanner();
+  const f = document.getElementById('forma-banner-' + pageId);
+  if (f) f.innerHTML = renderFormaBanner();
+}
+
+function renderPrehledSer()    { renderPrehledPage('prehled-ser'); }
+function renderPrehledSklad()  { renderPrehledPage('prehled-sklad'); }
+function renderPrehledTech()   { renderPrehledPage('prehled-tech'); }
+function renderPrehledUdrzba() { renderPrehledPage('prehled-udrzba'); }
+
 </script>
 </body>
 </html>
