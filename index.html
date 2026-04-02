@@ -2215,60 +2215,46 @@
   </div>
 </div>
 
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
 <script>
-// Firebase REST API - no SDK needed, works everywhere
-const FB_URL = 'https://colorplastic-87a1c-default-rtdb.europe-west1.firebasedatabase.app';
+// ══════════════════════════════════════════
+//  FIREBASE INIT
+// ══════════════════════════════════════════
+var db = null;
+function initFirebase() {
+  if (typeof firebase === 'undefined') {
+    console.error('Firebase SDK not loaded');
+    return false;
+  }
+  if (!firebase.apps.length) {
+    firebase.initializeApp({
+      apiKey: "AIzaSyBfxSMeAWZaLcrbiGqG9uv8wYyW_H9-sQ8",
+      authDomain: "colorplastic-87a1c.firebaseapp.com",
+      databaseURL: "https://colorplastic-87a1c-default-rtdb.europe-west1.firebasedatabase.app",
+      projectId: "colorplastic-87a1c",
+      storageBucket: "colorplastic-87a1c.firebasestorage.app",
+      messagingSenderId: "283651673468",
+      appId: "1:283651673468:web:07da20b37db6bd3857a8f9"
+    });
+  }
+  db = firebase.database();
+  return true;
+}
 
 function fbSave(path, data) {
-  fetch(FB_URL + '/' + path + '.json', {
-    method: 'PUT',
-    body: JSON.stringify(data)
-  }).catch(e => console.error('FB save error:', e));
+  if (!db) return;
+  db.ref(path).set(data).catch(e => console.error('FB save:', e));
 }
 
 function fbPushItem(path, data) {
-  fetch(FB_URL + '/' + path + '.json', {
-    method: 'POST',
-    body: JSON.stringify(data)
-  }).catch(e => console.error('FB push error:', e));
+  if (!db) return;
+  db.ref(path).push(data).catch(e => console.error('FB push:', e));
 }
 
 function fbListen(path, callback) {
-  const url = FB_URL + '/' + path + '.json';
-  // Use Server-Sent Events for real-time updates
-  const es = new EventSource(url + '?events=true&auth=');
-  es.addEventListener('put', function(e) {
-    try {
-      const d = JSON.parse(e.data);
-      callback(d.data);
-    } catch(err) {}
-  });
-  es.addEventListener('patch', function(e) {
-    try {
-      const d = JSON.parse(e.data);
-      // Re-fetch full data on patch
-      fetch(url).then(r => r.json()).then(callback).catch(()=>{});
-    } catch(err) {}
-  });
-  es.onerror = function() {
-    // Fallback: poll every 3 seconds
-    es.close();
-    fbPoll(path, callback);
-  };
-}
-
-function fbPoll(path, callback, interval) {
-  interval = interval || 3000;
-  fetch(FB_URL + '/' + path + '.json')
-    .then(r => r.json())
-    .then(callback)
-    .catch(e => console.error('FB poll error:', e));
-  setInterval(function() {
-    fetch(FB_URL + '/' + path + '.json')
-      .then(r => r.json())
-      .then(callback)
-      .catch(e => console.error('FB poll error:', e));
-  }, interval);
+  if (!db) return;
+  db.ref(path).on('value', snap => callback(snap.val()));
 }
 
 function addToHistory(entry) {
@@ -2514,7 +2500,8 @@ function initApp() {
   // Show first page
   switchPage(NAV_CONFIG[role][0].id);
   // Start Firebase listeners
-  initFirebaseListeners();
+  if (initFirebase()) initFirebaseListeners();
+  else console.error('Firebase failed to init');
 
   // Clock
   setInterval(() => {
