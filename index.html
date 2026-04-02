@@ -1187,7 +1187,12 @@ function startFirebase() {
     afterUpdate();
   });
   fbOn('materialy', function(val){
-    D.materialy = val ? fromFb(val) : [];
+    if (val) {
+      D.materialy = fromFb(val);
+    } else {
+      // First run - load defaults into Firebase
+      DEFAULT_MATS.forEach(function(m){ fbPush('materialy', m); });
+    }
     var ab=document.querySelector('.nb.on');
     if(ab && ab.dataset.page==='materialy') renderMaterialy();
   });
