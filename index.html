@@ -212,6 +212,1325 @@ tbody td { padding: 12px 16px; font-size: 13px; color: var(--text); }
 .section-divider { border-top: 1px solid var(--border); margin: 28px 0; }
 .section-title2 { font-family: 'Barlow Condensed', sans-serif; font-size: 18px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; margin-bottom: 18px; }
 
+
+/* DOVOLENÉ */
+.dov-type-badge { font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 3px; font-family: 'JetBrains Mono', monospace; }
+.dov-type-dovolena  { background: rgba(100,160,255,.12); color: #6ab0ff; }
+.dov-type-lekar     { background: rgba(255,200,50,.12);  color: #ffc832; }
+.dov-type-nemoc     { background: rgba(255,100,100,.12); color: #ff7070; }
+.dov-type-nahradni  { background: rgba(150,100,255,.12); color: #a070ff; }
+.dov-type-jine      { background: rgba(255,255,255,.06); color: var(--text2); }
+.dov-card { background: var(--card); border: 1px solid rgba(100,160,255,.25); border-radius: 8px; padding: 18px 20px; margin-bottom: 12px; display: flex; align-items: center; gap: 18px; }
+.dov-card-info { flex: 1; }
+.dov-card-name { font-family: 'Barlow Condensed', sans-serif; font-size: 19px; font-weight: 700; }
+.dov-card-meta { font-size: 13px; color: var(--text2); margin-top: 4px; }
+.dov-card-sub { font-size: 11px; color: var(--text3); margin-top: 3px; font-family: 'JetBrains Mono', monospace; }
+/* SCROLLBAR */
+::-webkit-scrollbar { width: 5px; height: 5px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--bg4); border-radius: 3px; }
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div id="login">
+  <div class="login-wrap">
+    <div class="logo-word"><span class="logo-c">C</span><span class="logo-rest">OLOR</span></div>
+    <div class="logo-plastic">PLASTIC</div>
+    <div class="logo-auto">AUTOMOTIVE</div>
+    <div class="login-card">
+      <div class="login-label">Vyberte roli a zadejte PIN</div>
+      <div class="roles">
+        <div class="role-btn" onclick="selRole('vedouci')" id="rb-vedouci">
+          <div class="role-icon">📊</div>
+          <span class="role-name">Vedoucí</span>
+          <span class="role-pin">PIN: 1111</span>
+        </div>
+        <div class="role-btn" onclick="selRole('mistr')" id="rb-mistr">
+          <div class="role-icon">🔧</div>
+          <span class="role-name">Mistr</span>
+          <span class="role-pin">PIN: 2222</span>
+        </div>
+        <div class="role-btn" onclick="selRole('serizovac')" id="rb-serizovac">
+          <div class="role-icon">⚙️</div>
+          <span class="role-name">Seřizovač</span>
+          <span class="role-pin">PIN: 3333</span>
+        </div>
+        <div class="role-btn" onclick="selRole('sklad')" id="rb-sklad">
+          <div class="role-icon">📦</div>
+          <span class="role-name">Sklad</span>
+          <span class="role-pin">PIN: 4444</span>
+        </div>
+        <div class="role-btn" onclick="selRole('technolog')" id="rb-technolog">
+          <div class="role-icon">🔬</div>
+          <span class="role-name">Technolog</span>
+          <span class="role-pin">PIN: 5555</span>
+        </div>
+        <div class="role-btn" onclick="selRole('udrzba')" id="rb-udrzba">
+          <div class="role-icon">🔩</div>
+          <span class="role-name">Údržba</span>
+          <span class="role-pin">PIN: 6666</span>
+        </div>
+      </div>
+      <input type="password" class="pin-input" id="pin" maxlength="4" placeholder="••••" onkeydown="if(event.key==='Enter')login()">
+      <button class="login-btn" onclick="login()">Přihlásit se →</button>
+      <div class="login-err" id="login-err">Nesprávný PIN nebo nevybraná role</div>
+    </div>
+  </div>
+</div>
+
+<!-- APP -->
+<div id="app">
+  <header class="topbar">
+    <div class="tl"><span class="tl-c">C</span><span class="tl-r">OLOR</span><span class="tl-p">PLASTIC</span></div>
+    <div class="divider"></div>
+    <nav class="nav" id="nav"></nav>
+    <div class="tr">
+      <div class="live-dot">Live</div>
+      <div class="clock" id="clock">--:--:--</div>
+      <div class="role-badge" id="role-badge">–</div>
+      <button class="logout" onclick="logout()">Odhlásit</button>
+    </div>
+  </header>
+  <div class="content">
+
+    <!-- PŘEHLED (vedouci, mistr) -->
+    <div class="page" id="page-prehled">
+      <div id="dov-banner"></div>
+      <div id="unavail-banner-prehled"></div>
+      <div id="forma-banner-prehled"></div>
+      <div class="page-title">Přehled</div>
+      <div class="page-sub">Aktuální výroba, požadavky a scrap</div>
+      <div class="stats" id="stats-prehled"></div>
+      <div style="font-family:'Barlow Condensed',sans-serif;font-size:16px;font-weight:700;letter-spacing:1px;text-transform:uppercase;margin-bottom:12px">🏭 Aktuální výroba</div>
+      <div class="prod-grid" id="prod-prehled"></div>
+      <div class="two-col">
+        <div class="card">
+          <div class="card-hdr"><span class="card-title">Materiálové požadavky</span><div class="live-dot">Live</div></div>
+          <div class="tbl-wrap"><table>
+            <thead><tr><th>Čas</th><th>Materiál</th><th>Množství</th><th>Stav</th></tr></thead>
+            <tbody id="tbl-req-prehled"></tbody>
+          </table></div>
+        </div>
+        <div class="card">
+          <div class="card-hdr"><span class="card-title">Dnešní scrap</span><div class="live-dot">Live</div></div>
+          <div class="tbl-wrap"><table>
+            <thead><tr><th>Čas</th><th>Materiál</th><th>kg</th><th>Typ</th></tr></thead>
+            <tbody id="tbl-scrap-prehled"></tbody>
+          </table></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SEŘIZOVAČ PŘEHLED -->
+    <div class="page" id="page-ser-prehled">
+      <div id="unavail-banner-ser"></div>
+      <div id="forma-banner-ser"></div>
+      <div class="page-title">Přehled</div>
+      <div class="page-sub">Aktuální výroba a oznámení</div>
+      <div style="font-family:'Barlow Condensed',sans-serif;font-size:16px;font-weight:700;letter-spacing:1px;text-transform:uppercase;margin-bottom:12px">🏭 Aktuální výroba</div>
+      <div class="prod-grid" id="prod-ser"></div>
+    </div>
+
+    <!-- POŽADAVKY (seřizovač) -->
+    <div class="page" id="page-pozadavky">
+      <div class="page-title">Požadavky na materiál</div>
+      <div class="page-sub">Odeslat nový požadavek do skladu</div>
+      <div class="two-col">
+        <div class="card" style="padding:22px">
+          <div style="font-family:'Barlow Condensed',sans-serif;font-size:16px;font-weight:700;letter-spacing:1px;text-transform:uppercase;margin-bottom:18px;padding-bottom:14px;border-bottom:1px solid var(--border)">Nový požadavek</div>
+          <div class="form-grid">
+            <div class="form-row">
+              <div class="fg"><label class="fl">Materiál</label>
+                <select class="fs" id="req-mat">
+                  <option value="">Vyberte...</option>
+                  <option>PP Natural</option><option>PP Bílý</option><option>PP Černý</option>
+                  <option>PE-HD Natural</option><option>PE-LD Transparentní</option>
+                  <option>ABS Černý</option><option>ABS Bílý</option><option>PS Crystal</option>
+                  <option>PET Transparentní</option><option>PA6 Přírodní</option><option>POM Bílý</option>
+                </select>
+              </div>
+              <div class="fg"><label class="fl">Množství (kg)</label>
+                <div class="w-wrap"><input type="number" class="fi" id="req-qty" placeholder="0" min="1"><span class="w-suf">kg</span></div>
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="fg"><label class="fl">Stroj</label>
+                <select class="fs" id="req-stroj">
+                  <option value="">Vyberte...</option>
+                  <option>Engel duo 300T</option><option>Engel duo 550T</option><option>Engel duo 700T</option>
+                  <option>Engel duo 900T</option><option>Engel duo 1700T</option><option>Engel duo 2000T</option>
+                </select>
+              </div>
+              <div class="fg"><label class="fl">Priorita</label>
+                <select class="fs" id="req-prior">
+                  <option value="normal">Normální</option>
+                  <option value="urgent">Urgentní</option>
+                </select>
+              </div>
+            </div>
+            <div class="fg"><label class="fl">Poznámka</label><textarea class="fta" id="req-note" placeholder="Volitelná poznámka..."></textarea></div>
+            <button class="btn btn-r btn-full" onclick="submitReq()">📤 Odeslat do skladu</button>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-hdr"><span class="card-title">Moje požadavky dnes</span><div class="live-dot">Live</div></div>
+          <div class="tbl-wrap"><table>
+            <thead><tr><th>Čas</th><th>Materiál</th><th>kg</th><th>Stav</th></tr></thead>
+            <tbody id="tbl-my-req"></tbody>
+          </table></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SCRAP -->
+    <div class="page" id="page-scrap">
+      <div class="page-title">Evidence scrapu</div>
+      <div class="page-sub">Zápis zmetkovitosti z výroby</div>
+      <div class="two-col">
+        <div class="card" style="padding:22px" id="scrap-form-card">
+          <div style="font-family:'Barlow Condensed',sans-serif;font-size:16px;font-weight:700;letter-spacing:1px;text-transform:uppercase;margin-bottom:18px;padding-bottom:14px;border-bottom:1px solid var(--border)">Zápis nového scrapu</div>
+          <div class="form-grid">
+            <div class="form-row">
+              <div class="fg"><label class="fl">Materiál</label>
+                <select class="fs" id="scrap-mat">
+                  <option value="">Vyberte...</option>
+                  <option>PP Natural</option><option>PP Bílý</option><option>PP Černý</option>
+                  <option>PE-HD Natural</option><option>PE-LD Transparentní</option>
+                  <option>ABS Černý</option><option>ABS Bílý</option><option>PS Crystal</option>
+                  <option>PET Transparentní</option><option>PA6 Přírodní</option><option>POM Bílý</option>
+                </select>
+              </div>
+              <div class="fg"><label class="fl">Hmotnost</label>
+                <div class="w-wrap"><input type="number" class="fi" id="scrap-wt" placeholder="0.0" min="0" step="0.1"><span class="w-suf">kg</span></div>
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="fg"><label class="fl">Stroj</label>
+                <select class="fs" id="scrap-stroj">
+                  <option value="">Vyberte...</option>
+                  <option>Engel duo 300T</option><option>Engel duo 550T</option><option>Engel duo 700T</option>
+                  <option>Engel duo 900T</option><option>Engel duo 1700T</option><option>Engel duo 2000T</option>
+                </select>
+              </div>
+              <div class="fg"><label class="fl">Typ zmetku</label>
+                <select class="fs" id="scrap-typ">
+                  <option value="">Vyberte...</option>
+                  <option>Startovní zmetek</option><option>Technologický zmetek</option>
+                  <option>Rozjezdový odpad</option><option>Vtokový zbytek</option>
+                  <option>Zkouška kvality</option><option>Havárie stroje</option><option>Jiný</option>
+                </select>
+              </div>
+            </div>
+            <div class="fg"><label class="fl">Důvod / Popis</label><textarea class="fta" id="scrap-reason" placeholder="Popis..."></textarea></div>
+            <button class="btn btn-r btn-full" onclick="submitScrap()">⚖️ Zapsat scrap</button>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-hdr"><span class="card-title">Dnešní záznamy scrapu</span><div class="live-dot">Live</div></div>
+          <div class="tbl-wrap"><table>
+            <thead><tr><th>Čas</th><th>Materiál</th><th>Typ</th><th>kg</th><th>Stroj</th></tr></thead>
+            <tbody id="tbl-scrap"></tbody>
+          </table></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SKLAD -->
+    <div class="page" id="page-sklad">
+      <div class="page-title">Materiálové požadavky – Sklad</div>
+      <div class="page-sub">Prioritní odbavení požadavků z výroby</div>
+      <div id="sklad-priority"></div>
+      <div id="sklad-cards"></div>
+      <div class="card">
+        <div class="card-hdr"><span class="card-title">Vyřízené požadavky</span></div>
+        <div class="tbl-wrap"><table>
+          <thead><tr><th>Čas</th><th>Materiál</th><th>kg</th><th>Stroj</th><th>Vyřízeno</th><th>Stav</th></tr></thead>
+          <tbody id="tbl-sklad-done"></tbody>
+        </table></div>
+      </div>
+    </div>
+
+    <!-- SKLAD PŘEHLED -->
+    <div class="page" id="page-sklad-prehled">
+      <div id="unavail-banner-sklad"></div>
+      <div id="forma-banner-sklad"></div>
+      <div class="page-title">Přehled</div>
+      <div class="page-sub">Aktuální výroba – Lisovna C7</div>
+      <div style="font-family:'Barlow Condensed',sans-serif;font-size:16px;font-weight:700;letter-spacing:1px;text-transform:uppercase;margin-bottom:12px">🏭 Aktuální výroba</div>
+      <div class="prod-grid" id="prod-sklad"></div>
+    </div>
+
+    <!-- SCRAP & REPORT (vedouci) -->
+    <div class="page" id="page-scrap-report">
+      <div class="page-title">Scrap & Reporting</div>
+      <div class="page-sub">Evidence odpadu a měsíční reporty</div>
+      <div class="stats" id="stats-scrap"></div>
+      <div class="card">
+        <div class="card-hdr"><span class="card-title">♻️ Dnešní záznamy scrapu</span><div class="live-dot">Live</div></div>
+        <div class="tbl-wrap"><table>
+          <thead><tr><th>Čas</th><th>Materiál</th><th>Typ</th><th>kg</th><th>Stroj</th><th>Důvod</th></tr></thead>
+          <tbody id="tbl-scrap-report"></tbody>
+        </table></div>
+      </div>
+      <div class="section-divider"></div>
+      <div class="section-title2">📧 Měsíční reporting</div>
+      <div class="two-col">
+        <div class="card" style="padding:22px">
+          <div class="form-grid">
+            <div class="form-row">
+              <div class="fg"><label class="fl">Měsíc</label>
+                <select class="fs" id="rep-month">
+                  <option>Leden 2025</option><option>Únor 2025</option><option>Březen 2025</option>
+                  <option selected>Duben 2025</option><option>Květen 2025</option>
+                </select>
+              </div>
+              <div class="fg"><label class="fl">Středisko</label>
+                <select class="fs" id="rep-dept">
+                  <option>Lisovna C7</option><option>Lisovna C9</option><option>Celý závod</option>
+                </select>
+              </div>
+            </div>
+            <div style="display:flex;gap:10px">
+              <button class="btn btn-ghost" onclick="showReport()">📋 Zobrazit náhled</button>
+              <button class="btn btn-r" onclick="downloadReport()">⬇ Stáhnout .txt</button>
+            </div>
+            <div id="report-preview" style="display:none;background:var(--bg4);border:1px solid var(--border);border-radius:6px;padding:16px;font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--text2);line-height:1.7;white-space:pre-wrap"></div>
+          </div>
+        </div>
+        <div>
+          <div class="card">
+            <div class="card-hdr"><span class="card-title">Scrap dle materiálu</span></div>
+            <div class="tbl-wrap"><table>
+              <thead><tr><th>Materiál</th><th>Zápisů</th><th>kg</th><th>%</th></tr></thead>
+              <tbody id="tbl-rep-mat"></tbody>
+            </table></div>
+          </div>
+          <div class="card">
+            <div class="card-hdr"><span class="card-title">Scrap dle důvodu</span></div>
+            <div class="tbl-wrap"><table>
+              <thead><tr><th>Typ</th><th>Počet</th><th>kg</th></tr></thead>
+              <tbody id="tbl-rep-reason"></tbody>
+            </table></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ZMĚNY FOREM -->
+    <div class="page" id="page-formy">
+      <div class="page-title">Změny forem</div>
+      <div class="page-sub">Plánované přetypování strojů</div>
+      <div class="two-col">
+        <div class="card" style="padding:22px">
+          <div style="font-family:'Barlow Condensed',sans-serif;font-size:16px;font-weight:700;letter-spacing:1px;text-transform:uppercase;margin-bottom:18px;padding-bottom:14px;border-bottom:1px solid var(--border)">Nové oznámení</div>
+          <div class="form-grid">
+            <div class="form-row">
+              <div class="fg"><label class="fl">Stroj</label>
+                <select class="fs" id="f-stroj">
+                  <option value="">Vyberte...</option>
+                  <option>Engel duo 300T</option><option>Engel duo 550T</option><option>Engel duo 700T</option>
+                  <option>Engel duo 900T</option><option>Engel duo 1700T</option><option>Engel duo 2000T</option>
+                </select>
+              </div>
+              <div class="fg"><label class="fl">Čas změny</label><input type="time" class="fi" id="f-cas" value="15:00"></div>
+            </div>
+            <div class="form-row">
+              <div class="fg"><label class="fl">Sundat formu</label>
+                <select class="fs" id="f-off">
+                  <option value="">Vyberte...</option>
+                  <option>č. 116</option><option>č. 126</option><option>č. 127</option><option>č. 128</option>
+                  <option>č. 129</option><option>č. 130</option><option>č. 131</option><option>č. 141</option>
+                  <option>č. 149</option><option>č. 150</option><option>č. 164</option><option>č. 175</option><option>č. 302</option>
+                </select>
+              </div>
+              <div class="fg"><label class="fl">Nasadit formu</label>
+                <select class="fs" id="f-on">
+                  <option value="">Vyberte...</option>
+                  <option>č. 116</option><option>č. 126</option><option>č. 127</option><option>č. 128</option>
+                  <option>č. 129</option><option>č. 130</option><option>č. 131</option><option>č. 141</option>
+                  <option>č. 149</option><option>č. 150</option><option>č. 164</option><option>č. 175</option><option>č. 302</option>
+                </select>
+              </div>
+            </div>
+            <div class="fg"><label class="fl">Materiál pro novou formu</label>
+              <select class="fs" id="f-mat">
+                <option value="">Není třeba</option>
+                <option>PP Natural</option><option>PP Bílý</option><option>PP Černý</option>
+                <option>PE-HD Natural</option><option>ABS Černý</option><option>ABS Bílý</option>
+                <option>PS Crystal</option><option>PET Transparentní</option><option>PA6 Přírodní</option><option>POM Bílý</option>
+              </select>
+            </div>
+            <label style="display:flex;align-items:center;gap:10px;font-size:13px;color:var(--text)">
+              <input type="checkbox" id="f-dry" style="width:16px;height:16px;accent-color:var(--red)"> Nutno nasušit materiál
+            </label>
+            <div class="fg"><label class="fl">Poznámka</label><textarea class="fta" id="f-note" placeholder="Další pokyny..."></textarea></div>
+            <button class="btn btn-r btn-full" onclick="submitForma()">🔔 Vydat oznámení</button>
+          </div>
+        </div>
+        <div id="formy-list"></div>
+      </div>
+    </div>
+
+    <!-- AKTUÁLNÍ VÝROBA (edit) -->
+    <div class="page" id="page-vyroba">
+      <div class="page-title">Aktuální výroba</div>
+      <div class="page-sub">Stav lisů a nasazených forem – Lisovna C7</div>
+      <div class="prod-grid" id="prod-edit"></div>
+    </div>
+
+
+    <!-- DOVOLENÉ – Mistr -->
+    <div class="page" id="page-dovolene-mistr">
+      <div class="page-title">Dovolené a nepřítomnosti</div>
+      <div class="page-sub">Nahlásit nepřítomnost zaměstnance</div>
+      <div class="two-col">
+        <div class="card" style="padding:22px">
+          <div style="font-family:'Barlow Condensed',sans-serif;font-size:16px;font-weight:700;letter-spacing:1px;text-transform:uppercase;margin-bottom:18px;padding-bottom:14px;border-bottom:1px solid var(--border)">Nová žádost</div>
+          <div class="form-grid">
+            <div class="form-row">
+              <div class="fg"><label class="fl">Jméno zaměstnance</label><input type="text" class="fi" id="dov-jmeno" placeholder="Jméno a příjmení"></div>
+              <div class="fg"><label class="fl">Pozice</label>
+                <select class="fs" id="dov-pozice">
+                  <option>Operátor</option><option>Seřizovač</option><option>Mistr</option>
+                  <option>Technolog</option><option>Údržba</option><option>Jiné</option>
+                </select>
+              </div>
+            </div>
+            <div class="fg"><label class="fl">Typ nepřítomnosti</label>
+              <select class="fs" id="dov-typ">
+                <option value="dovolena">Dovolená</option>
+                <option value="lekar">K lékaři</option>
+                <option value="nemoc">Nemocenská</option>
+                <option value="nahradni">Náhradní volno</option>
+                <option value="jine">Jiné</option>
+              </select>
+            </div>
+            <div class="form-row">
+              <div class="fg"><label class="fl">Od</label><input type="date" class="fi" id="dov-od"></div>
+              <div class="fg"><label class="fl">Do</label><input type="date" class="fi" id="dov-do"></div>
+            </div>
+            <div class="fg"><label class="fl">Poznámka</label><textarea class="fta" id="dov-note" placeholder="Důvod, náhrada..."></textarea></div>
+            <button class="btn btn-r btn-full" onclick="submitDov()">🏖 Odeslat žádost vedoucímu</button>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-hdr"><span class="card-title">Přehled žádostí</span><div class="live-dot">Live</div></div>
+          <div class="tbl-wrap"><table>
+            <thead><tr><th>Zaměstnanec</th><th>Typ</th><th>Od</th><th>Do</th><th>Stav</th></tr></thead>
+            <tbody id="tbl-dov-mistr"></tbody>
+          </table></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- DOVOLENÉ – Vedoucí -->
+    <div class="page" id="page-dovolene-vedouci">
+      <div class="page-title">Dovolené – schválení</div>
+      <div class="page-sub">Přehled žádostí od mistrů</div>
+      <div id="dov-pending-list"></div>
+      <div class="card">
+        <div class="card-hdr"><span class="card-title">Historie</span></div>
+        <div class="tbl-wrap"><table>
+          <thead><tr><th>Zaměstnanec</th><th>Typ</th><th>Pozice</th><th>Od</th><th>Do</th><th>Stav</th><th>Akce</th></tr></thead>
+          <tbody id="tbl-dov-vedouci"></tbody>
+        </table></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: Sklad -->
+<div class="modal-overlay" id="modal-sklad">
+  <div class="modal">
+    <div class="modal-title" id="ms-title">Reagovat na požadavek</div>
+    <div class="modal-sub" id="ms-sub"></div>
+    <div class="fg"><label class="fl">Poznámka</label><input type="text" class="fi" id="ms-note" placeholder="Volitelná poznámka..."></div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeModal('modal-sklad')">Zrušit</button>
+      <button class="btn btn-sm" style="background:rgba(255,69,69,.15);border:1px solid rgba(255,69,69,.3);color:#ff4545" onclick="respondReq('unavailable')">❌ Nedostupné</button>
+      <button class="btn btn-r btn-sm" onclick="respondReq('ready')">✅ Připraveno</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: Prod edit -->
+<div class="modal-overlay" id="modal-prod">
+  <div class="modal">
+    <div class="modal-title" id="mp-title">Aktualizovat lis</div>
+    <div class="modal-sub">Forma a materiál</div>
+    <div class="form-grid">
+      <div class="fg"><label class="fl">Nasazená forma</label>
+        <select class="fs" id="mp-forma">
+          <option value="">— Lis stojí —</option>
+          <option>č. 116</option><option>č. 126</option><option>č. 127</option><option>č. 128</option>
+          <option>č. 129</option><option>č. 130</option><option>č. 131</option><option>č. 141</option>
+          <option>č. 149</option><option>č. 150</option><option>č. 164</option><option>č. 175</option><option>č. 302</option>
+        </select>
+      </div>
+      <div class="fg"><label class="fl">Materiál</label>
+        <select class="fs" id="mp-mat">
+          <option value="">— Nevyplněno —</option>
+          <option>PP Natural</option><option>PP Bílý</option><option>PP Černý</option>
+          <option>PE-HD Natural</option><option>ABS Černý</option><option>ABS Bílý</option>
+          <option>PS Crystal</option><option>PET Transparentní</option><option>PA6 Přírodní</option><option>POM Bílý</option>
+        </select>
+      </div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeModal('modal-prod')">Zrušit</button>
+      <button class="btn btn-r" onclick="saveProd()">✔ Uložit</button>
+    </div>
+  </div>
+</div>
+
+<div class="toasts" id="toasts"></div>
+
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+<script>
+// ── FIREBASE ──────────────────────────────
+if (!firebase.apps.length) {
+  firebase.initializeApp({
+    apiKey: "AIzaSyBfxSMeAWZaLcrbiGqG9uv8wYyW_H9-sQ8",
+    authDomain: "colorplastic-87a1c.firebaseapp.com",
+    databaseURL: "https://colorplastic-87a1c-default-rtdb.europe-west1.firebasedatabase.app",
+    projectId: "colorplastic-87a1c",
+    storageBucket: "colorplastic-87a1c.firebasestorage.app",
+    messagingSenderId: "283651673468",
+    appId: "1:283651673468:web:07da20b37db6bd3857a8f9"
+  });
+}
+var db = firebase.database();
+function fbPush(path, data) { return db.ref(path).push(data); }
+function fbSet(path, data) { return db.ref(path).set(data); }
+function fbOn(path, cb) { db.ref(path).on('value', function(s){ cb(s.val()); }); }
+function fromFb(val) {
+  if (!val) return [];
+  return Object.entries(val).map(function(e){ return Object.assign({}, e[1], {fbKey: e[0]}); });
+}
+
+// ── STATE ─────────────────────────────────
+var role = null;
+var data = {
+  requests: [], scrap: [], skladAlerts: [], formaChanges: [], dovolene: [],
+  production: [
+    {machine:'Engel duo 300T', forma:null, mat:null, running:false, updated:null},
+    {machine:'Engel duo 550T', forma:null, mat:null, running:false, updated:null},
+    {machine:'Engel duo 700T', forma:null, mat:null, running:false, updated:null},
+    {machine:'Engel duo 900T', forma:null, mat:null, running:false, updated:null},
+    {machine:'Engel duo 1700T', forma:null, mat:null, running:false, updated:null},
+    {machine:'Engel duo 2000T', forma:null, mat:null, running:false, updated:null},
+  ]
+};
+var currentReqId = null;
+var currentProdMachine = null;
+var selRoleVal = null;
+
+// ── ROLES ─────────────────────────────────
+var ROLES = {
+  vedouci:   {pin:'1111', label:'Vedoucí výroby', short:'Vedoucí'},
+  mistr:     {pin:'2222', label:'Mistr',          short:'Mistr'},
+  serizovac: {pin:'3333', label:'Seřizovač',      short:'Seřizovač'},
+  sklad:     {pin:'4444', label:'Sklad',          short:'Sklad'},
+  technolog: {pin:'5555', label:'Technolog',      short:'Technolog'},
+  udrzba:    {pin:'6666', label:'Údržba',         short:'Údržba'},
+};
+var NAV = {
+  vedouci:   [{id:'prehled',label:'Přehled',icon:'📊'},{id:'scrap-report',label:'Scrap & Reporting',icon:'♻️'},{id:'formy',label:'Změny forem',icon:'🔔'},{id:'vyroba',label:'Výroba',icon:'🏭'},{id:'dovolene-vedouci',label:'Dovolené',icon:'🏖'}],
+  mistr:     [{id:'prehled',label:'Přehled',icon:'📊'},{id:'scrap',label:'Scrap',icon:'♻️'},{id:'vyroba',label:'Výroba',icon:'🏭'},{id:'dovolene-mistr',label:'Dovolené',icon:'🏖'}],
+  serizovac: [{id:'ser-prehled',label:'Přehled',icon:'📊'},{id:'pozadavky',label:'Požadavky',icon:'📤'},{id:'scrap',label:'Scrap',icon:'♻️'},{id:'vyroba',label:'Výroba',icon:'🏭'}],
+  sklad:     [{id:'sklad-prehled',label:'Přehled',icon:'📊'},{id:'sklad',label:'Požadavky výroby',icon:'📦'}],
+  technolog: [{id:'sklad-prehled',label:'Přehled',icon:'📊'},{id:'vyroba',label:'Výroba',icon:'🏭'}],
+  udrzba:    [{id:'sklad-prehled',label:'Přehled',icon:'📊'},{id:'vyroba',label:'Výroba',icon:'🏭'}],
+};
+
+// ── LOGIN ─────────────────────────────────
+function selRole(r) {
+  selRoleVal = r;
+  document.querySelectorAll('.role-btn').forEach(function(b){ b.classList.remove('active'); });
+  document.getElementById('rb-'+r).classList.add('active');
+  document.getElementById('pin').focus();
+}
+function login() {
+  var pin = document.getElementById('pin').value.trim();
+  var err = document.getElementById('login-err');
+  if (!selRoleVal || !ROLES[selRoleVal] || ROLES[selRoleVal].pin !== pin) {
+    err.style.display = 'block';
+    document.getElementById('pin').value = '';
+    return;
+  }
+  err.style.display = 'none';
+  role = selRoleVal;
+  document.getElementById('login').style.display = 'none';
+  document.getElementById('app').style.display = 'flex';
+  startApp();
+}
+function logout() {
+  role = null; selRoleVal = null;
+  document.getElementById('pin').value = '';
+  document.querySelectorAll('.role-btn').forEach(function(b){ b.classList.remove('active'); });
+  document.getElementById('login').style.display = 'flex';
+  document.getElementById('app').style.display = 'none';
+}
+
+// ── APP START ─────────────────────────────
+function startApp() {
+  document.getElementById('role-badge').textContent = ROLES[role].short;
+  buildNav();
+  switchPage(NAV[role][0].id);
+  startFirebase();
+  setInterval(function(){
+    var el = document.getElementById('clock');
+    if (el) el.textContent = new Date().toTimeString().slice(0,8);
+  }, 1000);
+}
+
+function buildNav() {
+  var nav = document.getElementById('nav');
+  nav.innerHTML = '';
+  NAV[role].forEach(function(item, i) {
+    var btn = document.createElement('button');
+    btn.className = 'nb' + (i===0?' active':'');
+    btn.dataset.page = item.id;
+    btn.innerHTML = item.icon + ' <span>' + item.label + '</span>';
+    btn.onclick = function(){ switchPage(item.id); };
+    nav.appendChild(btn);
+  });
+}
+
+function switchPage(pageId) {
+  document.querySelectorAll('.page').forEach(function(p){ p.classList.remove('active'); });
+  var pg = document.getElementById('page-' + pageId);
+  if (pg) pg.classList.add('active');
+  document.querySelectorAll('.nb').forEach(function(b){ b.classList.toggle('active', b.dataset.page===pageId); });
+  renderPage(pageId);
+}
+
+function renderPage(pageId) {
+  switch(pageId) {
+    case 'prehled':       renderPrehled(); break;
+    case 'ser-prehled':   renderSerPrehled(); break;
+    case 'sklad-prehled': renderSkladPrehled(); break;
+    case 'pozadavky':     renderPozadavky(); break;
+    case 'scrap':         renderScrap(); break;
+    case 'sklad':         renderSklad(); break;
+    case 'scrap-report':  renderScrapReport(); break;
+    case 'formy':         renderFormy(); break;
+    case 'vyroba':          renderVyroba(); break;
+    case 'dovolene-mistr':  renderDovMistr(); break;
+    case 'dovolene-vedouci':renderDovVedouci(); break;
+  }
+}
+
+// ── FIREBASE LISTENERS ────────────────────
+function startFirebase() {
+  fbOn('requests', function(val) {
+    data.requests = fromFb(val).reverse();
+    refreshAll();
+  });
+  fbOn('scrap', function(val) {
+    data.scrap = fromFb(val).map(function(s){ return Object.assign(s, {weight: parseFloat(s.weight)||0}); }).reverse();
+    refreshAll();
+  });
+  fbOn('skladAlerts', function(val) {
+    data.skladAlerts = fromFb(val);
+    refreshBanners();
+    refreshAll();
+  });
+  fbOn('formaChanges', function(val) {
+    data.formaChanges = fromFb(val).reverse();
+    refreshBanners();
+    refreshAll();
+  });
+  fbOn('dovolene', function(val) {
+    data.dovolene = fromFb(val).reverse();
+    updateBadges();
+    var ab = document.querySelector('.nb.active');
+    if (ab && (ab.dataset.page==='dovolene-mistr'||ab.dataset.page==='dovolene-vedouci')) renderPage(ab.dataset.page);
+    renderDovBanner();
+  });
+  fbOn('production', function(val) {
+    if (val) {
+      data.production = fromFb(val);
+    } else {
+      data.production.forEach(function(p, i){ fbSet('production/'+i, p); });
+    }
+    refreshAll();
+  });
+}
+
+function refreshAll() {
+  var activeBtn = document.querySelector('.nb.active');
+  if (activeBtn) renderPage(activeBtn.dataset.page);
+  updateBadges();
+  refreshBanners();
+}
+
+function refreshBanners() {
+  var allBannerIds = ['prehled','ser','sklad'];
+  allBannerIds.forEach(function(id) {
+    var u = document.getElementById('unavail-banner-'+id);
+    if (u) u.innerHTML = renderUnavailBanner();
+    var f = document.getElementById('forma-banner-'+id);
+    if (f) f.innerHTML = renderFormaBanner();
+  });
+}
+
+function updateBadges() {
+  var pendingReq = data.requests.filter(function(r){ return r.status==='pending'; }).length;
+  document.querySelectorAll('.nb').forEach(function(btn) {
+    var page = btn.dataset.page;
+    var badge = btn.querySelector('.badge');
+    var count = 0;
+    if (page === 'sklad') count = pendingReq;
+    if (page === 'dovolene-vedouci') count = data.dovolene.filter(function(d){return d.status==='pending';}).length;
+    if (count > 0) {
+      if (badge) { badge.textContent = count; }
+      else { btn.innerHTML += '<span class="badge">'+count+'</span>'; }
+    } else {
+      if (badge) badge.remove();
+    }
+  });
+}
+
+// ── RENDER FUNCTIONS ──────────────────────
+function now() { return new Date().toTimeString().slice(0,5); }
+
+function sbadge(status) {
+  var m = {pending:'s-pending Čeká', ready:'s-ready Připraveno', unavailable:'s-unavailable Nedostupné', done:'s-done Dodáno'};
+  var v = m[status] || 's-done '+status;
+  var parts = v.split(' ');
+  return '<span class="s '+parts[0]+'">'+parts.slice(1).join(' ')+'</span>';
+}
+
+function renderPrehled() {
+  var totalScrap = data.scrap.reduce(function(a,s){ return a+s.weight; }, 0);
+  var pending = data.requests.filter(function(r){ return r.status==='pending'; }).length;
+  var running = data.production.filter(function(p){ return p.running; }).length;
+  var el = document.getElementById('stats-prehled');
+  if (el) el.innerHTML =
+    '<div class="stat"><div class="stat-label">Aktivní požadavky</div><div class="stat-val">'+pending+' <span class="stat-unit">čeká</span></div></div>'+
+    '<div class="stat"><div class="stat-label">Dnešní scrap</div><div class="stat-val">'+totalScrap.toFixed(1)+' <span class="stat-unit">kg</span></div><div class="stat-meta">'+data.scrap.length+' zápisů</div></div>'+
+    '<div class="stat"><div class="stat-label">Aktivní stroje</div><div class="stat-val">'+running+' <span class="stat-unit">/ 6</span></div><div class="stat-meta">Lisovna C7</div></div>';
+
+  renderProdGrid('prod-prehled');
+
+  var tr = document.getElementById('tbl-req-prehled');
+  if (tr) tr.innerHTML = data.requests.slice(0,10).map(function(r){
+    return '<tr><td class="mono">'+r.time+'</td><td class="bold">'+r.material+'</td><td>'+r.qty+' kg</td><td>'+sbadge(r.status)+'</td></tr>';
+  }).join('') || '<tr><td colspan="4" style="text-align:center;color:var(--text3);padding:20px">Žádné požadavky</td></tr>';
+
+  var ts = document.getElementById('tbl-scrap-prehled');
+  if (ts) ts.innerHTML = data.scrap.slice(0,8).map(function(s){
+    return '<tr><td class="mono">'+s.time+'</td><td class="bold">'+s.material+'</td><td style="font-weight:700;color:#4de866">'+s.weight+' kg</td><td><span class="tbadge">'+s.type+'</span></td></tr>';
+  }).join('') || '<tr><td colspan="4" style="text-align:center;color:var(--text3);padding:20px">Žádné záznamy</td></tr>';
+}
+
+function renderSerPrehled() {
+  renderProdGrid('prod-ser');
+}
+
+function renderSkladPrehled() {
+  renderProdGrid('prod-sklad');
+}
+
+function renderVyroba() {
+  renderProdGrid('prod-edit');
+}
+
+function renderProdGrid(containerId) {
+  var canEdit = (role==='vedouci'||role==='serizovac'||role==='technolog'||role==='mistr');
+  var el = document.getElementById(containerId);
+  if (!el) return;
+  el.innerHTML = data.production.map(function(p){
+    return '<div class="prod-card'+(p.running?' running':'')+'">' +
+      '<div class="prod-machine"><span>'+p.machine+'</span><div class="prod-dot'+(p.running?' on':'')+'"></div></div>' +
+      (p.forma ? '<div class="prod-forma">'+p.forma+'</div><div class="prod-forma-label">Nasazená forma</div>' : '<div class="prod-idle">Lis stojí</div>') +
+      (p.mat ? '<div class="prod-mat">🎨 '+p.mat+'</div>' : '') +
+      (p.updated ? '<div class="prod-updated">Aktualizováno v '+p.updated+'</div>' : '') +
+      (canEdit ? '<button class="prod-edit" onclick="openProdModal(\''+p.machine+'\')">✏ Upravit</button>' : '') +
+    '</div>';
+  }).join('');
+}
+
+function renderPozadavky() {
+  var t = document.getElementById('tbl-my-req');
+  if (!t) return;
+  t.innerHTML = data.requests.map(function(r){
+    return '<tr><td class="mono">'+r.time+'</td><td class="bold">'+r.material+'</td><td>'+r.qty+' kg</td><td>'+sbadge(r.status)+'</td></tr>';
+  }).join('') || '<tr><td colspan="4" style="text-align:center;color:var(--text3);padding:20px">Žádné požadavky</td></tr>';
+}
+
+function renderScrap() {
+  var fc = document.getElementById('scrap-form-card');
+  if (fc) fc.style.display = (role==='mistr'||role==='technolog') ? 'none' : 'block';
+  var t = document.getElementById('tbl-scrap');
+  if (!t) return;
+  t.innerHTML = data.scrap.map(function(s){
+    return '<tr><td class="mono">'+s.time+'</td><td class="bold">'+s.material+'</td><td><span class="tbadge">'+s.type+'</span></td><td style="font-weight:700;color:#4de866">'+s.weight+' kg</td><td class="dim">'+s.machine+'</td></tr>';
+  }).join('') || '<tr><td colspan="5" style="text-align:center;color:var(--text3);padding:20px">Žádné záznamy</td></tr>';
+}
+
+function renderSklad() {
+  var pending = data.requests.filter(function(r){ return r.status==='pending'; });
+  var done = data.requests.filter(function(r){ return r.status!=='pending'; });
+
+  var pe = document.getElementById('sklad-priority');
+  if (pe) {
+    if (pending.length > 0) {
+      pe.innerHTML = '<div class="priority"><div class="priority-icon">🚨</div><div class="priority-text"><div class="priority-title">Nové požadavky</div><div class="priority-desc">Výroba čeká na materiál</div></div><div><div class="priority-count">'+pending.length+'</div><div class="priority-count-label">čekající</div></div></div>';
+    } else {
+      pe.innerHTML = '<div style="background:rgba(57,211,83,.08);border:1px solid rgba(57,211,83,.2);border-radius:8px;padding:16px 20px;margin-bottom:16px;display:flex;align-items:center;gap:12px"><span style="font-size:22px">✅</span><span style="font-weight:700;color:#4de866">Vše odbaveno</span></div>';
+    }
+  }
+
+  var ce = document.getElementById('sklad-cards');
+  if (ce) {
+    ce.innerHTML = pending.map(function(r){
+      var key = r.fbKey || r.id;
+      return '<div class="req-card">' +
+        '<div><div class="req-time">'+r.time+'</div><div class="req-label">čeká</div></div>' +
+        '<div><div class="req-mat">'+r.material+'</div><div class="req-meta"><span>⚖️ '+r.qty+' kg</span><span>🏭 '+r.machine+'</span></div></div>' +
+        '<div><button class="btn btn-r btn-sm" onclick="openSkladModal(\''+key+'\')">Reagovat</button></div>' +
+      '</div>';
+    }).join('');
+  }
+
+  var dt = document.getElementById('tbl-sklad-done');
+  if (dt) dt.innerHTML = done.map(function(r){
+    return '<tr><td class="mono">'+r.time+'</td><td class="bold">'+r.material+'</td><td>'+r.qty+' kg</td><td class="dim">'+r.machine+'</td><td class="mono">'+(r.resolvedTime||'–')+'</td><td>'+sbadge(r.status)+'</td></tr>';
+  }).join('') || '<tr><td colspan="6" style="text-align:center;color:var(--text3);padding:20px">Žádné vyřízené</td></tr>';
+}
+
+function renderScrapReport() {
+  var total = data.scrap.reduce(function(a,s){ return a+s.weight; }, 0);
+  var el = document.getElementById('stats-scrap');
+  if (el) el.innerHTML =
+    '<div class="stat"><div class="stat-label">Dnešní scrap</div><div class="stat-val">'+total.toFixed(1)+' <span class="stat-unit">kg</span></div><div class="stat-meta">'+data.scrap.length+' zápisů</div></div>'+
+    '<div class="stat"><div class="stat-label">Průměr / zápis</div><div class="stat-val">'+(data.scrap.length?(total/data.scrap.length).toFixed(1):0)+' <span class="stat-unit">kg</span></div></div>'+
+    '<div class="stat"><div class="stat-label">Typy zmetků</div><div class="stat-val">'+new Set(data.scrap.map(function(s){return s.type;})).size+' <span class="stat-unit">druhy</span></div></div>';
+
+  var t = document.getElementById('tbl-scrap-report');
+  if (t) t.innerHTML = data.scrap.map(function(s){
+    return '<tr><td class="mono">'+s.time+'</td><td class="bold">'+s.material+'</td><td><span class="tbadge">'+s.type+'</span></td><td style="font-weight:700;color:#4de866">'+s.weight+' kg</td><td class="dim">'+s.machine+'</td><td class="dim">'+s.reason+'</td></tr>';
+  }).join('') || '<tr><td colspan="6" style="text-align:center;color:var(--text3);padding:20px">Žádné záznamy</td></tr>';
+
+  renderRepTables();
+}
+
+function renderRepTables() {
+  var byMat = {}, byType = {};
+  var total = 0;
+  data.scrap.forEach(function(s) {
+    if (!byMat[s.material]) byMat[s.material] = {n:0, w:0};
+    byMat[s.material].n++; byMat[s.material].w += s.weight; total += s.weight;
+    if (!byType[s.type]) byType[s.type] = {n:0, w:0};
+    byType[s.type].n++; byType[s.type].w += s.weight;
+  });
+  var mt = document.getElementById('tbl-rep-mat');
+  if (mt) mt.innerHTML = Object.entries(byMat).sort(function(a,b){return b[1].w-a[1].w;}).map(function(e){
+    var pct = total>0 ? (e[1].w/total*100).toFixed(0) : 0;
+    return '<tr><td class="bold">'+e[0]+'</td><td>'+e[1].n+'</td><td style="font-weight:700">'+e[1].w.toFixed(1)+' kg</td><td class="dim">'+pct+'%</td></tr>';
+  }).join('') || '<tr><td colspan="4" style="text-align:center;color:var(--text3);padding:14px">Žádné záznamy</td></tr>';
+  var rt = document.getElementById('tbl-rep-reason');
+  if (rt) rt.innerHTML = Object.entries(byType).sort(function(a,b){return b[1].w-a[1].w;}).map(function(e){
+    return '<tr><td><span class="tbadge">'+e[0]+'</span></td><td>'+e[1].n+'×</td><td style="font-weight:700">'+e[1].w.toFixed(1)+' kg</td></tr>';
+  }).join('') || '<tr><td colspan="3" style="text-align:center;color:var(--text3);padding:14px">Žádné záznamy</td></tr>';
+}
+
+function renderFormy() {
+  var el = document.getElementById('formy-list');
+  if (!el) return;
+  if (!data.formaChanges.length) {
+    el.innerHTML = '<div style="text-align:center;padding:40px;color:var(--text3)">Žádná aktivní oznámení</div>';
+    return;
+  }
+  el.innerHTML = data.formaChanges.map(function(f){
+    var key = f.fbKey||f.id||'';
+    return '<div class="card" style="padding:18px;margin-bottom:12px">' +
+      '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">' +
+        '<span style="font-family:\'Barlow Condensed\',sans-serif;font-size:18px;font-weight:700">🏭 '+f.machine+'</span>' +
+        '<span style="font-family:\'JetBrains Mono\',monospace;font-size:18px;color:#ff6b6b">⏰ '+f.changeTime+'</span>' +
+      '</div>' +
+      '<div style="font-size:13px;color:var(--text2)">Sundat <span style="color:#ff4545;font-weight:700">'+f.formOff+'</span> → Nasadit <span style="color:#4de866;font-weight:700">'+f.formOn+'</span>'+(f.mat?' · '+f.mat:'')+'</div>' +
+      (f.dry?'<div style="margin-top:8px;display:inline-flex;align-items:center;gap:5px;background:var(--orange-dim);border:1px solid rgba(255,156,0,.3);border-radius:4px;padding:3px 8px;font-size:11px;font-weight:700;color:var(--orange);text-transform:uppercase">🔥 Nutno nasušit</div>':'') +
+      (f.note?'<div style="font-size:12px;color:var(--text3);margin-top:8px;padding-top:8px;border-top:1px solid var(--border)">'+f.note+'</div>':'') +
+    '</div>';
+  }).join('');
+}
+
+function renderUnavailBanner() {
+  if (!data.skladAlerts || !data.skladAlerts.length) return '';
+  if (role==='sklad') return '';
+  return data.skladAlerts.map(function(a) {
+    var dismissed = a.dismissedBy || [];
+    if (dismissed.indexOf(role) >= 0) return '';
+    var key = a.fbKey || '';
+    return '<div class="banner banner-red" style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px">' +
+      '<div>' +
+        '<div style="display:flex;align-items:center;gap:8px">' +
+          '<span style="font-size:18px">⛔</span>' +
+          '<span class="banner-title" style="color:#ff4545">Materiál nedostupný ve skladu</span>' +
+        '</div>' +
+        '<div class="banner-body" style="margin-top:5px"><strong>'+a.material+'</strong> · '+a.qty+' kg · '+a.machine+'</div>' +
+        (a.note?'<div class="banner-meta">'+a.note+'</div>':'') +
+        '<div class="banner-meta">Hlásí sklad · '+a.time+'</div>' +
+      '</div>' +
+      '<button class="banner-close" onclick="dismissAlert(\''+key+'\')">✕</button>' +
+    '</div>';
+  }).join('');
+}
+
+function renderFormaBanner() {
+  if (!data.formaChanges || !data.formaChanges.length) return '';
+  if (role==='vedouci') return '';
+  return data.formaChanges.map(function(f) {
+    var dismissed = f.dismissedBy || [];
+    if (dismissed.indexOf(role) >= 0) return '';
+    var key = f.fbKey||f.id||'';
+    return '<div class="banner banner-orange" style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px">' +
+      '<div>' +
+        '<div style="display:flex;align-items:center;gap:8px">' +
+          '<span style="font-size:18px">🔔</span>' +
+          '<span class="banner-title" style="color:var(--orange)">Plánovaná změna formy</span>' +
+        '</div>' +
+        '<div class="banner-body" style="margin-top:5px"><strong>'+f.machine+'</strong> · v <strong>'+f.changeTime+'</strong> · '+f.formOff+' → '+f.formOn+'</div>' +
+        (f.dry?'<div style="margin-top:6px;display:inline-flex;align-items:center;gap:5px;background:var(--orange-dim);border:1px solid rgba(255,156,0,.3);border-radius:4px;padding:2px 7px;font-size:11px;font-weight:700;color:var(--orange)">🔥 Nutno nasušit</div>':'') +
+        '<div class="banner-meta">Vydal vedoucí · '+f.issuedAt+'</div>' +
+      '</div>' +
+      '<button class="banner-close" onclick="dismissForma(\''+key+'\')">✕</button>' +
+    '</div>';
+  }).join('');
+}
+
+// ── ACTIONS ───────────────────────────────
+function submitReq() {
+  var mat = document.getElementById('req-mat').value;
+  var qty = document.getElementById('req-qty').value;
+  var stroj = document.getElementById('req-stroj').value;
+  var prior = document.getElementById('req-prior').value;
+  var note = document.getElementById('req-note').value;
+  if (!mat || !qty || !stroj) { toast('err','Chyba','Vyplňte materiál, množství a stroj.'); return; }
+  fbPush('requests', {time:now(), material:mat, qty:parseInt(qty), machine:stroj, priority:prior, note:note, status:'pending', worker:'Seřizovač', resolvedTime:null});
+  document.getElementById('req-mat').value='';
+  document.getElementById('req-qty').value='';
+  document.getElementById('req-stroj').value='';
+  document.getElementById('req-note').value='';
+  toast('ok','Požadavek odeslán', mat+' ('+qty+' kg) – sklad byl upozorněn');
+}
+
+function submitScrap() {
+  var mat = document.getElementById('scrap-mat').value;
+  var wt = document.getElementById('scrap-wt').value;
+  var stroj = document.getElementById('scrap-stroj').value;
+  var typ = document.getElementById('scrap-typ').value;
+  var reason = document.getElementById('scrap-reason').value;
+  if (!mat || !wt || !stroj || !typ) { toast('err','Chyba','Vyplňte všechna povinná pole.'); return; }
+  fbPush('scrap', {time:now(), material:mat, weight:parseFloat(wt), machine:stroj, type:typ, reason:reason||'–', worker:'Seřizovač'});
+  document.getElementById('scrap-mat').value='';
+  document.getElementById('scrap-wt').value='';
+  document.getElementById('scrap-stroj').value='';
+  document.getElementById('scrap-typ').value='';
+  document.getElementById('scrap-reason').value='';
+  toast('ok','Scrap zapsán', mat+' – '+wt+' kg evidováno');
+}
+
+function openSkladModal(reqKey) {
+  currentReqId = reqKey;
+  var req = data.requests.find(function(r){ return r.fbKey===reqKey||String(r.id)===String(reqKey); });
+  if (!req) return;
+  document.getElementById('ms-title').textContent = req.material;
+  document.getElementById('ms-sub').textContent = req.qty+' kg · '+req.machine;
+  document.getElementById('ms-note').value = '';
+  document.getElementById('modal-sklad').classList.add('open');
+}
+
+function respondReq(action) {
+  var req = data.requests.find(function(r){ return r.fbKey===currentReqId||String(r.id)===String(currentReqId); });
+  if (!req || !req.fbKey) { closeModal('modal-sklad'); return; }
+  var note = document.getElementById('ms-note').value;
+  req.status = action; req.resolvedTime = now(); req.note = note;
+  fbSet('requests/'+req.fbKey, req);
+  if (action==='unavailable') {
+    fbPush('skladAlerts', {material:req.material, qty:req.qty, machine:req.machine, time:now(), note:note, dismissedBy:[]});
+  }
+  closeModal('modal-sklad');
+  toast(action==='ready'?'ok':'err', action==='ready'?'Připraveno':'Nedostupné', req.material);
+}
+
+function dismissAlert(key) {
+  var alert = data.skladAlerts.find(function(a){ return a.fbKey===key; });
+  if (!alert) return;
+  if (!alert.dismissedBy) alert.dismissedBy = [];
+  if (alert.dismissedBy.indexOf(role) < 0) alert.dismissedBy.push(role);
+  fbSet('skladAlerts/'+key, alert);
+}
+
+function dismissForma(key) {
+  var f = data.formaChanges.find(function(x){ return x.fbKey===key||String(x.id)===String(key); });
+  if (!f || !f.fbKey) return;
+  if (!f.dismissedBy) f.dismissedBy = [];
+  if (f.dismissedBy.indexOf(role) < 0) f.dismissedBy.push(role);
+  fbSet('formaChanges/'+f.fbKey, f);
+}
+
+function submitForma() {
+  var stroj = document.getElementById('f-stroj').value;
+  var cas = document.getElementById('f-cas').value;
+  var off = document.getElementById('f-off').value;
+  var on = document.getElementById('f-on').value;
+  if (!stroj||!cas||!off||!on) { toast('err','Chyba','Vyplňte stroj, čas a formy.'); return; }
+  fbPush('formaChanges', {
+    machine:stroj, changeTime:cas, formOff:off, formOn:on,
+    mat:document.getElementById('f-mat').value,
+    dry:document.getElementById('f-dry').checked,
+    note:document.getElementById('f-note').value,
+    issuedAt:now(), dismissedBy:[]
+  });
+  document.getElementById('f-stroj').value='';
+  document.getElementById('f-off').value='';
+  document.getElementById('f-on').value='';
+  document.getElementById('f-mat').value='';
+  document.getElementById('f-dry').checked=false;
+  document.getElementById('f-note').value='';
+  toast('ok','Oznámení vydáno', stroj+' · '+cas);
+}
+
+function openProdModal(machine) {
+  currentProdMachine = machine;
+  var p = data.production.find(function(x){ return x.machine===machine; });
+  document.getElementById('mp-title').textContent = machine;
+  document.getElementById('mp-forma').value = p && p.forma ? p.forma : '';
+  document.getElementById('mp-mat').value = p && p.mat ? p.mat : '';
+  document.getElementById('modal-prod').classList.add('open');
+}
+
+function saveProd() {
+  var p = data.production.find(function(x){ return x.machine===currentProdMachine; });
+  if (!p) return;
+  var forma = document.getElementById('mp-forma').value;
+  var mat = document.getElementById('mp-mat').value;
+  p.forma = forma || null;
+  p.mat = mat || null;
+  p.running = !!forma;
+  p.updated = now();
+  var idx = data.production.indexOf(p);
+  var path = p.fbKey ? 'production/'+p.fbKey : 'production/'+idx;
+  fbSet(path, p);
+  closeModal('modal-prod');
+  toast('ok','Uloženo', currentProdMachine);
+}
+
+function closeModal(id) {
+  document.getElementById(id).classList.remove('open');
+}
+
+function showReport() {
+  var el = document.getElementById('report-preview');
+  if (!el) return;
+  var text = buildReport();
+  el.style.display = 'block';
+  el.textContent = text;
+}
+
+function downloadReport() {
+  var text = buildReport();
+  var month = (document.getElementById('rep-month')||{value:'report'}).value;
+  var fname = 'scrap-report-'+month.replace(/ /g,'-').toLowerCase()+'.txt';
+  var blob = new Blob([text], {type:'text/plain;charset=utf-8'});
+  var url = URL.createObjectURL(blob);
+  var a = document.createElement('a');
+  a.href = url; a.download = fname;
+  document.body.appendChild(a); a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+  toast('ok','Staženo', fname);
+}
+
+function buildReport() {
+  var month = (document.getElementById('rep-month')||{value:'?'}).value;
+  var dept = (document.getElementById('rep-dept')||{value:'?'}).value;
+  var total = data.scrap.reduce(function(a,s){return a+s.weight;},0);
+  var byMat = {}, byType = {};
+  data.scrap.forEach(function(s){
+    byMat[s.material] = (byMat[s.material]||0)+s.weight;
+    if (!byType[s.type]) byType[s.type]={n:0,w:0};
+    byType[s.type].n++; byType[s.type].w+=s.weight;
+  });
+  var lines = [
+    'SUMARIZACE SCRAPU – '+month.toUpperCase(),
+    'Středisko: '+dept,
+    'Generováno: '+new Date().toLocaleString('cs-CZ'),
+    '─'.repeat(48),
+    'CELKOVÝ SCRAP:   '+total.toFixed(1)+' kg',
+    'POČET ZÁPISŮ:    '+data.scrap.length+' ks',
+    '─'.repeat(48),
+    'DLE MATERIÁLU:'
+  ];
+  Object.entries(byMat).sort(function(a,b){return b[1]-a[1];}).forEach(function(e){
+    lines.push('  '+e[0].padEnd(28)+e[1].toFixed(1).padStart(7)+' kg');
+  });
+  lines.push('─'.repeat(48), 'DLE DŮVODU:');
+  Object.entries(byType).sort(function(a,b){return b[1].w-a[1].w;}).forEach(function(e){
+    lines.push('  '+e[0].padEnd(28)+e[1].n+'× '+e[1].w.toFixed(1)+' kg');
+  });
+  lines.push('─'.repeat(48), 'ColorPlastic Automotive');
+  return lines.join('\n');
+}
+
+// ── TOAST ─────────────────────────────────
+function toast(type, title, msg) {
+  var c = document.getElementById('toasts');
+  var t = document.createElement('div');
+  t.className = 'toast '+(type==='ok'?'ok':'err');
+  t.innerHTML = '<div class="toast-icon">'+(type==='ok'?'✅':'❌')+'</div><div class="toast-text"><strong>'+title+'</strong>'+(msg||'')+'</div>';
+  c.appendChild(t);
+  setTimeout(function(){ t.style.opacity='0'; t.style.transform='translateX(16px)'; t.style.transition='all .3s'; setTimeout(function(){ t.remove(); },300); }, 3500);
+}
+
+// ── DOVOLENÉ ─────────────────────────────────────────────────────────────
+function dovTypLabel(t) {
+  return {dovolena:'Dovolená', lekar:'K lékaři', nemoc:'Nemocenská', nahradni:'Náhradní volno', jine:'Jiné'}[t] || t;
+}
+function dovTypClass(t) {
+  return 'dov-type-badge dov-type-' + (t||'jine');
+}
+function dovSbadge(s) {
+  if (s==='pending')  return '<span class="s s-pending">Čeká</span>';
+  if (s==='approved') return '<span class="s s-ready">Schváleno</span>';
+  if (s==='rejected') return '<span class="s s-unavailable">Zamítnuto</span>';
+  return s;
+}
+function fmtDate(d) {
+  if (!d) return '–';
+  var p = d.split('-');
+  return p[2]+'.'+p[1]+'.'+p[0];
+}
+function submitDov() {
+  var jmeno = document.getElementById('dov-jmeno').value.trim();
+  var pozice = document.getElementById('dov-pozice').value;
+  var typ = document.getElementById('dov-typ').value;
+  var od = document.getElementById('dov-od').value;
+  var doo = document.getElementById('dov-do').value;
+  var note = document.getElementById('dov-note').value.trim();
+  if (!jmeno||!od||!doo) { toast('err','Chyba','Vyplňte jméno a datum.'); return; }
+  if (od > doo) { toast('err','Chyba','Datum "Do" musí být po "Od".'); return; }
+  fbPush('dovolene', {jmeno:jmeno, pozice:pozice, typ:typ, od:od, do:doo, note:note,
+    status:'pending', podal:ROLES[role].label, podalAt:now()});
+  document.getElementById('dov-jmeno').value='';
+  document.getElementById('dov-od').value='';
+  document.getElementById('dov-do').value='';
+  document.getElementById('dov-note').value='';
+  toast('ok','Žádost odeslána', jmeno);
+}
+function respondDov(fbKey, action) {
+  var d = data.dovolene.find(function(x){return x.fbKey===fbKey;});
+  if (!d) return;
+  d.status = action; d.resolvedAt = now(); d.resolvedBy = ROLES[role].label;
+  fbSet('dovolene/'+fbKey, d);
+  toast(action==='approved'?'ok':'err', action==='approved'?'Schváleno':'Zamítnuto', d.jmeno);
+}
+function renderDovMistr() {
+  var t = document.getElementById('tbl-dov-mistr'); if (!t) return;
+  t.innerHTML = data.dovolene.map(function(d) {
+    return '<tr><td class="bold">'+d.jmeno+'</td><td><span class="'+dovTypClass(d.typ)+'">'+dovTypLabel(d.typ)+'</span></td>'+
+      '<td class="mono">'+fmtDate(d.od)+'</td><td class="mono">'+fmtDate(d.do)+'</td><td>'+dovSbadge(d.status)+'</td></tr>';
+  }).join('') || '<tr><td colspan="5" style="text-align:center;color:var(--text3);padding:20px">Žádné žádosti</td></tr>';
+}
+function renderDovVedouci() {
+  renderDovBanner();
+  var pending = data.dovolene.filter(function(d){return d.status==='pending';});
+  var rest    = data.dovolene.filter(function(d){return d.status!=='pending';});
+  var pl = document.getElementById('dov-pending-list'); if (!pl) return;
+  if (!pending.length) {
+    pl.innerHTML = '<div style="background:rgba(57,211,83,.07);border:1px solid rgba(57,211,83,.2);border-radius:8px;padding:16px 20px;margin-bottom:16px;display:flex;align-items:center;gap:12px"><span style="font-size:20px">✅</span><span style="font-weight:700;color:#4de866">Žádné čekající žádosti</span></div>';
+  } else {
+    pl.innerHTML = pending.map(function(d) {
+      return '<div class="dov-card"><div class="dov-card-info">'+
+        '<div class="dov-card-name">'+d.jmeno+' <span style="font-size:13px;font-weight:400;color:var(--text2)">· '+d.pozice+'</span> <span class="'+dovTypClass(d.typ)+'">'+dovTypLabel(d.typ)+'</span></div>'+
+        '<div class="dov-card-meta">📅 '+fmtDate(d.od)+' – '+fmtDate(d.do)+(d.note?' · '+d.note:'')+'</div>'+
+        '<div class="dov-card-sub">Podal '+d.podal+' v '+d.podalAt+'</div></div>'+
+        '<div style="display:flex;gap:8px;flex-shrink:0">'+
+        '<button class="btn btn-sm" style="background:rgba(255,69,69,.15);border:1px solid rgba(255,69,69,.3);color:#ff4545" data-key="'+d.fbKey+'" data-action="rejected" onclick="respondDov(this.dataset.key,this.dataset.action)">❌ Zamítnout</button>'+
+        '<button class="btn btn-r btn-sm" data-key="'+d.fbKey+'" data-action="approved" onclick="respondDov(this.dataset.key,this.dataset.action)">✅ Schválit</button>'+
+        '</div></div>';
+    }).join('');
+  }
+  var t = document.getElementById('tbl-dov-vedouci'); if (!t) return;
+  t.innerHTML = rest.map(function(d) {
+    var changeBtn = d.status==='rejected'
+      ? '<button class="btn btn-ghost btn-sm" data-key="'+d.fbKey+'" data-action="approved" onclick="respondDov(this.dataset.key,this.dataset.action)">✅ Schválit</button>'
+      : '<button class="btn btn-ghost btn-sm" data-key="'+d.fbKey+'" data-action="rejected" onclick="respondDov(this.dataset.key,this.dataset.action)">❌ Zamítnout</button>';
+    return '<tr><td class="bold">'+d.jmeno+'</td><td><span class="'+dovTypClass(d.typ)+'">'+dovTypLabel(d.typ)+'</span></td>'+
+      '<td class="dim">'+d.pozice+'</td><td class="mono">'+fmtDate(d.od)+'</td><td class="mono">'+fmtDate(d.do)+'</td>'+
+      '<td>'+dovSbadge(d.status)+'</td><td>'+changeBtn+'</td></tr>';
+  }).join('') || '<tr><td colspan="7" style="text-align:center;color:var(--text3);padding:20px">Žádná historie</td></tr>';
+}
+function renderDovBanner() {
+  var el = document.getElementById('dov-banner'); if (!el) return;
+  if (role !== 'vedouci') { el.innerHTML=''; return; }
+  var pending = data.dovolene.filter(function(d){return d.status==='pending';});
+  if (!pending.length) { el.innerHTML=''; return; }
+  el.innerHTML = pending.map(function(d) {
+    return '<div class="banner" style="background:linear-gradient(135deg,#0a1020,#101828);border:1px solid rgba(100,160,255,.3);border-left:4px solid #4a9eff;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px">'+
+      '<div style="display:flex;align-items:center;gap:14px">'+
+        '<span style="font-size:24px">🏖</span>'+
+        '<div>'+
+          '<div class="banner-title" style="color:#4a9eff">'+dovTypLabel(d.typ)+'</div>'+
+          '<div class="banner-body"><strong>'+d.jmeno+'</strong> · '+d.pozice+' · '+fmtDate(d.od)+' – '+fmtDate(d.to)+'</div>'+
+          '<div class="banner-meta">Podal '+d.podal+' v '+d.podalAt+'</div>'+
+        '</div>'+
+      '</div>'+
+      '<div style="display:flex;gap:8px">'+
+        '<button class="btn btn-sm" style="background:rgba(255,69,69,.15);border:1px solid rgba(255,69,69,.3);color:#ff4545" data-key="'+d.fbKey+'" data-action="rejected" onclick="respondDov(this.dataset.key,this.dataset.action)">❌ Zamítnout</button>'+
+        '<button class="btn btn-r btn-sm" data-key="'+d.fbKey+'" data-action="approved" onclick="respondDov(this.dataset.key,this.dataset.action)">✅ Schválit</button>'+
+      '</div>'+
+    '</div>';
+  }).join('');
+}
+
+// Clock
+setInterval(function(){
+  var el = document.getElementById('clock');
+  if (el) el.textContent = new Date().toTimeString().slice(0,8);
+}, 1000);
+</script>
+</body>
+</html>/* CARDS */
+.card { background: var(--card); border: 1px solid var(--border); border-radius: 8px; overflow: hidden; margin-bottom: 18px; }
+.card-hdr { padding: 14px 18px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
+.card-title { font-size: 12px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; color: var(--text); }
+.page-title { font-family: 'Barlow Condensed', sans-serif; font-size: 22px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; margin-bottom: 4px; }
+.page-sub { font-size: 13px; color: var(--text2); margin-bottom: 20px; }
+
+/* TWO COL */
+.two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+@media(max-width:900px) { .two-col { grid-template-columns: 1fr; } }
+
+/* STATS */
+.stats { display: grid; grid-template-columns: repeat(3,1fr); gap: 14px; margin-bottom: 20px; }
+.stat { background: var(--card); border: 1px solid var(--border); border-radius: 8px; padding: 18px 20px; position: relative; overflow: hidden; }
+.stat::before { content:''; position:absolute; top:0;left:0;right:0; height:2px; background:var(--red); }
+.stat-label { font-size: 10px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; color: var(--text2); margin-bottom: 8px; }
+.stat-val { font-family: 'Barlow Condensed', sans-serif; font-size: 34px; font-weight: 700; color: var(--text); line-height: 1; }
+.stat-unit { font-size: 13px; color: var(--text2); font-weight: 400; }
+.stat-meta { font-size: 12px; color: var(--text2); margin-top: 6px; }
+
+/* TABLE */
+.tbl-wrap { overflow-x: auto; }
+table { width: 100%; border-collapse: collapse; }
+thead th { padding: 10px 16px; text-align: left; font-size: 10px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; color: var(--text3); background: rgba(255,255,255,0.02); border-bottom: 1px solid var(--border); white-space: nowrap; }
+tbody tr { border-bottom: 1px solid var(--border); }
+tbody tr:last-child { border-bottom: none; }
+tbody tr:hover { background: rgba(255,255,255,0.02); }
+tbody td { padding: 12px 16px; font-size: 13px; color: var(--text); }
+.mono { font-family: 'JetBrains Mono', monospace; font-size: 12px; color: var(--text2); }
+.bold { font-weight: 700; }
+.dim { color: var(--text2); font-size: 12px; }
+
+/* STATUS BADGES */
+.s { display: inline-flex; align-items: center; gap: 5px; font-size: 11px; font-weight: 700; padding: 3px 9px; border-radius: 4px; text-transform: uppercase; letter-spacing: .5px; }
+.s::before { content:''; width:5px; height:5px; border-radius:50%; background:currentColor; }
+.s-pending { background:var(--orange-dim); color:var(--orange); }
+.s-ready { background:rgba(57,211,83,.1); color:#4de866; }
+.s-unavailable { background:rgba(255,69,69,.15); color:#ff4545; }
+.s-done { background:rgba(255,255,255,.05); color:var(--text2); }
+
+/* TYPE BADGE */
+.tbadge { font-size: 11px; font-weight: 700; padding: 2px 7px; border-radius: 3px; background: rgba(255,255,255,.06); color: var(--text2); font-family: 'JetBrains Mono', monospace; }
+
+/* FORMS */
+.form-grid { display: grid; gap: 14px; }
+.form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+.fg { display: flex; flex-direction: column; gap: 6px; }
+.fl { font-size: 11px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; color: var(--text2); }
+.fi, .fs, .fta { background: var(--bg4); border: 1px solid var(--border2); border-radius: 6px; padding: 10px 13px; font-family: 'Barlow', sans-serif; font-size: 14px; color: var(--text); outline: none; width: 100%; transition: border-color .15s; }
+.fi:focus, .fs:focus, .fta:focus { border-color: var(--red); }
+.fs option { background: var(--bg4); }
+.fta { resize: vertical; min-height: 80px; }
+.w-wrap { position: relative; }
+.w-wrap .fi { padding-right: 44px; }
+.w-suf { position: absolute; right: 12px; top: 50%; transform: translateY(-50%); font-size: 12px; font-weight: 600; color: var(--text2); pointer-events: none; }
+
+/* BUTTONS */
+.btn { border: none; border-radius: 6px; padding: 9px 16px; font-family: 'Barlow', sans-serif; font-size: 12px; font-weight: 700; letter-spacing: .5px; text-transform: uppercase; cursor: pointer; transition: all .15s; display: inline-flex; align-items: center; gap: 6px; }
+.btn-r { background: var(--red); color: #fff; }
+.btn-r:hover { background: var(--red2); }
+.btn-ghost { background: var(--bg4); border: 1px solid var(--border); color: var(--text2); }
+.btn-ghost:hover { color: var(--text); }
+.btn-sm { padding: 6px 11px; font-size: 11px; }
+.btn-full { width: 100%; justify-content: center; }
+
+/* BANNER */
+.banner { border-radius: 8px; padding: 16px 20px; margin-bottom: 14px; position: relative; overflow: hidden; }
+.banner-red { background: linear-gradient(135deg,#1a0a0a,#22100f); border: 1px solid rgba(255,69,69,.4); }
+.banner-red::before { content:''; position:absolute; left:0;top:0;bottom:0; width:4px; background:#ff4545; }
+.banner-orange { background: linear-gradient(135deg,#1a1400,#221e00); border: 1px solid rgba(255,156,0,.35); }
+.banner-orange::before { content:''; position:absolute; left:0;top:0;bottom:0; width:4px; background:var(--orange); }
+.banner-title { font-size: 14px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; }
+.banner-body { font-size: 13px; color: var(--text); margin-top: 4px; }
+.banner-meta { font-size: 11px; color: var(--text3); margin-top: 6px; font-family: 'JetBrains Mono', monospace; }
+.banner-close { background: none; border: none; color: var(--text3); cursor: pointer; font-size: 18px; line-height: 1; padding: 0 2px; }
+.banner-close:hover { color: var(--text2); }
+
+/* PRIORITY */
+.priority { background: linear-gradient(135deg,#ff4545,#cc0000); border-radius: 8px; padding: 18px 22px; margin-bottom: 18px; display: flex; align-items: center; gap: 16px; }
+.priority-icon { font-size: 30px; }
+.priority-text { flex: 1; }
+.priority-title { font-family: 'Barlow Condensed', sans-serif; font-size: 18px; font-weight: 900; letter-spacing: 2px; text-transform: uppercase; color: #fff; }
+.priority-desc { font-size: 13px; color: rgba(255,255,255,.8); margin-top: 2px; }
+.priority-count { font-family: 'Barlow Condensed', sans-serif; font-size: 44px; font-weight: 900; color: #fff; line-height: 1; text-align: center; }
+.priority-count-label { font-size: 11px; color: rgba(255,255,255,.7); letter-spacing: 1px; text-transform: uppercase; text-align: center; }
+
+/* SKLAD CARD */
+.req-card { background: var(--card); border: 1px solid var(--border); border-radius: 8px; padding: 18px 20px; margin-bottom: 12px; display: grid; grid-template-columns: 80px 1fr auto; gap: 16px; align-items: center; border-left: 4px solid var(--orange); }
+.req-time { font-family: 'JetBrains Mono', monospace; font-size: 17px; font-weight: 500; text-align: center; }
+.req-label { font-size: 11px; color: var(--red); font-weight: 700; text-align: center; }
+.req-mat { font-family: 'Barlow Condensed', sans-serif; font-size: 20px; font-weight: 700; }
+.req-meta { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 5px; font-size: 13px; color: var(--text2); }
+
+/* PROD GRID */
+.prod-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 12px; margin-bottom: 18px; }
+@media(max-width:900px) { .prod-grid { grid-template-columns: 1fr 1fr; } }
+.prod-card { background: var(--card); border: 1px solid var(--border); border-radius: 8px; padding: 14px 16px; position: relative; overflow: hidden; }
+.prod-card.running { border-color: rgba(57,211,83,.3); }
+.prod-card::before { content:''; position:absolute; left:0;top:0;bottom:0; width:3px; background:var(--text3); }
+.prod-card.running::before { background:var(--green); box-shadow: 0 0 6px rgba(57,211,83,.4); }
+.prod-machine { font-family: 'Barlow Condensed', sans-serif; font-size: 14px; font-weight: 700; color: var(--text2); display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px; }
+.prod-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--text3); }
+.prod-dot.on { background: var(--green); animation: pulse 1.5s infinite; }
+.prod-forma { font-family: 'Barlow Condensed', sans-serif; font-size: 28px; font-weight: 900; color: var(--text); line-height: 1; }
+.prod-forma-label { font-size: 10px; font-weight: 600; letter-spacing: 1.5px; text-transform: uppercase; color: var(--text3); margin-top: 1px; }
+.prod-mat { font-size: 12px; color: var(--text2); margin-top: 7px; padding-top: 7px; border-top: 1px solid var(--border); }
+.prod-updated { font-size: 10px; color: var(--text3); margin-top: 5px; }
+.prod-edit { background: none; border: 1px solid var(--border); border-radius: 4px; color: var(--text3); font-size: 11px; padding: 3px 8px; cursor: pointer; margin-top: 8px; }
+.prod-edit:hover { color: var(--text); border-color: var(--border2); }
+.prod-idle { font-size: 13px; color: var(--text3); font-style: italic; }
+
+/* MODAL */
+.modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,.7); z-index: 500; display: none; align-items: center; justify-content: center; backdrop-filter: blur(3px); }
+.modal-overlay.open { display: flex; }
+.modal { background: var(--bg3); border: 1px solid var(--border2); border-radius: 10px; padding: 28px; width: 440px; max-width: 95vw; }
+.modal-title { font-family: 'Barlow Condensed', sans-serif; font-size: 18px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; margin-bottom: 4px; }
+.modal-sub { font-size: 13px; color: var(--text2); margin-bottom: 18px; }
+.modal-actions { display: flex; gap: 8px; justify-content: flex-end; margin-top: 18px; }
+
+/* TOAST */
+.toasts { position: fixed; bottom: 20px; right: 20px; z-index: 1000; display: flex; flex-direction: column; gap: 8px; }
+.toast { background: var(--bg3); border: 1px solid var(--border2); border-radius: 8px; padding: 12px 16px; min-width: 280px; display: flex; align-items: center; gap: 10px; animation: slideIn .25s ease; box-shadow: 0 6px 24px rgba(0,0,0,.4); }
+.toast.ok { border-color: rgba(57,211,83,.3); }
+.toast.err { border-color: rgba(255,69,69,.3); }
+@keyframes slideIn { from{opacity:0;transform:translateX(16px);} to{opacity:1;transform:none;} }
+.toast-icon { font-size: 18px; }
+.toast-text { font-size: 13px; line-height: 1.4; }
+.toast-text strong { display: block; font-weight: 700; }
+
+/* SCRAP & REPORT */
+.section-divider { border-top: 1px solid var(--border); margin: 28px 0; }
+.section-title2 { font-family: 'Barlow Condensed', sans-serif; font-size: 18px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; margin-bottom: 18px; }
+
 /* SCROLLBAR */
 ::-webkit-scrollbar { width: 5px; height: 5px; }
 ::-webkit-scrollbar-track { background: transparent; }
