@@ -3146,7 +3146,7 @@ function submitRequest() {
     resolvedTime: null,
   };
 
-  appData.requests.unshift(newReq);
+  fbPushItem('requests', newReq);
 
   // Reset form
   document.getElementById('req-material').value = '';
