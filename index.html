@@ -3114,7 +3114,7 @@ function renderFormaBanner() {
         '</div>' +
         '<div style="display:flex;align-items:center;gap:12px">' +
           '<div style="font-size:11px;color:var(--text-dimmer);font-family:monospace">Vydal vedoucí · ' + f.issuedAt + '</div>' +
-          (!isVedouci ? '<button onclick="dismissFormaBanner(this.dataset.key)" data-key="' + key + '" style="background:none;border:none;color:var(--text-dimmer);cursor:pointer;font-size:18px;line-height:1;padding:0 2px" title="Zavřít">✕</button>' : '') +
+          '<button onclick="dismissFormaBanner(this.dataset.key)" data-key="' + key + '" style="background:none;border:none;color:var(--text-dimmer);cursor:pointer;font-size:18px;line-height:1;padding:0 2px" title="Zavřít">✕</button>' +
         '</div>' +
       '</div>' +
     '</div>';
