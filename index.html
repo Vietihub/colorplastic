@@ -291,6 +291,36 @@ tbody td{padding:11px 14px;font-size:13px;}
   thead th{padding:7px 10px;font-size:9px;}
   tbody td{padding:9px 10px;font-size:12px;}
 }
+
+/* PLÁN */
+.plan-table { width:100%; border-collapse:collapse; }
+.plan-table th { padding:9px 10px; text-align:center; font-size:10px; font-weight:700; letter-spacing:1px; text-transform:uppercase; color:var(--text3); background:rgba(255,255,255,.02); border:1px solid var(--border); white-space:nowrap; }
+.plan-table th.mach-col { text-align:left; min-width:110px; }
+.plan-table td { padding:0; border:1px solid var(--border); vertical-align:top; min-width:100px; }
+.plan-cell { padding:8px 10px; min-height:70px; cursor:pointer; transition:background .15s; position:relative; }
+.plan-cell:hover { background:rgba(255,255,255,.04); }
+.plan-cell.has-plan { background:rgba(232,0,30,.06); }
+.plan-cell.today { background:rgba(74,158,255,.06); border:1px solid rgba(74,158,255,.2); }
+.plan-cell.today.has-plan { background:rgba(74,158,255,.1); }
+.plan-cell-forma { font-family:'Barlow Condensed',sans-serif; font-size:17px; font-weight:700; color:var(--text); line-height:1; }
+.plan-cell-mat { font-size:11px; color:var(--text2); margin-top:2px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:110px; }
+.plan-cell-qty { font-size:11px; color:var(--green-text); font-weight:600; margin-top:3px; }
+.plan-cell-smena { font-size:10px; font-weight:700; letter-spacing:.5px; text-transform:uppercase; margin-top:3px; }
+.smena-r { color:#4a9eff; }
+.smena-o { color:var(--orange); }
+.smena-n { color:#a070ff; }
+.plan-cell-note { font-size:10px; color:var(--text3); margin-top:3px; font-style:italic; }
+.plan-cell-empty { font-size:11px; color:var(--text3); padding:8px 10px; min-height:70px; display:flex; align-items:center; justify-content:center; cursor:pointer; }
+.plan-cell-empty:hover { color:var(--text2); }
+.day-header { font-size:12px; font-weight:700; }
+.day-header.today-hdr { color:var(--blue); }
+.day-date { font-size:10px; font-weight:400; margin-top:1px; opacity:.7; }
+.mach-cell { padding:9px 10px; font-family:'Barlow Condensed',sans-serif; font-size:14px; font-weight:700; color:var(--text2); background:rgba(255,255,255,.02); }
+/* Dnešní plán karty */
+.plan-today-card { background:var(--card); border:1px solid var(--blue-dim); border-left:3px solid var(--blue); border-radius:8px; padding:12px 14px; margin-bottom:10px; }
+.plan-today-mach { font-family:'Barlow Condensed',sans-serif; font-size:13px; font-weight:700; color:var(--text2); margin-bottom:6px; }
+.plan-today-forma { font-family:'Barlow Condensed',sans-serif; font-size:22px; font-weight:900; color:var(--text); line-height:1; }
+.plan-today-meta { font-size:12px; color:var(--text2); margin-top:5px; display:flex; flex-wrap:wrap; gap:10px; }
 </style>
 </head>
 <body>
@@ -343,6 +373,7 @@ tbody td{padding:11px 14px;font-size:13px;}
       <div class="stats" id="stats-prehled"></div>
       <div class="stitle">🏭 Aktuální výroba</div>
       <div class="pgrid" id="prod-prehled"></div>
+      <div id="plan-today-section" style="margin-bottom:16px"></div>
       <div class="two">
         <div class="card">
           <div class="chdr"><span class="ct">Materiálové požadavky</span><div class="live">Live</div></div>
@@ -358,6 +389,29 @@ tbody td{padding:11px 14px;font-size:13px;}
             <tbody id="tbl-scrap-p"></tbody>
           </table></div>
         </div>
+      </div>
+    </div>
+
+    <!-- PLÁNOVÁNÍ -->
+    <div class="page" id="page-plan">
+      <div style="display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:4px">
+        <div><div class="ptitle">Plánování výroby</div><div class="psub">Týdenní plán pro všechny lisy – klikni na buňku pro zadání</div></div>
+        <div style="display:flex;gap:8px;align-items:center">
+          <button class="btn bg bsm" onclick="planPrevWeek()">← Předchozí</button>
+          <span id="plan-week-label" style="font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--text2)"></span>
+          <button class="btn bg bsm" onclick="planNextWeek()">Další →</button>
+          <button class="btn br bsm" onclick="planThisWeek()">Tento týden</button>
+        </div>
+      </div>
+      <div class="card" style="overflow-x:auto;padding:0">
+        <table class="plan-table" id="plan-grid"></table>
+      </div>
+      <div style="display:flex;gap:16px;margin-top:10px;font-size:12px;color:var(--text2)">
+        <span style="display:flex;align-items:center;gap:6px"><span style="width:12px;height:12px;background:rgba(74,158,255,.2);border:1px solid rgba(74,158,255,.3);border-radius:2px;display:inline-block"></span>Dnes</span>
+        <span style="display:flex;align-items:center;gap:6px"><span style="width:12px;height:12px;background:rgba(232,0,30,.1);border:1px solid rgba(232,0,30,.2);border-radius:2px;display:inline-block"></span>Naplánováno</span>
+        <span class="smena-r">■ Ranní</span>
+        <span class="smena-o">■ Odpolední</span>
+        <span class="smena-n" style="color:#a070ff">■ Noční</span>
       </div>
     </div>
 
@@ -742,6 +796,45 @@ tbody td{padding:11px 14px;font-size:13px;}
   </div>
 </div>
 
+<!-- MODAL: Plán -->
+<div class="moverlay" id="mod-plan">
+  <div class="modal">
+    <div style="display:flex;justify-content:space-between;align-items:flex-start">
+      <div><div class="mtitle" id="pm-title">Lis</div><div class="msub" id="pm-date"></div></div>
+      <button class="btn bwarn bsm" onclick="deletePlanEntry()" style="margin-top:2px">✕ Smazat</button>
+    </div>
+    <div class="fgrid">
+      <div class="frow">
+        <div class="fg"><label class="fl">Forma č.</label><input type="text" class="fi" id="pm-forma" placeholder="napr. č. 128"></div>
+        <div class="fg"><label class="fl">Směna</label>
+          <select class="fs" id="pm-smena">
+            <option value="ranní">Ranní</option>
+            <option value="odpolední">Odpolední</option>
+            <option value="noční">Noční</option>
+          </select>
+        </div>
+      </div>
+      <div class="frow">
+        <div class="fg"><label class="fl">Materiál</label>
+          <select class="fs" id="pm-mat">
+            <option value="">— Nevyplněno —</option>
+            <option>Lukablend 7400 (PC/ABS)</option>
+            <option>Enflex 120 (PP)</option>
+            <option>Bayblend TX65 (PC/ABS)</option>
+            <option>Lukablend 8500 (PC/ABS)</option>
+          </select>
+        </div>
+        <div class="fg"><label class="fl">Počet kusů</label><input type="number" class="fi" id="pm-qty" placeholder="0" min="0"></div>
+      </div>
+      <div class="fg"><label class="fl">Poznámka</label><textarea class="fta" id="pm-note" placeholder="Objednávka, zákazník..."></textarea></div>
+    </div>
+    <div class="mact">
+      <button class="btn bg" onclick="closeModal('mod-plan')">Zrušit</button>
+      <button class="btn br" onclick="savePlan()">✔ Uložit</button>
+    </div>
+  </div>
+</div>
+
 <!-- MODAL: Materiál -->
 <div class="moverlay" id="mod-mat">
   <div class="modal">
@@ -870,7 +963,7 @@ var curReqKey = null;
 var curProdMachine = null;
 var D = {
   requests:[], scrap:[], skladAlerts:[], formaChanges:[],
-  objednavky:[], dovolene:[], materialy:[],
+  objednavky:[], dovolene:[], materialy:[], plan:{},
   production:[
     {machine:'Engel duo 300T',forma:null,mat:null,running:false,updated:null},
     {machine:'Engel duo 550T',forma:null,mat:null,running:false,updated:null},
@@ -888,7 +981,7 @@ var PINS = {vedouci:'1111',mistr:'2222',serizovac:'3333',sklad:'4444',technolog:
 var LABELS = {vedouci:'Vedoucí výroby',mistr:'Mistr',serizovac:'Seřizovač',sklad:'Sklad',technolog:'Technolog',udrzba:'Údržba'};
 var SHORT = {vedouci:'Vedoucí',mistr:'Mistr',serizovac:'Seřizovač',sklad:'Sklad',technolog:'Technolog',udrzba:'Údržba'};
 var NAV = {
-  vedouci:  [{id:'prehled',lbl:'Přehled',ic:'📊'},{id:'formy',lbl:'Změny forem',ic:'🔔'},{id:'dovolene-vedouci',lbl:'Dovolené',ic:'🏖'},{id:'vyroba',lbl:'Výroba',ic:'🏭'},{id:'scrap-report',lbl:'Scrap & Reporting',ic:'♻️'}],
+  vedouci:  [{id:'prehled',lbl:'Přehled',ic:'📊'},{id:'plan',lbl:'Plánování',ic:'📅'},{id:'formy',lbl:'Změny forem',ic:'🔔'},{id:'dovolene-vedouci',lbl:'Dovolené',ic:'🏖'},{id:'vyroba',lbl:'Výroba',ic:'🏭'},{id:'scrap-report',lbl:'Scrap & Reporting',ic:'♻️'}],
   mistr:    [{id:'prehled',lbl:'Přehled',ic:'📊'},{id:'scrap',lbl:'Scrap',ic:'♻️'},{id:'vyroba',lbl:'Výroba',ic:'🏭'},{id:'objednavky',lbl:'Objednávky mat.',ic:'🛒'},{id:'dovolene',lbl:'Dovolené',ic:'🏖'}],
   serizovac:[{id:'ser-prehled',lbl:'Přehled',ic:'📊'},{id:'pozadavky',lbl:'Požadavky',ic:'📤'},{id:'scrap',lbl:'Scrap',ic:'♻️'},{id:'vyroba',lbl:'Výroba',ic:'🏭'},{id:'materialy',lbl:'Materiály',ic:'🧪'}],
   sklad:    [{id:'sklad-prehled',lbl:'Přehled',ic:'📊'},{id:'sklad',lbl:'Požadavky & Objednávky',ic:'📦'}],
@@ -980,6 +1073,7 @@ function render(pageId) {
     case 'dovolene-vedouci': renderDovVedouci(); break;
     case 'materialy':         renderMaterialy(); break;
     case 'tech-prehled':      renderTechPrehled(); break;
+    case 'plan':              renderPlan(); break;
   }
   renderBanners();
 }
@@ -1161,6 +1255,154 @@ function deleteMat(key) {
   toast('ok','Smazáno','Záznam odstraněn');
 }
 
+// ── PLÁNOVÁNÍ ─────────────────────────────────────────────────────
+var planWeekOffset = 0;
+var editPlanKey = null;
+
+var MACHINES_LIST = ['Engel duo 300T','Engel duo 550T','Engel duo 700T','Engel duo 900T','Engel duo 1700T','Engel duo 2000T'];
+var DAY_NAMES = ['Po','Út','St','Čt','Pá','So','Ne'];
+var DAY_FULL  = ['Pondělí','Úterý','Středa','Čtvrtek','Pátek','Sobota','Neděle'];
+
+function getWeekDates(offset) {
+  var now = new Date();
+  var day = now.getDay();
+  var diff = day === 0 ? -6 : 1 - day;
+  var monday = new Date(now);
+  monday.setDate(now.getDate() + diff + offset * 7);
+  monday.setHours(0,0,0,0);
+  var dates = [];
+  for (var i = 0; i < 7; i++) {
+    var d = new Date(monday);
+    d.setDate(monday.getDate() + i);
+    dates.push(d);
+  }
+  return dates;
+}
+
+function dateKey(d) {
+  return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
+}
+
+function isToday(d) {
+  var t = new Date(); t.setHours(0,0,0,0);
+  return d.getTime() === t.getTime();
+}
+
+function planPrevWeek() { planWeekOffset--; renderPlan(); }
+function planNextWeek() { planWeekOffset++; renderPlan(); }
+function planThisWeek() { planWeekOffset=0; renderPlan(); }
+
+function smenaClass(s) {
+  return s==='ranní'?'smena-r':s==='odpolední'?'smena-o':'smena-n';
+}
+function smenaLabel(s) {
+  return s==='ranní'?'R':s==='odpolední'?'O':'N';
+}
+
+function renderPlan() {
+  var dates = getWeekDates(planWeekOffset);
+  var lbl = document.getElementById('plan-week-label');
+  if (lbl) {
+    var d0 = dates[0], d6 = dates[6];
+    lbl.textContent = d0.getDate()+'.'+(d0.getMonth()+1)+'. – '+d6.getDate()+'.'+(d6.getMonth()+1)+'.'+d6.getFullYear();
+  }
+  var grid = document.getElementById('plan-grid'); if (!grid) return;
+
+  var html = '<thead><tr><th class="mach-col">Lis</th>';
+  dates.forEach(function(d, i) {
+    var today = isToday(d);
+    html += '<th><div class="day-header'+(today?' today-hdr':'')+'">' + DAY_FULL[i] + '</div>';
+    html += '<div class="day-date">' + d.getDate()+'.'+(d.getMonth()+1)+'.' + '</div></th>';
+  });
+  html += '</tr></thead><tbody>';
+
+  MACHINES_LIST.forEach(function(mach) {
+    html += '<tr><td class="mach-cell">' + mach + '</td>';
+    dates.forEach(function(d) {
+      var dk = dateKey(d);
+      var planKey = mach.replace(/ /g,'_') + '_' + dk;
+      var p = D.plan[planKey];
+      var today = isToday(d);
+      if (p && (p.forma || p.qty)) {
+        html += '<td><div class="plan-cell has-plan'+(today?' today':'')+'" data-k="'+planKey+'" onclick="openPlanModal(this.dataset.k,\''+mach+'\',\''+dk+'\')">';
+        if (p.forma) html += '<div class="plan-cell-forma">'+p.forma+'</div>';
+        if (p.mat) html += '<div class="plan-cell-mat">'+p.mat+'</div>';
+        if (p.qty) html += '<div class="plan-cell-qty">'+p.qty+' ks</div>';
+        if (p.smena) html += '<div class="plan-cell-smena '+smenaClass(p.smena)+'">'+smenaLabel(p.smena)+'</div>';
+        if (p.note) html += '<div class="plan-cell-note">'+p.note+'</div>';
+        html += '</div></td>';
+      } else {
+        html += '<td><div class="plan-cell-empty'+(today?' today':'')+'" data-k="'+planKey+'" onclick="openPlanModal(this.dataset.k,\''+mach+'\',\''+dk+'\')">';
+        html += role==='vedouci' ? '+' : '–';
+        html += '</div></td>';
+      }
+    });
+    html += '</tr>';
+  });
+  html += '</tbody>';
+  grid.innerHTML = html;
+}
+
+function renderPlanToday() {
+  var el = document.getElementById('plan-today-section'); if (!el) return;
+  var today = dateKey(new Date());
+  var items = [];
+  MACHINES_LIST.forEach(function(mach) {
+    var k = mach.replace(/ /g,'_') + '_' + today;
+    var p = D.plan[k];
+    if (p && (p.forma || p.qty)) items.push({mach:mach, p:p});
+  });
+  if (!items.length) { el.innerHTML=''; return; }
+  el.innerHTML = '<div class="stitle">📅 Dnešní plán výroby</div>' +
+    '<div class="three">' +
+    items.map(function(item) {
+      var p = item.p;
+      return '<div class="plan-today-card">' +
+        '<div class="plan-today-mach">'+item.mach+'</div>' +
+        (p.forma ? '<div class="plan-today-forma">'+p.forma+'</div>' : '') +
+        '<div class="plan-today-meta">' +
+          (p.mat ? '<span>🎨 '+p.mat+'</span>' : '') +
+          (p.qty ? '<span style="color:var(--green-text);font-weight:700">'+p.qty+' ks</span>' : '') +
+          (p.smena ? '<span class="'+smenaClass(p.smena)+'" style="font-weight:700">'+p.smena+'</span>' : '') +
+          (p.note ? '<span style="color:var(--text3);font-style:italic">'+p.note+'</span>' : '') +
+        '</div>' +
+      '</div>';
+    }).join('') +
+    '</div>';
+}
+
+function openPlanModal(planKey, mach, dk) {
+  if (role !== 'vedouci') return;
+  editPlanKey = planKey;
+  var p = D.plan[planKey] || {};
+  document.getElementById('pm-title').textContent = mach;
+  document.getElementById('pm-date').textContent = dk.split('-').reverse().join('.');
+  document.getElementById('pm-forma').value = p.forma||'';
+  document.getElementById('pm-mat').value = p.mat||'';
+  document.getElementById('pm-qty').value = p.qty||'';
+  document.getElementById('pm-smena').value = p.smena||'ranní';
+  document.getElementById('pm-note').value = p.note||'';
+  document.getElementById('mod-plan').classList.add('on');
+}
+
+function savePlan() {
+  var forma = document.getElementById('pm-forma').value.trim();
+  var mat   = document.getElementById('pm-mat').value.trim();
+  var qty   = document.getElementById('pm-qty').value.trim();
+  var smena = document.getElementById('pm-smena').value;
+  var note  = document.getElementById('pm-note').value.trim();
+  if (!forma && !qty) { toast('err','Chyba','Zadejte formu nebo počet kusů.'); return; }
+  fbSet('plan/'+editPlanKey, {forma:forma, mat:mat, qty:qty, smena:smena, note:note});
+  closeModal('mod-plan');
+  toast('ok','Plán uložen', forma ? forma+' · '+smena : qty+' ks · '+smena);
+}
+
+function deletePlanEntry() {
+  db.ref('plan/'+editPlanKey).remove();
+  closeModal('mod-plan');
+  toast('ok','Smazáno','Plán odstraněn');
+}
+
 function startFirebase() {
   fbOn('requests', function(val){
     D.requests = fromFb(val).reverse();
@@ -1185,6 +1427,12 @@ function startFirebase() {
   fbOn('dovolene', function(val){
     D.dovolene = fromFb(val).reverse();
     afterUpdate();
+  });
+  fbOn('plan', function(val){
+    D.plan = val || {};
+    var ab=document.querySelector('.nb.on');
+    if(ab && ab.dataset.page==='plan') renderPlan();
+    renderPlanToday();
   });
   fbOn('materialy', function(val){
     if (val) {
@@ -1356,6 +1604,7 @@ function renderPrehled() {
     '<div class="stat"><div class="sl">Dnešní scrap</div><div class="sv">'+totalScrap.toFixed(1)+' <span class="su">kg</span></div><div class="sm">'+D.scrap.length+' zápisů</div></div>'+
     '<div class="stat"><div class="sl">Aktivní stroje</div><div class="sv">'+running+' <span class="su">/ 6</span></div></div>';
   renderProd('prod-prehled');
+  renderPlanToday();
   var tr = document.getElementById('tbl-req-p');
   if (tr) tr.innerHTML = D.requests.slice(0,10).map(function(r){
     return '<tr><td class="mono">'+r.time+'</td><td class="bold">'+r.material+'</td><td>'+r.qty+' kg</td><td>'+sbadge(r.status)+'</td></tr>';
