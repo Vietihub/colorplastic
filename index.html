@@ -442,15 +442,36 @@ tbody td { padding: 12px 16px; font-size: 13px; color: var(--text); }
 
     <!-- SKLAD -->
     <div class="page" id="page-sklad">
-      <div class="page-title">Materiálové požadavky – Sklad</div>
-      <div class="page-sub">Prioritní odbavení požadavků z výroby</div>
+      <div class="page-title">Sklad – Požadavky & Objednávky</div>
+      <div class="page-sub">Materiálové požadavky z výroby a objednávky pomocného materiálu</div>
+
+      <!-- SEKCE 1: POŽADAVKY VÝROBY -->
+      <div style="font-family:'Barlow Condensed',sans-serif;font-size:18px;font-weight:700;letter-spacing:1px;text-transform:uppercase;margin-bottom:14px;display:flex;align-items:center;gap:10px">
+        📦 Požadavky výroby <div class="live-dot" style="margin-left:8px">Live</div>
+      </div>
       <div id="sklad-priority"></div>
       <div id="sklad-cards"></div>
-      <div class="card">
+      <div class="card" style="margin-bottom:28px">
         <div class="card-hdr"><span class="card-title">Vyřízené požadavky</span></div>
         <div class="tbl-wrap"><table>
           <thead><tr><th>Čas</th><th>Materiál</th><th>kg</th><th>Stroj</th><th>Vyřízeno</th><th>Stav</th></tr></thead>
           <tbody id="tbl-sklad-done"></tbody>
+        </table></div>
+      </div>
+
+      <!-- SEKCE 2: OBJEDNÁVKY MATERIÁLU -->
+      <div style="border-top:1px solid var(--border);margin-bottom:24px;padding-top:24px">
+        <div style="font-family:'Barlow Condensed',sans-serif;font-size:18px;font-weight:700;letter-spacing:1px;text-transform:uppercase;margin-bottom:14px;display:flex;align-items:center;gap:10px">
+          🛒 Objednávky pomocného materiálu <div class="live-dot" style="margin-left:8px">Live</div>
+        </div>
+      </div>
+      <div id="obj-priority"></div>
+      <div id="obj-cards"></div>
+      <div class="card">
+        <div class="card-hdr"><span class="card-title">Vyřízené objednávky</span></div>
+        <div class="tbl-wrap"><table>
+          <thead><tr><th>Čas</th><th>Položka</th><th>Množství</th><th>Poznámka</th><th>Stav</th></tr></thead>
+          <tbody id="tbl-obj-done"></tbody>
         </table></div>
       </div>
     </div>
@@ -584,6 +605,49 @@ tbody td { padding: 12px 16px; font-size: 13px; color: var(--text); }
     </div>
 
 
+
+    <!-- OBJEDNÁVKY – Mistr -->
+    <div class="page" id="page-objednavky">
+      <div class="page-title">Objednávky materiálu</div>
+      <div class="page-sub">Objednat proklady, miralon, klipy a další pomocný materiál</div>
+      <div class="two-col">
+        <div class="card" style="padding:22px">
+          <div style="font-family:'Barlow Condensed',sans-serif;font-size:16px;font-weight:700;letter-spacing:1px;text-transform:uppercase;margin-bottom:18px;padding-bottom:14px;border-bottom:1px solid var(--border)">Nová objednávka</div>
+          <div class="form-grid">
+            <div class="fg"><label class="fl">Položka</label>
+              <select class="fs" id="obj-item">
+                <option value="">Vyberte položku...</option>
+                <option>Proklady plastové</option><option>Proklady kartonové</option>
+                <option>Miralon</option><option>Klipy</option>
+                <option>Páska lepicí</option><option>Páska smršťovací</option>
+                <option>Sáčky PE</option><option>Kartonové krabice</option>
+                <option>Fólie stretch</option><option>Rukavice</option>
+                <option>Vázací pásky</option><option>Palety dřevěné</option>
+                <option>Jiné...</option>
+              </select>
+            </div>
+            <div class="form-row">
+              <div class="fg"><label class="fl">Množství</label><input type="number" class="fi" id="obj-qty" placeholder="0" min="1"></div>
+              <div class="fg"><label class="fl">Jednotka</label>
+                <select class="fs" id="obj-unit">
+                  <option>ks</option><option>bal</option><option>role</option>
+                  <option>kg</option><option>m</option><option>paleta</option>
+                </select>
+              </div>
+            </div>
+            <div class="fg"><label class="fl">Poznámka / Specifikace</label><textarea class="fta" id="obj-note" placeholder="Rozměr, barva, typ..."></textarea></div>
+            <button class="btn btn-r btn-full" onclick="submitObj()">🛒 Odeslat objednávku</button>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-hdr"><span class="card-title">Moje objednávky</span><div class="live-dot">Live</div></div>
+          <div class="tbl-wrap"><table>
+            <thead><tr><th>Čas</th><th>Položka</th><th>Množství</th><th>Stav</th></tr></thead>
+            <tbody id="tbl-obj-mistr"></tbody>
+          </table></div>
+        </div>
+      </div>
+    </div>
 
     <!-- OBJEDNÁVKY – Mistr -->
     <div class="page" id="page-objednavky">
@@ -802,7 +866,7 @@ var NAV = {
   vedouci:   [{id:'prehled',label:'Přehled',icon:'📊'},{id:'scrap-report',label:'Scrap & Reporting',icon:'♻️'},{id:'formy',label:'Změny forem',icon:'🔔'},{id:'vyroba',label:'Výroba',icon:'🏭'},{id:'dovolene-vedouci',label:'Dovolené',icon:'🏖'}],
   mistr:     [{id:'prehled',label:'Přehled',icon:'📊'},{id:'objednavky',label:'Objednávky mat.',icon:'🛒'},{id:'scrap',label:'Scrap',icon:'♻️'},{id:'vyroba',label:'Výroba',icon:'🏭'},{id:'dovolene-mistr',label:'Dovolené',icon:'🏖'}],
   serizovac: [{id:'ser-prehled',label:'Přehled',icon:'📊'},{id:'pozadavky',label:'Požadavky',icon:'📤'},{id:'scrap',label:'Scrap',icon:'♻️'},{id:'vyroba',label:'Výroba',icon:'🏭'}],
-  sklad:     [{id:'sklad-prehled',label:'Přehled',icon:'📊'},{id:'sklad',label:'Požadavky výroby',icon:'📦'},{id:'objednavky-sklad',label:'Objednávky mat.',icon:'🛒'}],
+  sklad:     [{id:'sklad-prehled',label:'Přehled',icon:'📊'},{id:'sklad',label:'Požadavky & Objednávky',icon:'📦'}],
   technolog: [{id:'sklad-prehled',label:'Přehled',icon:'📊'},{id:'vyroba',label:'Výroba',icon:'🏭'}],
   udrzba:    [{id:'sklad-prehled',label:'Přehled',icon:'📊'},{id:'vyroba',label:'Výroba',icon:'🏭'}],
 };
@@ -881,7 +945,6 @@ function renderPage(pageId) {
     case 'formy':         renderFormy(); break;
     case 'vyroba':          renderVyroba(); break;
     case 'objednavky':      renderObjednavky(); break;
-    case 'objednavky-sklad':renderObjednavkySklad(); break;
     case 'dovolene-mistr':  renderDovMistr(); break;
     case 'dovolene-vedouci':renderDovVedouci(); break;
   }
@@ -955,7 +1018,7 @@ function updateBadges() {
     var count = 0;
     if (page === 'sklad') count = pendingReq;
     if (page === 'dovolene-vedouci') count = data.dovolene.filter(function(d){return d.status==='pending';}).length;
-    if (page === 'objednavky-sklad') count = data.objednavky.filter(function(o){return o.status==='pending';}).length;
+    if (page === 'sklad') count = pendingReq + data.objednavky.filter(function(o){return o.status==='pending';}).length;
     if (count > 0) {
       if (badge) { badge.textContent = count; }
       else { btn.innerHTML += '<span class="badge">'+count+'</span>'; }
@@ -1072,7 +1135,37 @@ function renderSklad() {
   if (dt) dt.innerHTML = done.map(function(r){
     return '<tr><td class="mono">'+r.time+'</td><td class="bold">'+r.material+'</td><td>'+r.qty+' kg</td><td class="dim">'+r.machine+'</td><td class="mono">'+(r.resolvedTime||'–')+'</td><td>'+sbadge(r.status)+'</td></tr>';
   }).join('') || '<tr><td colspan="6" style="text-align:center;color:var(--text3);padding:20px">Žádné vyřízené</td></tr>';
+  // Also render objednávky section
+  renderObjednavkySkladInline();
 }
+
+function renderObjednavkySkladInline() {
+  var pending = data.objednavky.filter(function(o){return o.status==='pending';});
+  var done    = data.objednavky.filter(function(o){return o.status!=='pending';});
+  var pe = document.getElementById('obj-priority');
+  if (pe) {
+    if (pending.length) {
+      pe.innerHTML = '<div class="priority"><div class="priority-icon">🛒</div><div class="priority-text"><div class="priority-title">Nové objednávky</div><div class="priority-desc">Požadavky od mistrů čekají na vyřízení</div></div><div><div class="priority-count">'+pending.length+'</div><div class="priority-count-label">čekající</div></div></div>';
+    } else {
+      pe.innerHTML = '<div style="background:rgba(57,211,83,.07);border:1px solid rgba(57,211,83,.2);border-radius:8px;padding:16px 20px;margin-bottom:16px;display:flex;align-items:center;gap:12px"><span style="font-size:20px">✅</span><span style="font-weight:700;color:#4de866">Vše vyřízeno</span></div>';
+    }
+  }
+  var ce = document.getElementById('obj-cards');
+  if (ce) {
+    ce.innerHTML = pending.map(function(o) {
+      return '<div class="req-card">'+
+        '<div><div class="req-time">'+o.time+'</div><div class="req-label">čeká</div></div>'+
+        '<div><div class="req-mat">'+o.item+'</div><div class="req-meta"><span>'+o.qty+' '+o.unit+'</span>'+(o.note?'<span>'+o.note+'</span>':'')+'<span>'+o.podal+'</span></div></div>'+
+        '<div style="display:flex;gap:8px">'+
+        '<button class="btn btn-sm" style="background:rgba(255,69,69,.15);border:1px solid rgba(255,69,69,.3);color:#ff4545" data-key="'+o.fbKey+'" data-action="unavailable" onclick="respondObj(this.dataset.key,this.dataset.action)">❌</button>'+
+        '<button class="btn btn-r btn-sm" data-key="'+o.fbKey+'" data-action="done" onclick="respondObj(this.dataset.key,this.dataset.action)">✅ Vyřízeno</button>'+
+        '</div></div>';
+    }).join('');
+  }
+  var dt = document.getElementById('tbl-obj-done');
+  if (dt) dt.innerHTML = done.map(function(o) {
+    return '<tr><td class="mono">'+o.time+'</td><td class="bold">'+o.item+'</td><td>'+o.qty+' '+o.unit+'</td><td class="dim">'+(o.note||'–')+'</td><td>'+objStatusBadge(o.status)+'</td></tr>';
+  }).join('') || '<tr><td colspan="5" style="text-align:center;color:var(--text3);padding:20px">Žádné vyřízené</td></tr>';
 
 function renderScrapReport() {
   var total = data.scrap.reduce(function(a,s){ return a+s.weight; }, 0);
@@ -1392,34 +1485,6 @@ function renderObjednavky() {
     return '<tr><td class="mono">'+o.time+'</td><td class="bold">'+o.item+'</td><td>'+o.qty+' '+o.unit+'</td><td>'+objStatusBadge(o.status)+'</td></tr>';
   }).join('') || '<tr><td colspan="4" style="text-align:center;color:var(--text3);padding:20px">Žádné objednávky</td></tr>';
 }
-function renderObjednavkySklad() {
-  var pending = data.objednavky.filter(function(o){return o.status==='pending';});
-  var done    = data.objednavky.filter(function(o){return o.status!=='pending';});
-  var pe = document.getElementById('obj-priority');
-  if (pe) {
-    if (pending.length) {
-      pe.innerHTML = '<div class="priority"><div class="priority-icon">🛒</div><div class="priority-text"><div class="priority-title">Nové objednávky</div><div class="priority-desc">Požadavky od mistrů čekají na vyřízení</div></div><div><div class="priority-count">'+pending.length+'</div><div class="priority-count-label">čekající</div></div></div>';
-    } else {
-      pe.innerHTML = '<div style="background:rgba(57,211,83,.07);border:1px solid rgba(57,211,83,.2);border-radius:8px;padding:16px 20px;margin-bottom:16px;display:flex;align-items:center;gap:12px"><span style="font-size:20px">✅</span><span style="font-weight:700;color:#4de866">Vše vyřízeno</span></div>';
-    }
-  }
-  var ce = document.getElementById('obj-cards');
-  if (ce) {
-    ce.innerHTML = pending.map(function(o) {
-      return '<div class="req-card">'+
-        '<div><div class="req-time">'+o.time+'</div><div class="req-label">čeká</div></div>'+
-        '<div><div class="req-mat">'+o.item+'</div><div class="req-meta"><span>'+o.qty+' '+o.unit+'</span>'+(o.note?'<span>'+o.note+'</span>':'')+'<span>'+o.podal+'</span></div></div>'+
-        '<div style="display:flex;gap:8px">'+
-        '<button class="btn btn-sm" style="background:rgba(255,69,69,.15);border:1px solid rgba(255,69,69,.3);color:#ff4545" data-key="'+o.fbKey+'" data-action="unavailable" onclick="respondObj(this.dataset.key,this.dataset.action)">❌</button>'+
-        '<button class="btn btn-r btn-sm" data-key="'+o.fbKey+'" data-action="done" onclick="respondObj(this.dataset.key,this.dataset.action)">✅ Vyřízeno</button>'+
-        '</div></div>';
-    }).join('');
-  }
-  var dt = document.getElementById('tbl-obj-done');
-  if (dt) dt.innerHTML = done.map(function(o) {
-    return '<tr><td class="mono">'+o.time+'</td><td class="bold">'+o.item+'</td><td>'+o.qty+' '+o.unit+'</td><td class="dim">'+(o.note||'–')+'</td><td>'+objStatusBadge(o.status)+'</td></tr>';
-  }).join('') || '<tr><td colspan="5" style="text-align:center;color:var(--text3);padding:20px">Žádné vyřízené</td></tr>';
-}
 
 // ── DOVOLENÉ ─────────────────────────────────────────────────────────────
 function dovTypLabel(t) {
@@ -1520,6 +1585,7 @@ function renderDovBanner() {
       '</div>'+
     '</div>';
   }).join('');
+}
 }
 
 // Clock
