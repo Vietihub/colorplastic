@@ -2340,17 +2340,7 @@ function nowTime() {
 //  FIREBASE SYNC
 // ══════════════════════════════════════════
 
-function fbSave(path, data) {
-  db.ref(path).set(data).catch(e => console.error('FB save error:', path, e));
-}
 
-function fbPushItem(path, data) {
-  return db.ref(path).push(data).catch(e => console.error('FB push error:', path, e));
-}
-
-function fbListen(path, callback) {
-  db.ref(path).on('value', snap => callback(snap.val()));
-}
 
 function processRequests(val) {
   appData.requests = val ? Object.entries(val).map(([k,v]) => ({...v, fbKey: k})) : [];
