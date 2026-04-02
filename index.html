@@ -1367,23 +1367,6 @@
     .sklad-request-card { grid-template-columns: 1fr; }
   }
 </style>
-<script src="https://cdn.jsdelivr.net/npm/firebase@9.23.0/firebase-app-compat.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/firebase@9.23.0/firebase-database-compat.min.js"></script>
-<script>
-const firebaseConfig = {
-  apiKey: "AIzaSyBfxSMeAWZaLcrbiGqG9uv8wYyW_H9-sQ8",
-  authDomain: "colorplastic-87a1c.firebaseapp.com",
-  databaseURL: "https://colorplastic-87a1c-default-rtdb.europe-west1.firebasedatabase.app",
-  projectId: "colorplastic-87a1c",
-  storageBucket: "colorplastic-87a1c.firebasestorage.app",
-  messagingSenderId: "283651673468",
-  appId: "1:283651673468:web:07da20b37db6bd3857a8f9"
-};
-firebase.initializeApp(firebaseConfig);
-const db = firebase.database();
-window.fbDb = db;
-window.firebaseReady = true;
-</script>
 
 </head>
 <body>
@@ -2233,6 +2216,66 @@ window.firebaseReady = true;
 </div>
 
 <script>
+// Firebase REST API - no SDK needed, works everywhere
+const FB_URL = 'https://colorplastic-87a1c-default-rtdb.europe-west1.firebasedatabase.app';
+
+function fbSave(path, data) {
+  fetch(FB_URL + '/' + path + '.json', {
+    method: 'PUT',
+    body: JSON.stringify(data)
+  }).catch(e => console.error('FB save error:', e));
+}
+
+function fbPushItem(path, data) {
+  fetch(FB_URL + '/' + path + '.json', {
+    method: 'POST',
+    body: JSON.stringify(data)
+  }).catch(e => console.error('FB push error:', e));
+}
+
+function fbListen(path, callback) {
+  const url = FB_URL + '/' + path + '.json';
+  // Use Server-Sent Events for real-time updates
+  const es = new EventSource(url + '?events=true&auth=');
+  es.addEventListener('put', function(e) {
+    try {
+      const d = JSON.parse(e.data);
+      callback(d.data);
+    } catch(err) {}
+  });
+  es.addEventListener('patch', function(e) {
+    try {
+      const d = JSON.parse(e.data);
+      // Re-fetch full data on patch
+      fetch(url).then(r => r.json()).then(callback).catch(()=>{});
+    } catch(err) {}
+  });
+  es.onerror = function() {
+    // Fallback: poll every 3 seconds
+    es.close();
+    fbPoll(path, callback);
+  };
+}
+
+function fbPoll(path, callback, interval) {
+  interval = interval || 3000;
+  fetch(FB_URL + '/' + path + '.json')
+    .then(r => r.json())
+    .then(callback)
+    .catch(e => console.error('FB poll error:', e));
+  setInterval(function() {
+    fetch(FB_URL + '/' + path + '.json')
+      .then(r => r.json())
+      .then(callback)
+      .catch(e => console.error('FB poll error:', e));
+  }, interval);
+}
+
+function addToHistory(entry) {
+  entry.timestamp = Date.now();
+  fbPushItem('historyLog', entry);
+}
+
 // ══════════════════════════════════════════
 //  STATE
 // ══════════════════════════════════════════
@@ -2309,61 +2352,58 @@ function fbListen(path, callback) {
   db.ref(path).on('value', snap => callback(snap.val()));
 }
 
+function processRequests(val) {
+  appData.requests = val ? Object.entries(val).map(([k,v]) => ({...v, fbKey: k})) : [];
+  refreshCurrentPage();
+}
+function processScrap(val) {
+  appData.scrap = val ? Object.entries(val).map(([k,v]) => ({...v, fbKey: k})).reverse() : [];
+  refreshCurrentPage();
+}
+function processSkladAlerts(val) {
+  appData.skladAlerts = val ? Object.entries(val).map(([k,v]) => ({...v, fbKey: k})) : [];
+  const unavailHTML = renderUnavailBanner();
+  ['dashboard','req','scrap','prehled-ser','prehled-sklad','prehled-tech','prehled-udrzba'].forEach(function(id) {
+    const el = document.getElementById('unavail-banner-' + id);
+    if (el) el.innerHTML = unavailHTML;
+  });
+  refreshCurrentPage();
+}
+function processHistory(val) {
+  appData.historyLog = val
+    ? Object.entries(val).map(([k,v]) => ({...v, fbKey: k})).sort((a,b) => (b.timestamp||0) - (a.timestamp||0))
+    : [];
+  ['dashboard-history','prehled-ser-history','prehled-sklad-history','prehled-tech-history','prehled-udrzba-history'].forEach(function(id) {
+    const el = document.getElementById(id);
+    if (el) el.innerHTML = renderHistoryLog();
+  });
+}
+function processProduction(val) {
+  if (val) {
+    appData.production = Object.entries(val).map(([k,v]) => ({...v, fbKey: k}));
+  } else {
+    appData.production.forEach((p, i) => fbSave('production/' + i, p));
+  }
+  renderProductionGrid();
+}
+function processFormaChanges(val) {
+  appData.formaChanges = val ? Object.entries(val).map(([k,v]) => ({...v, fbKey: k})).reverse() : [];
+  const formaHTML = renderFormaBanner();
+  ['dashboard','sklad','req','scrap','prehled-ser','prehled-sklad','prehled-tech','prehled-udrzba'].forEach(function(id) {
+    const el = document.getElementById('forma-banner-' + id);
+    if (el) el.innerHTML = formaHTML;
+  });
+  refreshCurrentPage();
+}
+
 function initFirebaseListeners() {
-  // REQUESTS
-  fbListen('requests', val => {
-    appData.requests = val ? Object.entries(val).map(([k,v]) => ({...v, fbKey: k})) : [];
-    refreshCurrentPage();
-  });
-
-  // SCRAP
-  fbListen('scrap', val => {
-    appData.scrap = val ? Object.entries(val).map(([k,v]) => ({...v, fbKey: k})).reverse() : [];
-    refreshCurrentPage();
-  });
-
-  // SKLAD ALERTS
-  fbListen('skladAlerts', val => {
-    appData.skladAlerts = val ? Object.entries(val).map(([k,v]) => ({...v, fbKey: k})) : [];
-    const unavailHTML = renderUnavailBanner();
-    ['dashboard','req','scrap','prehled-ser','prehled-sklad','prehled-tech','prehled-udrzba'].forEach(function(id) {
-      const el = document.getElementById('unavail-banner-' + id);
-      if (el) el.innerHTML = unavailHTML;
-    });
-    refreshCurrentPage();
-  });
-
-  // HISTORY LOG
-  fbListen('historyLog', val => {
-    appData.historyLog = val
-      ? Object.entries(val).map(([k,v]) => ({...v, fbKey: k})).sort((a,b) => (b.timestamp||0) - (a.timestamp||0))
-      : [];
-    ['dashboard-history','prehled-ser-history','prehled-sklad-history','prehled-tech-history','prehled-udrzba-history'].forEach(function(id) {
-      const el = document.getElementById(id);
-      if (el) el.innerHTML = renderHistoryLog();
-    });
-  });
-
-  // PRODUCTION
-  fbListen('production', val => {
-    if (val) {
-      appData.production = Object.entries(val).map(([k,v]) => ({...v, fbKey: k}));
-    } else {
-      appData.production.forEach((p, i) => fbSave('production/' + i, p));
-    }
-    renderProductionGrid();
-  });
-
-  // FORMA CHANGES
-  fbListen('formaChanges', val => {
-    appData.formaChanges = val ? Object.entries(val).map(([k,v]) => ({...v, fbKey: k})).reverse() : [];
-    const formaHTML = renderFormaBanner();
-    ['dashboard','sklad','req','scrap','prehled-ser','prehled-sklad','prehled-tech','prehled-udrzba'].forEach(function(id) {
-      const el = document.getElementById('forma-banner-' + id);
-      if (el) el.innerHTML = formaHTML;
-    });
-    refreshCurrentPage();
-  });
+  // Use Server-Sent Events (Firebase streaming) - falls back to polling
+  fbListen('requests', processRequests);
+  fbListen('scrap', processScrap);
+  fbListen('skladAlerts', processSkladAlerts);
+  fbListen('historyLog', processHistory);
+  fbListen('production', processProduction);
+  fbListen('formaChanges', processFormaChanges);
 }
 
 function refreshCurrentPage() {
