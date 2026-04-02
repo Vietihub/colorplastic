@@ -718,16 +718,52 @@ tbody td{padding:11px 14px;font-size:13px;}
     </div>
 
 
+    <!-- PŘEHLED TECHNOLOG -->
+    <div class="page" id="page-tech-prehled">
+      <div id="unavail-tech"></div><div id="forma-tech"></div>
+      <div class="ptitle">Přehled</div><div class="psub">Aktuální výroba – Lisovna C7</div>
+      <div class="stitle">🏭 Aktuální výroba</div>
+      <div class="pgrid" id="prod-tech"></div>
+    </div>
+
     <!-- MATERIÁLY -->
     <div class="page" id="page-materialy">
-      <div class="ptitle">Materiály</div>
-      <div class="psub" id="mat-psub">Parametry zpracování materiálů</div>
+      <div style="display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:4px">
+        <div><div class="ptitle">Materiály</div><div class="psub" id="mat-psub">Parametry zpracování materiálů</div></div>
+        <button class="btn br" id="mat-add-btn" onclick="openMatModalNew()" style="display:none;margin-top:4px">+ Přidat</button>
+      </div>
       <div class="card">
         <div class="tw"><table>
-          <thead><tr><th>Forma</th><th>Typ</th><th>Název</th><th>Interní č.</th><th>Teplota sušení</th><th>Čas sušení</th></tr></thead>
+          <thead><tr><th>Forma</th><th>Typ</th><th>Název</th><th>Interní č.</th><th>Teplota sušení</th><th>Čas sušení</th><th></th></tr></thead>
           <tbody id="tbl-materialy"></tbody>
         </table></div>
       </div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: Materiál -->
+<div class="moverlay" id="mod-mat">
+  <div class="modal">
+    <div class="mtitle" id="mat-modal-title">Upravit materiál</div>
+    <div class="msub">Parametry formy a materiálu</div>
+    <div class="fgrid">
+      <div class="frow">
+        <div class="fg"><label class="fl">Forma č.</label><input type="text" class="fi" id="mat-forma" placeholder="Č. 128"></div>
+        <div class="fg"><label class="fl">Typ plastu</label><input type="text" class="fi" id="mat-typ" placeholder="PC/ABS"></div>
+      </div>
+      <div class="frow">
+        <div class="fg"><label class="fl">Název materiálu</label><input type="text" class="fi" id="mat-nazev" placeholder="Lukablend 7400"></div>
+        <div class="fg"><label class="fl">Interní číslo</label><input type="text" class="fi" id="mat-cislo" placeholder="1.131"></div>
+      </div>
+      <div class="frow">
+        <div class="fg"><label class="fl">Teplota sušení (°C)</label><input type="number" class="fi" id="mat-teplota" placeholder="110"></div>
+        <div class="fg"><label class="fl">Čas sušení (hod)</label><input type="number" class="fi" id="mat-cas" placeholder="2"></div>
+      </div>
+    </div>
+    <div class="mact">
+      <button class="btn bg" onclick="closeModal('mod-mat')">Zrušit</button>
+      <button class="btn br" onclick="saveMat()">✔ Uložit</button>
     </div>
   </div>
 </div>
@@ -744,13 +780,23 @@ tbody td{padding:11px 14px;font-size:13px;}
       <button class="btn br bsm" onclick="respondReq('ready')">✅ Připraveno</button>
     </div>
 
+    <!-- PŘEHLED TECHNOLOG -->
+    <div class="page" id="page-tech-prehled">
+      <div id="unavail-tech"></div><div id="forma-tech"></div>
+      <div class="ptitle">Přehled</div><div class="psub">Aktuální výroba – Lisovna C7</div>
+      <div class="stitle">🏭 Aktuální výroba</div>
+      <div class="pgrid" id="prod-tech"></div>
+    </div>
+
     <!-- MATERIÁLY -->
     <div class="page" id="page-materialy">
-      <div class="ptitle">Materiály</div>
-      <div class="psub" id="mat-psub">Parametry zpracování materiálů</div>
+      <div style="display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:4px">
+        <div><div class="ptitle">Materiály</div><div class="psub" id="mat-psub">Parametry zpracování materiálů</div></div>
+        <button class="btn br" id="mat-add-btn" onclick="openMatModalNew()" style="display:none;margin-top:4px">+ Přidat</button>
+      </div>
       <div class="card">
         <div class="tw"><table>
-          <thead><tr><th>Forma</th><th>Typ</th><th>Název</th><th>Interní č.</th><th>Teplota sušení</th><th>Čas sušení</th></tr></thead>
+          <thead><tr><th>Forma</th><th>Typ</th><th>Název</th><th>Interní č.</th><th>Teplota sušení</th><th>Čas sušení</th><th></th></tr></thead>
           <tbody id="tbl-materialy"></tbody>
         </table></div>
       </div>
@@ -824,7 +870,7 @@ var curReqKey = null;
 var curProdMachine = null;
 var D = {
   requests:[], scrap:[], skladAlerts:[], formaChanges:[],
-  objednavky:[], dovolene:[],
+  objednavky:[], dovolene:[], materialy:[],
   production:[
     {machine:'Engel duo 300T',forma:null,mat:null,running:false,updated:null},
     {machine:'Engel duo 550T',forma:null,mat:null,running:false,updated:null},
@@ -846,7 +892,7 @@ var NAV = {
   mistr:    [{id:'prehled',lbl:'Přehled',ic:'📊'},{id:'scrap',lbl:'Scrap',ic:'♻️'},{id:'vyroba',lbl:'Výroba',ic:'🏭'},{id:'objednavky',lbl:'Objednávky mat.',ic:'🛒'},{id:'dovolene',lbl:'Dovolené',ic:'🏖'}],
   serizovac:[{id:'ser-prehled',lbl:'Přehled',ic:'📊'},{id:'pozadavky',lbl:'Požadavky',ic:'📤'},{id:'scrap',lbl:'Scrap',ic:'♻️'},{id:'vyroba',lbl:'Výroba',ic:'🏭'},{id:'materialy',lbl:'Materiály',ic:'🧪'}],
   sklad:    [{id:'sklad-prehled',lbl:'Přehled',ic:'📊'},{id:'sklad',lbl:'Požadavky & Objednávky',ic:'📦'}],
-  technolog:[{id:'sklad-prehled',lbl:'Přehled',ic:'📊'},{id:'vyroba',lbl:'Výroba',ic:'🏭'},{id:'materialy',lbl:'Materiály',ic:'🧪'}],
+  technolog:[{id:'tech-prehled',lbl:'Přehled',ic:'📊'},{id:'vyroba',lbl:'Výroba',ic:'🏭'},{id:'materialy',lbl:'Materiály',ic:'🧪'}],
   udrzba:   [{id:'sklad-prehled',lbl:'Přehled',ic:'📊'},{id:'vyroba',lbl:'Výroba',ic:'🏭'}]
 };
 
@@ -933,6 +979,7 @@ function render(pageId) {
     case 'dovolene':         renderDovMistr(); break;
     case 'dovolene-vedouci': renderDovVedouci(); break;
     case 'materialy':         renderMaterialy(); break;
+    case 'tech-prehled':      renderTechPrehled(); break;
   }
   renderBanners();
 }
@@ -1011,23 +1058,107 @@ function renderSkladPrehled() {
   }).join('') || '<tr><td colspan="4" style="text-align:center;color:var(--text3);padding:14px">Žádné vyřízené</td></tr>';
 }
 
+function renderTechPrehled() {
+  renderProd('prod-tech');
+  var u=document.getElementById('unavail-tech'); if(u) u.innerHTML=buildUnavailBanner();
+  var f=document.getElementById('forma-tech'); if(f) f.innerHTML=buildFormaBanner();
+}
+
+var DEFAULT_MATS = [
+  {forma:'Č. 126',typ:'PC/ABS',nazev:'Lukablend 7400',cislo:'1.131',teplota:'110',cas:'2'},
+  {forma:'Č. 127',typ:'PC/ABS',nazev:'Lukablend 7400',cislo:'1.131',teplota:'110',cas:'2'},
+  {forma:'Č. 128',typ:'PC/ABS',nazev:'Lukablend 7400',cislo:'1.131',teplota:'110',cas:'2'},
+  {forma:'Č. 129',typ:'PC/ABS',nazev:'Lukablend 7400',cislo:'1.131',teplota:'110',cas:'2'},
+  {forma:'Č. 130',typ:'PC/ABS',nazev:'Lukablend 7400',cislo:'1.131',teplota:'110',cas:'2'},
+  {forma:'Č. 131',typ:'PC/ABS',nazev:'Lukablend 7400',cislo:'1.131',teplota:'110',cas:'2'},
+  {forma:'Č. 141',typ:'PP',    nazev:'Enflex 120',    cislo:'1.089',teplota:'80', cas:'2'},
+  {forma:'Č. 149',typ:'PP',    nazev:'Enflex 120',    cislo:'1.089',teplota:'80', cas:'2'},
+  {forma:'Č. 150',typ:'PC/ABS',nazev:'Bayblend TX65', cislo:'1.001',teplota:'110',cas:'2'},
+  {forma:'Č. 151',typ:'PC/ABS',nazev:'Bayblend TX65', cislo:'1.001',teplota:'110',cas:'2'},
+  {forma:'Č. 175',typ:'PC/ABS',nazev:'Lukablend 8500',cislo:'1.155',teplota:'110',cas:'4'}
+];
+
+var editMatKey = null;
+
 function renderMaterialy() {
-  var canEdit = role === 'technolog';
-  var sub = document.getElementById('mat-psub');
-  if (sub) sub.textContent = canEdit ? 'Správa parametrů – editace povolena' : 'Parametry zpracování – pouze čtení';
-  var tbody = document.getElementById('tbl-materialy');
-  if (!tbody) return;
-  var mats = [{forma:"Č. 126",typ:"PC/ABS",nazev:"Lukablend 7400",cislo:"1.131",teplota:"110°C",cas:"2 hodiny"},{forma:"Č. 127",typ:"PC/ABS",nazev:"Lukablend 7400",cislo:"1.131",teplota:"110°C",cas:"2 hodiny"},{forma:"Č. 128",typ:"PC/ABS",nazev:"Lukablend 7400",cislo:"1.131",teplota:"110°C",cas:"2 hodiny"},{forma:"Č. 129",typ:"PC/ABS",nazev:"Lukablend 7400",cislo:"1.131",teplota:"110°C",cas:"2 hodiny"},{forma:"Č. 130",typ:"PC/ABS",nazev:"Lukablend 7400",cislo:"1.131",teplota:"110°C",cas:"2 hodiny"},{forma:"Č. 131",typ:"PC/ABS",nazev:"Lukablend 7400",cislo:"1.131",teplota:"110°C",cas:"2 hodiny"},{forma:"Č. 141",typ:"PP",nazev:"Enflex 120",cislo:"1.089",teplota:"80°C",cas:"2 hodiny"},{forma:"Č. 149",typ:"PP",nazev:"Enflex 120",cislo:"1.089",teplota:"80°C",cas:"2 hodiny"},{forma:"Č. 150",typ:"PC/ABS",nazev:"Bayblend TX65",cislo:"1.001",teplota:"110°C",cas:"2 hodiny"},{forma:"Č. 151",typ:"PC/ABS",nazev:"Bayblend TX65",cislo:"1.001",teplota:"110°C",cas:"2 hodiny"},{forma:"Č. 175",typ:"PC/ABS",nazev:"Lukablend 8500",cislo:"1.155",teplota:"110°C",cas:"4 hodiny"}];
+  var canEdit = role==='technolog';
+  var sub=document.getElementById('mat-psub');
+  if(sub) sub.textContent = canEdit ? 'Správa materiálů – přidat, upravit, odebrat' : 'Parametry zpracování – pouze čtení';
+
+  // Show/hide add button
+  var addBtn=document.getElementById('mat-add-btn');
+  if(addBtn) addBtn.style.display = canEdit ? 'inline-flex' : 'none';
+
+  var mats = D.materialy.length ? D.materialy : DEFAULT_MATS;
+  var tbody=document.getElementById('tbl-materialy'); if(!tbody) return;
   tbody.innerHTML = mats.map(function(m) {
+    var k = m.fbKey||'';
     return '<tr>' +
-      '<td class="bold" style="color:var(--text)">' + m.forma + '</td>' +
+      '<td class="bold">' + m.forma + '</td>' +
       '<td><span class="tbadge">' + m.typ + '</span></td>' +
       '<td class="bold">' + m.nazev + '</td>' +
       '<td class="mono">' + m.cislo + '</td>' +
-      '<td style="color:var(--orange);font-weight:600">' + m.teplota + '</td>' +
-      '<td style="color:var(--text2)">' + m.cas + '</td>' +
+      '<td style="color:var(--orange);font-weight:600">' + m.teplota + ' °C</td>' +
+      '<td style="color:var(--text2)">' + m.cas + ' hod</td>' +
+      (canEdit ?
+        '<td style="display:flex;gap:5px;padding:8px 14px">' +
+          '<button class="btn bg bsm" data-k="'+k+'" data-m="'+encodeURIComponent(JSON.stringify(m))+'" onclick="openMatModal(this)">✏</button>' +
+          '<button class="btn bwarn bsm" data-k="'+k+'" onclick="deleteMat(this.dataset.k)">✕</button>' +
+        '</td>'
+        : '<td></td>') +
     '</tr>';
   }).join('');
+}
+
+function openMatModal(btn) {
+  var m = JSON.parse(decodeURIComponent(btn.dataset.m));
+  editMatKey = btn.dataset.k || null;
+  document.getElementById('mat-modal-title').textContent = editMatKey ? 'Upravit materiál' : 'Přidat materiál';
+  document.getElementById('mat-forma').value = m.forma||'';
+  document.getElementById('mat-typ').value = m.typ||'';
+  document.getElementById('mat-nazev').value = m.nazev||'';
+  document.getElementById('mat-cislo').value = m.cislo||'';
+  document.getElementById('mat-teplota').value = m.teplota||'';
+  document.getElementById('mat-cas').value = m.cas||'';
+  document.getElementById('mod-mat').classList.add('on');
+}
+
+function openMatModalNew() {
+  editMatKey = null;
+  document.getElementById('mat-modal-title').textContent = 'Přidat materiál';
+  ['mat-forma','mat-typ','mat-nazev','mat-cislo','mat-teplota','mat-cas'].forEach(function(id){
+    document.getElementById(id).value='';
+  });
+  document.getElementById('mod-mat').classList.add('on');
+}
+
+function saveMat() {
+  var forma   = document.getElementById('mat-forma').value.trim();
+  var typ     = document.getElementById('mat-typ').value.trim();
+  var nazev   = document.getElementById('mat-nazev').value.trim();
+  var cislo   = document.getElementById('mat-cislo').value.trim();
+  var teplota = document.getElementById('mat-teplota').value.trim();
+  var cas     = document.getElementById('mat-cas').value.trim();
+  if(!forma||!nazev){toast('err','Chyba','Vyplňte formu a název.');return;}
+  var obj = {forma:forma,typ:typ,nazev:nazev,cislo:cislo,teplota:teplota,cas:cas};
+  if(editMatKey) {
+    fbSet('materialy/'+editMatKey, obj);
+    toast('ok','Uloženo',forma+' – '+nazev);
+  } else {
+    // Init from defaults first if empty
+    if(!D.materialy.length) {
+      DEFAULT_MATS.forEach(function(m){ fbPush('materialy', m); });
+    }
+    fbPush('materialy', obj);
+    toast('ok','Přidáno',forma+' – '+nazev);
+  }
+  closeModal('mod-mat');
+}
+
+function deleteMat(key) {
+  if(!key){toast('err','Chyba','Nelze smazat – záznam nemá klíč.');return;}
+  db.ref('materialy/'+key).remove();
+  toast('ok','Smazáno','Záznam odstraněn');
 }
 
 function startFirebase() {
@@ -1054,6 +1185,11 @@ function startFirebase() {
   fbOn('dovolene', function(val){
     D.dovolene = fromFb(val).reverse();
     afterUpdate();
+  });
+  fbOn('materialy', function(val){
+    D.materialy = val ? fromFb(val) : [];
+    var ab=document.querySelector('.nb.on');
+    if(ab && ab.dataset.page==='materialy') renderMaterialy();
   });
   fbOn('production', function(val){
     if (val) {
