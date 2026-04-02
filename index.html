@@ -3969,6 +3969,213 @@ function renderScrapReport() {
   if (document.getElementById('report-material-table')) renderReport();
 }
 
+// ══════════════════════════════════════════
+//  RECOVERED FUNCTIONS
+// ══════════════════════════════════════════
+
+function formatDate(s) {
+  if (!s) return '–';
+  var d = new Date(s);
+  return d.toLocaleDateString('cs-CZ',{day:'2-digit',month:'2-digit',year:'numeric'});
+}
+function countDays(from,to) {
+  return Math.round((new Date(to)-new Date(from))/86400000)+1;
+}
+function refreshAllBanners() {
+  var unavailHTML = renderUnavailBanner();
+  var formaHTML = renderFormaBanner();
+  ['dashboard','scrap','req','prehled-ser','prehled-sklad','prehled-tech','prehled-udrzba','sklad'].forEach(function(id) {
+    var u=document.getElementById('unavail-banner-'+id); if(u) u.innerHTML=unavailHTML;
+    var f=document.getElementById('forma-banner-'+id); if(f) f.innerHTML=formaHTML;
+  });
+  ['dashboard-history','prehled-ser-history','prehled-sklad-history','prehled-tech-history','prehled-udrzba-history'].forEach(function(id){
+    var el=document.getElementById(id); if(el) el.innerHTML=renderHistoryLog();
+  });
+}
+function renderPrehledPage(pageId) {
+  renderProductionGrid();
+  var h=document.getElementById(pageId+'-history'); if(h) h.innerHTML=renderHistoryLog();
+  var u=document.getElementById('unavail-banner-'+pageId); if(u) u.innerHTML=renderUnavailBanner();
+  var f=document.getElementById('forma-banner-'+pageId); if(f) f.innerHTML=renderFormaBanner();
+}
+function renderPrehledSer()    { renderPrehledPage('prehled-ser'); }
+function renderPrehledSklad()  { renderPrehledPage('prehled-sklad'); }
+function renderPrehledTech()   { renderPrehledPage('prehled-tech'); }
+function renderPrehledUdrzba() { renderPrehledPage('prehled-udrzba'); }
+
+function renderMaterialy() {
+  var canEdit = currentRole==='technolog';
+  var addBtn=document.getElementById('btn-add-material'); if(addBtn) addBtn.style.display=canEdit?'inline-flex':'none';
+  var sub=document.getElementById('materialy-subtitle'); if(sub) sub.textContent=canEdit?'Editace parametrů zpracování plastů':'Parametry zpracování plastů – pouze čtení';
+  var ah=document.getElementById('mat-actions-header'); if(ah) ah.textContent=canEdit?'Akce':'';
+  var tbody=document.getElementById('materialy-table'); if(!tbody) return;
+  tbody.innerHTML=(appData.materialy||[]).map(function(m){
+    return '<tr>'+
+      '<td style="font-weight:700">'+m.name+'</td>'+
+      '<td style="color:var(--text-dim);font-size:12px">'+m.type+'</td>'+
+      '<td style="font-family:monospace;font-size:13px">'+m.tempMin+'–'+m.tempMax+' °C</td>'+
+      '<td>'+(m.dryNeeded?'<span style="background:var(--orange-dim);border:1px solid rgba(255,156,0,0.3);border-radius:4px;padding:3px 8px;font-size:11px;font-weight:700;color:var(--orange)">🔥 ANO</span>':'<span style="font-size:12px;color:var(--text-dimmer)">Ne</span>')+'</td>'+
+      '<td style="font-family:monospace;font-size:13px;color:var(--text-dim)">'+(m.dryNeeded&&m.dryTemp?m.dryTemp+' °C':'–')+'</td>'+
+      '<td style="font-family:monospace;font-size:13px;color:var(--text-dim)">'+(m.dryNeeded&&m.dryTime?m.dryTime+' hod':'–')+'</td>'+
+      '<td style="font-size:12px;color:var(--text-dim)">'+(m.note||'–')+'</td>'+
+      '<td>'+(canEdit?'<button class="btn btn-ghost btn-sm" onclick="openMaterialModal(this.dataset.key)" data-key="'+(m.fbKey||m.id)+'">' + '✏ Upravit</button>':'')+'</td>'+
+    '</tr>';
+  }).join('')||'<tr><td colspan="8" style="text-align:center;color:var(--text-dimmer);padding:24px">Žádné materiály</td></tr>';
+}
+function openMaterialModal(id) {
+  var isNew=!id; currentMatId=id||null;
+  document.getElementById('modal-mat-title').textContent=isNew?'Přidat materiál':'Upravit materiál';
+  var m=id?(appData.materialy||[]).find(function(x){return x.fbKey===id||x.id===id;}):null;
+  document.getElementById('mat-name').value=m?m.name:'';
+  document.getElementById('mat-type').value=m?m.type:'';
+  document.getElementById('mat-temp-min').value=m?m.tempMin:'';
+  document.getElementById('mat-temp-max').value=m?m.tempMax:'';
+  document.getElementById('mat-dry-needed').checked=m?!!m.dryNeeded:false;
+  document.getElementById('mat-dry-temp').value=m&&m.dryTemp?m.dryTemp:'';
+  document.getElementById('mat-dry-time').value=m&&m.dryTime?m.dryTime:'';
+  document.getElementById('mat-note').value=m?m.note||'':'';
+  document.getElementById('dry-fields').style.display=(m&&m.dryNeeded)?'block':'none';
+  document.getElementById('modal-material').classList.add('open');
+}
+function closeMaterialModal() { document.getElementById('modal-material').classList.remove('open'); currentMatId=null; }
+
+function renderObjednavky() {
+  var tbody=document.getElementById('objednavky-my-table'); if(!tbody) return;
+  var all=appData.objednavky||[];
+  tbody.innerHTML=all.length?all.map(function(o){return '<tr><td style="font-family:monospace;font-size:12px;color:var(--text-dim)">'+o.time+'</td><td style="font-weight:600">'+o.item+'</td><td>'+o.qty+' '+o.unit+'</td><td>'+objStatusBadge(o.status)+'</td></tr>';}).join(''):'<tr><td colspan="4" style="text-align:center;color:var(--text-dimmer);padding:24px">Žádné objednávky</td></tr>';
+}
+function renderObjednavkySklad() {
+  var pending=(appData.objednavky||[]).filter(function(o){return o.status==='pending';});
+  var done=(appData.objednavky||[]).filter(function(o){return o.status!=='pending';});
+  var listEl=document.getElementById('objednavky-sklad-list');
+  if(listEl) {
+    if(!pending.length) {
+      listEl.innerHTML='<div style="background:var(--green-glow);border:1px solid rgba(232,0,30,0.2);border-radius:8px;padding:20px 24px;margin-bottom:20px;display:flex;align-items:center;gap:16px"><span style="font-size:24px">OK</span><div style="font-size:15px;font-weight:700;color:var(--green-text)">Zadne cekajici objednavky</div></div>';
+    } else {
+      var html='<div style="background:linear-gradient(135deg,#1a1400,#221e00);border:1px solid rgba(255,156,0,0.4);border-radius:8px;padding:18px 22px;margin-bottom:16px"><div style="font-size:16px;font-weight:700;color:var(--orange)">Cekajici objednavky ('+pending.length+')</div></div>';
+      pending.forEach(function(o){
+        html+='<div style="background:var(--card);border:1px solid rgba(255,156,0,0.25);border-radius:8px;padding:18px 20px;margin-bottom:12px;display:flex;align-items:center;gap:20px">'+
+          '<div style="flex:1"><div style="font-size:18px;font-weight:700;color:var(--text)">'+o.item+'</div>'+
+          '<div style="font-size:13px;color:var(--text-dim);margin-top:4px">'+o.qty+' '+o.unit+(o.note?' · '+o.note:'')+' · '+o.time+' · '+o.role+'</div></div>'+
+          '<div style="display:flex;gap:8px">'+
+          '<button class="btn btn-red btn-sm" data-key="'+o.fbKey+'" data-action="unavailable" onclick="respondObjednavka(this.dataset.key,this.dataset.action)">Nedostupne</button>'+
+          '<button class="btn btn-green btn-sm" data-key="'+o.fbKey+'" data-action="done" onclick="respondObjednavka(this.dataset.key,this.dataset.action)">Vyrizeno</button></div></div>';
+      });
+      listEl.innerHTML=html;
+    }
+  }
+  var doneEl=document.getElementById('objednavky-done-table');
+  if(doneEl) doneEl.innerHTML=done.length?done.map(function(o){return '<tr><td style="font-family:monospace;font-size:12px;color:var(--text-dim)">'+o.time+'</td><td style="font-weight:600">'+o.item+'</td><td>'+o.qty+' '+o.unit+'</td><td style="color:var(--text-dim);font-size:12px">'+(o.note||'–')+'</td><td>'+objStatusBadge(o.status)+'</td></tr>';}).join(''):'<tr><td colspan="5" style="text-align:center;color:var(--text-dimmer);padding:24px">Zadne vyrizene</td></tr>';
+}
+
+function renderObjednavkyVedouci() {
+  var tbody=document.getElementById('objednavky-vedouci-table'); if(!tbody) return;
+  var all=appData.objednavky||[];
+  tbody.innerHTML=all.length?all.map(function(o){return '<tr><td style="font-family:monospace;font-size:12px;color:var(--text-dim)">'+o.time+'</td><td style="font-weight:600">'+o.item+'</td><td>'+o.qty+' '+o.unit+'</td><td style="color:var(--text-dim);font-size:12px">'+(o.note||'–')+'</td><td>'+objStatusBadge(o.status)+'</td></tr>';}).join(''):'<tr><td colspan="5" style="text-align:center;color:var(--text-dimmer);padding:24px">Žádné objednávky</td></tr>';
+}
+function submitObjednavka() {
+  var item=document.getElementById('obj-item').value;
+  var qty=document.getElementById('obj-qty').value;
+  var unit=document.getElementById('obj-unit').value;
+  var note=document.getElementById('obj-note').value.trim();
+  if(!item||!qty){showToast('error','Chyba','Vyberte položku a zadejte množství.');return;}
+  fbPushItem('objednavky',{time:nowTime(),item:item,qty:parseInt(qty),unit:unit,note:note,status:'pending',role:ROLES[currentRole].label});
+  document.getElementById('obj-item').value='';
+  document.getElementById('obj-qty').value='';
+  document.getElementById('obj-note').value='';
+  showToast('success','Objednávka odeslána',item+' – '+qty+' '+unit);
+}
+function respondObjednavka(fbKey,action) {
+  var obj=(appData.objednavky||[]).find(function(o){return o.fbKey===fbKey;});
+  if(!obj) return;
+  obj.status=action; obj.resolvedTime=nowTime();
+  fbSave('objednavky/'+fbKey,obj);
+  showToast(action==='done'?'success':'error','Stav aktualizován',action==='done'?obj.item+' – vyřízeno':obj.item+' – nedostupné');
+}
+function objStatusBadge(s) {
+  if(s==='pending') return '<span class="status status-pending">Čeká</span>';
+  if(s==='done') return '<span class="status status-ready">Vyřízeno</span>';
+  if(s==='unavailable') return '<span class="status status-unavailable">Nedostupné</span>';
+  return '<span class="status status-delivered">'+s+'</span>';
+}
+function submitDovolena() {
+  var name=document.getElementById('dov-name').value.trim();
+  var role=document.getElementById('dov-role').value;
+  var type=document.getElementById('dov-type').value;
+  var from=document.getElementById('dov-from').value;
+  var to=document.getElementById('dov-to').value;
+  var note=document.getElementById('dov-note').value.trim();
+  if(!name||!from||!to){showToast('error','Chyba','Vyplňte jméno a datum.');return;}
+  if(from>to){showToast('error','Chyba','Datum "Do" musí být po datu "Od".');return;}
+  fbPushItem('dovolene',{name:name,role:role,type:type,from:from,to:to,note:note,status:'pending',submittedAt:nowTime(),submittedBy:ROLES[currentRole].label});
+  document.getElementById('dov-name').value='';
+  document.getElementById('dov-from').value='';
+  document.getElementById('dov-to').value='';
+  document.getElementById('dov-note').value='';
+  addToHistory({time:nowTime(),type:'dovolena',role:ROLES[currentRole].label,icon:'🏖',text:'Žádost: <strong>'+name+'</strong> ('+role+') · '+formatDate(from)+' – '+formatDate(to)});
+  showToast('success','Žádost odeslána',name);
+}
+function respondDovolena(fbKey,action) {
+  var d=(appData.dovolene||[]).find(function(x){return x.fbKey===fbKey;});
+  if(!d) return;
+  d.status=action; d.resolvedAt=nowTime(); d.resolvedBy=ROLES[currentRole].label;
+  fbSave('dovolene/'+fbKey,d);
+  addToHistory({time:nowTime(),type:'dovolena',role:ROLES[currentRole].label,icon:action==='approved'?'✅':'❌',text:(action==='approved'?'Schválena':'Zamítnuta')+' dovolená: <strong>'+d.name+'</strong>'});
+  showToast(action==='approved'?'success':'error',action==='approved'?'Dovolená schválena':'Dovolená zamítnuta',d.name);
+  refreshDovoleneBanner();
+}
+function renderDovolene() {
+  var tbody=document.getElementById('dovolene-mistr-table'); if(!tbody) return;
+  var all=appData.dovolene||[];
+  tbody.innerHTML=all.length?all.map(function(d){return '<tr><td style="font-weight:600">'+d.name+'</td><td><span class="scrap-type-badge">'+(d.type||'Dovolená')+'</span></td><td style="color:var(--text-dim);font-size:12px">'+d.role+'</td><td style="font-family:monospace;font-size:12px">'+formatDate(d.from)+'</td><td style="font-family:monospace;font-size:12px">'+formatDate(d.to)+'</td><td>'+dovStatusBadge(d.status)+'</td></tr>';}).join(''):'<tr><td colspan="6" style="text-align:center;color:var(--text-dimmer);padding:24px">Žádné žádosti</td></tr>';
+}
+function renderDovoleneVedouci() {
+  refreshDovoleneBanner();
+  var pending=(appData.dovolene||[]).filter(function(d){return d.status==='pending';});
+  var rest=(appData.dovolene||[]).filter(function(d){return d.status!=='pending';});
+  var listEl=document.getElementById('dovolene-pending-list');
+  if(listEl) {
+    if(!pending.length) {
+      listEl.innerHTML='<div style="background:var(--green-glow);border:1px solid rgba(232,0,30,0.15);border-radius:8px;padding:18px 22px;margin-bottom:20px;display:flex;align-items:center;gap:14px"><span style="font-size:22px">OK</span><div style="font-size:14px;font-weight:700;color:var(--green-text)">Zadne cekajici zadosti</div></div>';
+    } else {
+      var h='';
+      pending.forEach(function(d){
+        h+='<div style="background:var(--card);border:1px solid rgba(100,160,255,0.25);border-radius:8px;padding:18px 22px;margin-bottom:14px;display:flex;align-items:center;gap:20px">'+
+          '<div style="flex:1"><div style="font-size:18px;font-weight:700;color:var(--text)">'+d.name+' <span style="font-size:13px;font-weight:400;color:var(--text-dim)">'+d.role+'</span></div>'+
+          '<div style="font-size:13px;color:var(--text-dim);margin-top:5px">'+formatDate(d.from)+' - '+formatDate(d.to)+(d.note?' · '+d.note:'')+'</div>'+
+          '<div style="font-size:11px;color:var(--text-dimmer);margin-top:4px">'+d.submittedBy+' v '+d.submittedAt+'</div></div>'+
+          '<div style="display:flex;gap:8px;flex-shrink:0">'+
+          '<button class="btn btn-red btn-sm" data-key="'+d.fbKey+'" data-action="rejected" onclick="respondDovolena(this.dataset.key,this.dataset.action)">Zamitnut</button>'+
+          '<button class="btn btn-green btn-sm" data-key="'+d.fbKey+'" data-action="approved" onclick="respondDovolena(this.dataset.key,this.dataset.action)">Schvalit</button>'+
+          '</div></div>';
+      });
+      listEl.innerHTML=h;
+    }
+  }
+  var tbody=document.getElementById('dovolene-vedouci-table');
+  if(tbody) {
+    if(!rest.length) {
+      tbody.innerHTML='<tr><td colspan="8" style="text-align:center;color:var(--text-dimmer);padding:24px">Zadna historie</td></tr>';
+    } else {
+      var rows='';
+      rest.forEach(function(d){
+        var changeBtn=d.status==='rejected'
+          ?'<button class="btn btn-ghost btn-sm" data-key="'+d.fbKey+'" data-action="approved" onclick="respondDovolena(this.dataset.key,this.dataset.action)">Schvalit</button>'
+          :'<button class="btn btn-ghost btn-sm" data-key="'+d.fbKey+'" data-action="rejected" onclick="respondDovolena(this.dataset.key,this.dataset.action)">Zamitnut</button>';
+        rows+='<tr><td style="font-weight:600">'+d.name+'</td><td><span class="scrap-type-badge">'+(d.type||'Dovolena')+'</span></td><td style="color:var(--text-dim);font-size:12px">'+d.role+'</td><td style="font-family:monospace;font-size:12px">'+formatDate(d.from)+'</td><td style="font-family:monospace;font-size:12px">'+formatDate(d.to)+'</td><td style="font-size:12px;color:var(--text-dim)">'+(d.note||'–')+'</td><td>'+dovStatusBadge(d.status)+'</td><td>'+changeBtn+'</td></tr>';
+      });
+      tbody.innerHTML=rows;
+    }
+  }
+}
+
+function dovStatusBadge(s) {
+  if(s==='pending') return '<span class="status status-pending">Čeká</span>';
+  if(s==='approved') return '<span class="status status-ready">Schváleno</span>';
+  if(s==='rejected') return '<span class="status status-unavailable">Zamítnuto</span>';
+  return s;
+}
+
 </script>
 </body>
 </html>
