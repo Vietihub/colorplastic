@@ -1835,7 +1835,7 @@
                 <button class="btn btn-ghost" onclick="generateReport()">
                   📋 Zobrazit náhled
                 </button>
-                <button class="btn btn-green" onclick="sendReport()">⬇ Stáhnout PDF</button>
+                <button class="btn btn-green" onclick="sendReport()">📄 Stáhnout jako PDF</button>
               </div>
             </div>
           </div>
@@ -2362,13 +2362,10 @@
                   </select>
                 </div>
               </div>
-              <div class="form-group">
-                <label class="form-label">E-mail příjemce</label>
-                <input type="email" class="form-input" id="report-email" value="vedeni@colorplastic.cz">
-              </div>
+
               <div style="display:flex;gap:10px">
                 <button class="btn btn-ghost" onclick="generateReport()">📋 Zobrazit náhled</button>
-                <button class="btn btn-green" onclick="sendReport()">⬇ Stáhnout PDF</button>
+                <button class="btn btn-green" onclick="sendReport()">📄 Stáhnout jako PDF</button>
               </div>
             </div>
           </div>
@@ -2631,7 +2628,7 @@
   </div>
 </div>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://unpkg.com/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
 <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
 <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
 <script>
@@ -2996,12 +2993,13 @@ function initApp() {
   if (initFirebase()) initFirebaseListeners();
   else console.error('Firebase failed to init');
 
-  // Clock
-  setInterval(() => {
-    const now = new Date();
-    document.getElementById('topbar-time').textContent =
-      now.toTimeString().slice(0,8);
-  }, 1000);
+  // Clock - start immediately
+  function updateClock() {
+    const el = document.getElementById('topbar-time');
+    if (el) el.textContent = new Date().toTimeString().slice(0,8);
+  }
+  updateClock();
+  setInterval(updateClock, 1000);
 }
 
 function switchPage(pageId) {
@@ -3237,6 +3235,7 @@ function renderReport() {
 
   const total = appData.scrap.reduce((a,s) => a+s.weight, 0);
   const mtbody = document.getElementById('report-material-table');
+  if (!mtbody) return;
   mtbody.innerHTML = Object.entries(byMaterial)
     .sort((a,b) => b[1].weight - a[1].weight)
     .map(([mat, d]) => `
@@ -3263,6 +3262,7 @@ function renderReport() {
   });
 
   const rtbody = document.getElementById('report-reason-table');
+  if (!rtbody) return;
   rtbody.innerHTML = Object.entries(byType)
     .sort((a,b) => b[1].weight - a[1].weight)
     .map(([type, d]) => `
@@ -3851,71 +3851,39 @@ function generateReport() {
 function sendReport() {
   const text = buildReportText();
   const month = document.getElementById('report-month') ? document.getElementById('report-month').value : 'report';
-  const filename = 'scrap-report-' + month.replace(/ /g,'-').toLowerCase() + '.pdf';
 
-  try {
-    const { jsPDF } = window.jspdf;
-    const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
-
-    // Header bar
-    doc.setFillColor(232, 0, 30);
-    doc.rect(0, 0, 210, 18, 'F');
-    doc.setTextColor(255, 255, 255);
-    doc.setFontSize(14);
-    doc.setFont('helvetica', 'bold');
-    doc.text('ColorPlastic Automotive', 14, 12);
-    doc.setFontSize(10);
-    doc.text('Výrobní systém – Scrap Report', 210 - 14, 12, { align: 'right' });
-
-    // Content
-    doc.setTextColor(30, 30, 30);
-    doc.setFontSize(9);
-    doc.setFont('courier', 'normal');
-
-    const lines = text.split('\n');
-    let y = 28;
-    const lineH = 5;
-    const pageH = 280;
-
-    lines.forEach(function(line) {
-      if (y > pageH) {
-        doc.addPage();
-        y = 20;
-      }
-      // Highlight section headers
-      if (line.startsWith('SUMARIZACE') || line.startsWith('CELKOVÝ') || line.startsWith('PŘEHLED')) {
-        doc.setFont('courier', 'bold');
-        doc.setTextColor(232, 0, 30);
-      } else if (line.startsWith('─')) {
-        doc.setTextColor(180, 180, 180);
-        doc.setFont('courier', 'normal');
-      } else {
-        doc.setTextColor(30, 30, 30);
-        doc.setFont('courier', 'normal');
-      }
-      doc.text(line, 14, y);
-      y += lineH;
-    });
-
-    // Footer
-    doc.setFont('helvetica', 'normal');
-    doc.setFontSize(8);
-    doc.setTextColor(150, 150, 150);
-    doc.text('Generováno: ' + new Date().toLocaleString('cs-CZ'), 14, 290);
-
-    doc.save(filename);
-    showToast('success', 'PDF staženo', filename);
-  } catch(e) {
-    // Fallback to txt if jsPDF not available
-    const blob = new Blob([text], { type: 'text/plain;charset=utf-8' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = filename.replace('.pdf', '.txt');
-    a.click();
-    URL.revokeObjectURL(url);
-    showToast('success', 'Report stažen', filename.replace('.pdf','.txt'));
-  }
+  // Open print window - user can Save as PDF from browser print dialog
+  const printWin = window.open('', '_blank', 'width=800,height=900');
+  printWin.document.write([
+    '<!DOCTYPE html><html><head><meta charset="UTF-8">',
+    '<title>Scrap Report – ' + month + '</title>',
+    '<style>',
+    '  @page { margin: 15mm; }',
+    '  body { font-family: monospace; font-size: 11px; color: #1a1a1a; background: #fff; }',
+    '  .header { background: #e8001e; color: #fff; padding: 12px 16px; margin: -15mm -15mm 20px -15mm; display: flex; justify-content: space-between; align-items: center; }',
+    '  .header h1 { margin: 0; font-size: 16px; font-family: sans-serif; }',
+    '  .header span { font-size: 11px; font-family: sans-serif; opacity: 0.9; }',
+    '  pre { white-space: pre-wrap; line-height: 1.7; margin: 0; }',
+    '  .red { color: #e8001e; font-weight: bold; }',
+    '  .grey { color: #aaa; }',
+    '  .footer { margin-top: 20px; border-top: 1px solid #ddd; padding-top: 8px; font-size: 10px; color: #999; font-family: sans-serif; }',
+    '  @media print { .no-print { display: none; } }',
+    '</style></head><body>',
+    '<div class="header"><h1>ColorPlastic Automotive</h1><span>Výrobní systém – Scrap Report</span></div>',
+    '<div class="no-print" style="background:#fff3cd;border:1px solid #ffc107;padding:10px 14px;border-radius:6px;margin-bottom:16px;font-family:sans-serif;font-size:13px">',
+    '  💡 Stiskni <strong>Ctrl+P</strong> (nebo Cmd+P na Mac) → vyber <strong>Uložit jako PDF</strong>',
+    '  <button onclick="window.print()" style="margin-left:16px;background:#e8001e;color:#fff;border:none;padding:8px 16px;border-radius:4px;cursor:pointer;font-size:13px">🖨 Tisk / Uložit PDF</button>',
+    '</div>',
+    '<pre>' + text
+      .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+      .replace(/SUMARIZACE SCRAPU[^<]*/g, function(m){return '<span class="red">'+m+'</span>';})
+      .replace(/CELK[^<]*/g, function(m){return '<span class="red">'+m+'</span>';})
+      .replace(/─+/g, function(m){return '<span class="grey">'+m+'</span>';}) + '</pre>',
+    '<div class="footer">Generováno: ' + new Date().toLocaleString('cs-CZ') + ' | ColorPlastic Automotive – Výrobní systém</div>',
+    '</body></html>'
+  ].join(''));
+  printWin.document.close();
+  showToast('success', 'Report otevřen', 'Použij Ctrl+P → Uložit jako PDF');
 }
 
 
@@ -3958,8 +3926,8 @@ function renderScrapReport() {
     `).join('') || '<tr><td colspan="6" style="text-align:center;color:var(--text-dimmer);padding:24px">Žádné záznamy</td></tr>';
   }
 
-  // Report tables
-  renderReport();
+  // Report tables - only if elements exist
+  if (document.getElementById('report-material-table')) renderReport();
 }
 
 // ══════════════════════════════════════════
@@ -4395,6 +4363,12 @@ function objStatusBadge(status) {
   if (status === 'unavailable') return '<span class="status status-unavailable">Nedostupné</span>';
   return '<span class="status status-delivered">' + status + '</span>';
 }
+
+// Global clock
+setInterval(function() {
+  var el = document.getElementById('topbar-time');
+  if (el) el.textContent = new Date().toTimeString().slice(0,8);
+}, 1000);
 
 function renderPrehledPage(pageId) {
   renderProductionGrid();
