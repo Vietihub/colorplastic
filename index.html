@@ -757,11 +757,13 @@ function doLogin() {
   }
   err.style.display='none';
   role = selR;
+  sessionStorage.setItem('cp_role', role);
   document.getElementById('login').style.display='none';
   document.getElementById('app').style.display='flex';
   startApp();
 }
 function doLogout() {
+  sessionStorage.removeItem('cp_role');
   role=null; selR=null;
   document.getElementById('pin').value='';
   document.querySelectorAll('.rb').forEach(function(b){ b.classList.remove('on'); });
@@ -1401,6 +1403,18 @@ function toast(type, title, msg) {
 
 // Clear PIN on load
 document.getElementById('pin').value='';
+
+// Auto-restore session
+(function() {
+  var saved = sessionStorage.getItem('cp_role');
+  if (saved && PINS[saved]) {
+    role = saved;
+    selR = saved;
+    document.getElementById('login').style.display='none';
+    document.getElementById('app').style.display='flex';
+    startApp();
+  }
+})();
 
 // Clock
 setInterval(function(){
