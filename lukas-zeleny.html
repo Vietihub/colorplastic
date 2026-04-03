@@ -1,0 +1,1014 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lukáš Zelený – Zedník & Rekonstrukce</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;900&family=Barlow:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #1a1a1a;
+    --bg2: #222222;
+    --bg3: #2a2a2a;
+    --orange: #ff8c00;
+    --orange-dim: rgba(255,140,0,0.12);
+    --orange-mid: rgba(255,140,0,0.35);
+    --white: #f5f5f5;
+    --gray: #888;
+    --light-gray: #ccc;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--bg);
+    color: var(--white);
+    font-family: 'Barlow', sans-serif;
+    font-weight: 300;
+    line-height: 1.6;
+    overflow-x: hidden;
+  }
+
+  /* ── NAV ── */
+  nav {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    z-index: 100;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 5%;
+    height: 68px;
+    background: rgba(26,26,26,0.92);
+    backdrop-filter: blur(10px);
+    border-bottom: 1px solid rgba(255,140,0,0.15);
+  }
+
+  .nav-logo {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 900;
+    font-size: 1.35rem;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--white);
+  }
+  .nav-logo span { color: var(--orange); }
+
+  .nav-links {
+    display: flex;
+    gap: 2.5rem;
+    list-style: none;
+  }
+  .nav-links a {
+    color: var(--light-gray);
+    text-decoration: none;
+    font-size: 0.8rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    font-weight: 500;
+    transition: color 0.2s;
+  }
+  .nav-links a:hover { color: var(--orange); }
+
+  .nav-cta {
+    background: var(--orange);
+    color: #111 !important;
+    padding: 0.5rem 1.2rem;
+    font-weight: 700 !important;
+    letter-spacing: 0.06em !important;
+  }
+  .nav-cta:hover { background: #e07c00; color: #111 !important; }
+
+  /* Hamburger */
+  .hamburger {
+    display: none;
+    flex-direction: column;
+    gap: 5px;
+    cursor: pointer;
+    background: none;
+    border: none;
+    padding: 4px;
+  }
+  .hamburger span {
+    display: block;
+    width: 26px;
+    height: 2px;
+    background: var(--white);
+    transition: 0.3s;
+  }
+
+  /* ── HERO ── */
+  #hero {
+    position: relative;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    overflow: hidden;
+  }
+
+  .hero-bg {
+    position: absolute;
+    inset: 0;
+    background:
+      linear-gradient(105deg, rgba(26,26,26,0.97) 0%, rgba(26,26,26,0.75) 55%, rgba(26,26,26,0.4) 100%),
+      url('https://images.unsplash.com/photo-1504307651254-35680f356dfd?w=1600&q=80') center/cover no-repeat;
+  }
+
+  /* Noise texture overlay */
+  .hero-bg::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+    opacity: 0.3;
+    pointer-events: none;
+  }
+
+  .hero-content {
+    position: relative;
+    z-index: 2;
+    padding: 0 5%;
+    max-width: 800px;
+    margin-top: 68px;
+    animation: fadeUp 0.9s ease both;
+  }
+
+  .hero-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.6rem;
+    font-size: 0.7rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--orange);
+    font-weight: 600;
+    margin-bottom: 1.5rem;
+    font-family: 'Barlow Condensed', sans-serif;
+  }
+  .hero-badge::before {
+    content: '';
+    display: block;
+    width: 32px;
+    height: 2px;
+    background: var(--orange);
+  }
+
+  h1 {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 900;
+    font-size: clamp(3rem, 8vw, 6rem);
+    line-height: 0.95;
+    text-transform: uppercase;
+    letter-spacing: -0.01em;
+    margin-bottom: 1.5rem;
+  }
+  h1 em {
+    font-style: normal;
+    color: var(--orange);
+    display: block;
+  }
+
+  .hero-sub {
+    font-size: clamp(1rem, 2vw, 1.15rem);
+    color: var(--light-gray);
+    max-width: 520px;
+    margin-bottom: 2.5rem;
+    line-height: 1.7;
+  }
+
+  .hero-actions {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+    align-items: center;
+  }
+
+  .btn-primary {
+    display: inline-block;
+    background: var(--orange);
+    color: #111;
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 700;
+    font-size: 0.95rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    padding: 1rem 2.2rem;
+    text-decoration: none;
+    transition: background 0.2s, transform 0.15s;
+    border: none;
+    cursor: pointer;
+  }
+  .btn-primary:hover { background: #e07c00; transform: translateY(-2px); }
+
+  .btn-ghost {
+    display: inline-block;
+    border: 1px solid rgba(255,255,255,0.25);
+    color: var(--white);
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 600;
+    font-size: 0.95rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    padding: 1rem 2.2rem;
+    text-decoration: none;
+    transition: border-color 0.2s, color 0.2s;
+  }
+  .btn-ghost:hover { border-color: var(--orange); color: var(--orange); }
+
+  .hero-stats {
+    position: absolute;
+    bottom: 3rem;
+    right: 5%;
+    display: flex;
+    gap: 3rem;
+    z-index: 2;
+    animation: fadeUp 1.1s 0.3s ease both;
+  }
+  .stat {
+    text-align: right;
+  }
+  .stat-num {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 2.8rem;
+    font-weight: 900;
+    color: var(--orange);
+    line-height: 1;
+  }
+  .stat-label {
+    font-size: 0.7rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--gray);
+    margin-top: 0.2rem;
+  }
+
+  /* ── SECTION BASE ── */
+  section { padding: 100px 5%; }
+
+  .section-label {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.6rem;
+    font-size: 0.68rem;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--orange);
+    font-weight: 600;
+    font-family: 'Barlow Condensed', sans-serif;
+    margin-bottom: 1rem;
+  }
+  .section-label::before {
+    content: '';
+    display: block;
+    width: 24px;
+    height: 2px;
+    background: var(--orange);
+  }
+
+  .section-title {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 900;
+    font-size: clamp(2.2rem, 5vw, 3.8rem);
+    text-transform: uppercase;
+    letter-spacing: -0.01em;
+    line-height: 1;
+    margin-bottom: 1.2rem;
+  }
+  .section-title span { color: var(--orange); }
+
+  .section-desc {
+    color: var(--light-gray);
+    font-size: 1rem;
+    max-width: 560px;
+    line-height: 1.75;
+    margin-bottom: 3.5rem;
+  }
+
+  /* ── DIVIDER ── */
+  .divider {
+    width: 100%;
+    height: 1px;
+    background: linear-gradient(90deg, var(--orange) 0%, rgba(255,140,0,0.1) 60%, transparent 100%);
+    margin: 0;
+  }
+
+  /* ── SERVICES ── */
+  #sluzby { background: var(--bg); }
+
+  .services-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    flex-wrap: wrap;
+    gap: 1.5rem;
+    margin-bottom: 4rem;
+  }
+
+  .services-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 1px;
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(255,255,255,0.06);
+  }
+
+  .service-card {
+    background: var(--bg2);
+    padding: 2.5rem;
+    transition: background 0.3s;
+    position: relative;
+    overflow: hidden;
+  }
+  .service-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0;
+    width: 3px;
+    height: 0;
+    background: var(--orange);
+    transition: height 0.35s ease;
+  }
+  .service-card:hover { background: var(--bg3); }
+  .service-card:hover::before { height: 100%; }
+
+  .service-icon {
+    width: 52px;
+    height: 52px;
+    border: 1px solid var(--orange-mid);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 1.5rem;
+    background: var(--orange-dim);
+    flex-shrink: 0;
+  }
+  .service-icon svg { width: 26px; height: 26px; stroke: var(--orange); fill: none; stroke-width: 1.5; }
+
+  .service-cat {
+    font-size: 0.62rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--orange);
+    font-weight: 600;
+    font-family: 'Barlow Condensed', sans-serif;
+    margin-bottom: 0.5rem;
+  }
+
+  .service-name {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 700;
+    font-size: 1.4rem;
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+    margin-bottom: 0.8rem;
+    color: var(--white);
+  }
+
+  .service-text {
+    font-size: 0.9rem;
+    color: var(--gray);
+    line-height: 1.7;
+  }
+
+  /* ── GALLERY ── */
+  #galerie { background: var(--bg); }
+
+  .gallery-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    grid-template-rows: auto auto;
+    gap: 6px;
+  }
+
+  .gallery-item {
+    position: relative;
+    overflow: hidden;
+    aspect-ratio: 4/3;
+    background: var(--bg3);
+  }
+  .gallery-item:first-child {
+    grid-column: span 2;
+    aspect-ratio: 16/9;
+  }
+
+  .gallery-item img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    filter: grayscale(30%) contrast(1.05);
+    transition: transform 0.6s ease, filter 0.4s ease;
+    display: block;
+  }
+  .gallery-item:hover img { transform: scale(1.05); filter: grayscale(0%) contrast(1.1); }
+
+  .gallery-overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to top, rgba(0,0,0,0.7) 0%, transparent 50%);
+    display: flex;
+    align-items: flex-end;
+    padding: 1.2rem;
+    opacity: 0;
+    transition: opacity 0.3s;
+  }
+  .gallery-item:hover .gallery-overlay { opacity: 1; }
+
+  .gallery-label {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 700;
+    font-size: 0.85rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--white);
+  }
+
+  .before-after-badge {
+    display: inline-flex;
+    gap: 4px;
+    position: absolute;
+    top: 1rem;
+    left: 1rem;
+  }
+  .ba-pill {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 0.65rem;
+    font-weight: 700;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    padding: 3px 8px;
+  }
+  .ba-before { background: rgba(0,0,0,0.7); color: var(--gray); border: 1px solid var(--gray); }
+  .ba-after { background: var(--orange); color: #111; }
+
+  /* ── WHY US ── */
+  #proc-ja { background: var(--bg2); }
+
+  .why-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 5rem;
+    align-items: center;
+  }
+
+  .why-list { list-style: none; display: flex; flex-direction: column; gap: 1.5rem; }
+  .why-item {
+    display: flex;
+    gap: 1.2rem;
+    align-items: flex-start;
+    padding-bottom: 1.5rem;
+    border-bottom: 1px solid rgba(255,255,255,0.07);
+  }
+  .why-item:last-child { border-bottom: none; padding-bottom: 0; }
+
+  .why-num {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 900;
+    font-size: 2rem;
+    color: var(--orange);
+    line-height: 1;
+    min-width: 2.5rem;
+    opacity: 0.5;
+  }
+
+  .why-title {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 700;
+    font-size: 1.05rem;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    margin-bottom: 0.3rem;
+  }
+  .why-desc { font-size: 0.88rem; color: var(--gray); line-height: 1.7; }
+
+  .why-visual {
+    position: relative;
+    aspect-ratio: 4/5;
+  }
+  .why-visual img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    filter: grayscale(20%);
+  }
+  .why-visual-frame {
+    position: absolute;
+    bottom: -1.5rem;
+    right: -1.5rem;
+    width: 60%;
+    height: 60%;
+    border: 2px solid var(--orange);
+    pointer-events: none;
+  }
+  .why-tag {
+    position: absolute;
+    top: 1.5rem;
+    left: -1.5rem;
+    background: var(--orange);
+    color: #111;
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 900;
+    font-size: 0.85rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    padding: 0.7rem 1.2rem;
+    writing-mode: vertical-rl;
+    transform: rotate(180deg);
+  }
+
+  /* ── CONTACT ── */
+  #kontakt { background: var(--bg); }
+
+  .contact-grid {
+    display: grid;
+    grid-template-columns: 1fr 1.3fr;
+    gap: 5rem;
+    align-items: start;
+  }
+
+  .contact-info { display: flex; flex-direction: column; gap: 2rem; }
+
+  .contact-item {
+    display: flex;
+    gap: 1rem;
+    align-items: flex-start;
+  }
+  .contact-icon {
+    width: 44px;
+    height: 44px;
+    background: var(--orange-dim);
+    border: 1px solid var(--orange-mid);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+  .contact-icon svg { width: 20px; height: 20px; stroke: var(--orange); fill: none; stroke-width: 1.5; }
+  .contact-label { font-size: 0.65rem; letter-spacing: 0.18em; text-transform: uppercase; color: var(--gray); font-weight: 600; margin-bottom: 0.25rem; }
+  .contact-value { font-size: 1rem; font-weight: 500; color: var(--white); }
+  .contact-value a { color: var(--white); text-decoration: none; }
+  .contact-value a:hover { color: var(--orange); }
+
+  .contact-guarantee {
+    margin-top: 1rem;
+    padding: 1.5rem;
+    border: 1px solid var(--orange-mid);
+    background: var(--orange-dim);
+  }
+  .guarantee-title {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 700;
+    font-size: 1rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--orange);
+    margin-bottom: 0.5rem;
+  }
+  .guarantee-text { font-size: 0.85rem; color: var(--light-gray); line-height: 1.6; }
+
+  /* FORM */
+  form { display: flex; flex-direction: column; gap: 1rem; }
+
+  .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+
+  .form-group { display: flex; flex-direction: column; gap: 0.4rem; }
+  .form-label {
+    font-size: 0.65rem;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--gray);
+    font-weight: 600;
+  }
+
+  input, textarea, select {
+    background: var(--bg3);
+    border: 1px solid rgba(255,255,255,0.1);
+    color: var(--white);
+    font-family: 'Barlow', sans-serif;
+    font-size: 0.95rem;
+    padding: 0.85rem 1rem;
+    width: 100%;
+    transition: border-color 0.2s;
+    outline: none;
+    -webkit-appearance: none;
+  }
+  input:focus, textarea:focus, select:focus { border-color: var(--orange); }
+  textarea { resize: vertical; min-height: 120px; }
+
+  select option { background: var(--bg3); }
+
+  .btn-submit {
+    width: 100%;
+    background: var(--orange);
+    color: #111;
+    border: none;
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 900;
+    font-size: 1.2rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    padding: 1.15rem 2rem;
+    cursor: pointer;
+    transition: background 0.2s, transform 0.15s;
+    margin-top: 0.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.7rem;
+  }
+  .btn-submit:hover { background: #e07c00; transform: translateY(-2px); }
+  .btn-submit svg { width: 20px; height: 20px; stroke: #111; fill: none; stroke-width: 2.5; }
+
+  /* ── FOOTER ── */
+  footer {
+    background: #111;
+    border-top: 1px solid rgba(255,140,0,0.15);
+    padding: 2rem 5%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
+    flex-wrap: wrap;
+  }
+  .footer-brand {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 900;
+    font-size: 1.1rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+  .footer-brand span { color: var(--orange); }
+  .footer-copy { font-size: 0.78rem; color: var(--gray); }
+
+  /* ── SCROLL REVEAL ── */
+  .reveal { opacity: 0; transform: translateY(24px); transition: opacity 0.7s ease, transform 0.7s ease; }
+  .reveal.visible { opacity: 1; transform: none; }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(30px); }
+    to { opacity: 1; transform: none; }
+  }
+
+  /* ── RESPONSIVE ── */
+  @media (max-width: 900px) {
+    .nav-links { display: none; }
+    .hamburger { display: flex; }
+    .nav-links.open {
+      display: flex;
+      flex-direction: column;
+      position: fixed;
+      top: 68px; left: 0; right: 0;
+      background: #111;
+      padding: 2rem 5%;
+      gap: 1.5rem;
+      border-bottom: 1px solid rgba(255,140,0,0.2);
+    }
+    .gallery-grid { grid-template-columns: 1fr 1fr; }
+    .gallery-item:first-child { grid-column: span 2; }
+    .why-grid { grid-template-columns: 1fr; }
+    .why-visual { display: none; }
+    .contact-grid { grid-template-columns: 1fr; }
+    .hero-stats { gap: 1.5rem; }
+    .form-row { grid-template-columns: 1fr; }
+  }
+
+  @media (max-width: 600px) {
+    section { padding: 70px 5%; }
+    .gallery-grid { grid-template-columns: 1fr; }
+    .gallery-item:first-child { grid-column: span 1; aspect-ratio: 4/3; }
+    .hero-stats { position: static; margin-top: 3rem; justify-content: flex-start; }
+    .hero-content { padding-bottom: 2rem; }
+    .services-header { flex-direction: column; align-items: flex-start; }
+  }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-logo">Lukáš <span>Zelený</span></div>
+  <ul class="nav-links" id="navLinks">
+    <li><a href="#sluzby">Služby</a></li>
+    <li><a href="#galerie">Galerie</a></li>
+    <li><a href="#proc-ja">Proč já</a></li>
+    <li><a href="#kontakt" class="nav-cta">Kontakt</a></li>
+  </ul>
+  <button class="hamburger" id="hamburger" aria-label="Menu">
+    <span></span><span></span><span></span>
+  </button>
+</nav>
+
+<!-- HERO -->
+<section id="hero">
+  <div class="hero-bg"></div>
+  <div class="hero-content">
+    <div class="hero-badge">Zedník &amp; Rekonstrukce — Praha a okolí</div>
+    <h1>Kvalitní<br>řemeslo<br><em>na míru</em></h1>
+    <p class="hero-sub">Od koupelny po plot — každá zakázka je jiná, každá si zaslouží stejnou péči. Žádná práce není příliš malá ani příliš velká.</p>
+    <div class="hero-actions">
+      <a href="#kontakt" class="btn-primary">Chci cenovou nabídku</a>
+      <a href="#sluzby" class="btn-ghost">Zobrazit služby</a>
+    </div>
+  </div>
+  <div class="hero-stats">
+    <div class="stat">
+      <div class="stat-num">12+</div>
+      <div class="stat-label">Let zkušeností</div>
+    </div>
+    <div class="stat">
+      <div class="stat-num">200+</div>
+      <div class="stat-label">Dokončených zakázek</div>
+    </div>
+    <div class="stat">
+      <div class="stat-num">100%</div>
+      <div class="stat-label">Spokojených klientů</div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- SERVICES -->
+<section id="sluzby">
+  <div class="services-header">
+    <div>
+      <div class="section-label">Co nabízím</div>
+      <h2 class="section-title">Moje <span>Služby</span></h2>
+      <p class="section-desc">Pracuji poctivě, komunikuji jasně a po sobě uklidím. Nabízím kompletní řemeslné práce — od drobných oprav až po celkové rekonstrukce na klíč.</p>
+    </div>
+  </div>
+
+  <div class="services-grid reveal">
+
+    <!-- INTERIÉRY -->
+    <div class="service-card">
+      <div class="service-icon">
+        <svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="0.5"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="3" y1="15" x2="21" y2="15"/><line x1="9" y1="9" x2="9" y2="21"/></svg>
+      </div>
+      <div class="service-cat">Interiéry</div>
+      <div class="service-name">Sádrokartony & Příčky</div>
+      <p class="service-text">Stavba, opravy a přesklení sádrokartonových příček, podhledů i celých místností. Rovné stěny, přesné rohy, žádné mezery. Výsledek, ze kterého se těší i malíř.</p>
+    </div>
+
+    <div class="service-card">
+      <div class="service-icon">
+        <svg viewBox="0 0 24 24"><path d="M4 20 L4 8 L12 4 L20 8 L20 20 Z"/><path d="M9 20 L9 14 L15 14 L15 20"/><rect x="9" y="9" width="2" height="2"/><rect x="13" y="9" width="2" height="2"/></svg>
+      </div>
+      <div class="service-cat">Interiéry</div>
+      <div class="service-name">Rekonstrukce Koupelen</div>
+      <p class="service-text">Kompletní přestavba koupelny na klíč — od bourání po finální obklady. Postaráme se o rozvody, hydroizolaci, obkládačky i sanitární prvky. Vy jen čekáte na výsledek.</p>
+    </div>
+
+    <div class="service-card">
+      <div class="service-icon">
+        <svg viewBox="0 0 24 24"><rect x="2" y="2" width="5" height="5"/><rect x="9.5" y="2" width="5" height="5"/><rect x="17" y="2" width="5" height="5"/><rect x="2" y="9.5" width="5" height="5"/><rect x="9.5" y="9.5" width="5" height="5"/><rect x="17" y="9.5" width="5" height="5"/><rect x="2" y="17" width="5" height="5"/><rect x="9.5" y="17" width="5" height="5"/><rect x="17" y="17" width="5" height="5"/></svg>
+      </div>
+      <div class="service-cat">Interiéry</div>
+      <div class="service-name">Pokládka Dlažby & Obkladů</div>
+      <p class="service-text">Keramika, velkoformátové desky, kamenná mozaika — každý typ dlažby a obkladu vyžaduje jiný přístup. Práce odvádím pečlivě, spáry rovné jako pravítko.</p>
+    </div>
+
+    <!-- EXTERIÉRY -->
+    <div class="service-card">
+      <div class="service-icon">
+        <svg viewBox="0 0 24 24"><line x1="3" y1="20" x2="21" y2="20"/><line x1="6" y1="20" x2="6" y2="8"/><line x1="10" y1="20" x2="10" y2="8"/><line x1="14" y1="20" x2="14" y2="8"/><line x1="18" y1="20" x2="18" y2="8"/><line x1="3" y1="8" x2="21" y2="8"/><line x1="3" y1="12" x2="21" y2="12"/></svg>
+      </div>
+      <div class="service-cat">Exteriéry</div>
+      <div class="service-name">Stavba Plotů & Zdí</div>
+      <p class="service-text">Zděné ploty, gabionové stěny, betonové základy i opěrné zdi. Solidní práce, která vydrží dekády a okamžitě pozdvihne vzhled vaší nemovitosti.</p>
+    </div>
+
+    <div class="service-card">
+      <div class="service-icon">
+        <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+      </div>
+      <div class="service-cat">Exteriéry</div>
+      <div class="service-name">Opravy & Fasády</div>
+      <p class="service-text">Praskliny ve zdi, popraskané omítky, poškozené rohy — opravy exteriéru, které jsou vidět i za 10 let. Práce s důrazem na trvanlivost a estetiku.</p>
+    </div>
+
+    <!-- OPRAVY -->
+    <div class="service-card">
+      <div class="service-icon">
+        <svg viewBox="0 0 24 24"><path d="M14.7 6.3a1 1 0 000 1.4l1.6 1.6a1 1 0 001.4 0l3.77-3.77a6 6 0 01-7.94 7.94l-6.91 6.91a2.12 2.12 0 01-3-3l6.91-6.91a6 6 0 017.94-7.94l-3.76 3.76z"/></svg>
+      </div>
+      <div class="service-cat">Opravy & Zakázky</div>
+      <div class="service-name">Hodinový Manžel & Opravy</div>
+      <p class="service-text">Drobné zednické práce, které nikdo jiný nechce brát? Vezmu je. Zalití šroubu, oprávka omítky, upevnění rohu — s radostí a za rozumnou cenu.</p>
+    </div>
+
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- GALLERY -->
+<section id="galerie">
+  <div class="section-label">Výsledky práce</div>
+  <h2 class="section-title">Před <span>&amp;</span> Po</h2>
+  <p class="section-desc">Každý projekt začíná vizí a končí dokonale odvedenou prací. Přesvědčte se sami.</p>
+
+  <div class="gallery-grid reveal">
+    <div class="gallery-item">
+      <img src="https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=900&q=80" alt="Koupelna po rekonstrukci">
+      <div class="before-after-badge"><span class="ba-pill ba-after">Po</span></div>
+      <div class="gallery-overlay"><span class="gallery-label">Rekonstrukce koupelny — Praha 6</span></div>
+    </div>
+    <div class="gallery-item">
+      <img src="https://images.unsplash.com/photo-1484154218962-a197022b5858?w=600&q=80" alt="Koupelna před rekonstrukcí">
+      <div class="before-after-badge"><span class="ba-pill ba-before">Před</span></div>
+      <div class="gallery-overlay"><span class="gallery-label">Stav před zahájením prací</span></div>
+    </div>
+    <div class="gallery-item">
+      <img src="https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=600&q=80" alt="Zděný plot">
+      <div class="before-after-badge"><span class="ba-pill ba-after">Po</span></div>
+      <div class="gallery-overlay"><span class="gallery-label">Zděný plot — Kladno</span></div>
+    </div>
+    <div class="gallery-item">
+      <img src="https://images.unsplash.com/photo-1504307651254-35680f356dfd?w=600&q=80" alt="Sádrokarton">
+      <div class="before-after-badge"><span class="ba-pill ba-after">Po</span></div>
+      <div class="gallery-overlay"><span class="gallery-label">Sádrokartonové příčky</span></div>
+    </div>
+    <div class="gallery-item">
+      <img src="https://images.unsplash.com/photo-1615873968403-89e068629265?w=600&q=80" alt="Dlažba">
+      <div class="before-after-badge"><span class="ba-pill ba-after">Po</span></div>
+      <div class="gallery-overlay"><span class="gallery-label">Pokládka velkoformátové dlažby</span></div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- WHY ME -->
+<section id="proc-ja">
+  <div class="why-grid">
+    <div>
+      <div class="section-label">Proč zrovna já</div>
+      <h2 class="section-title">Řemeslo <span>s hlavou</span></h2>
+      <p class="section-desc">Nejsem firma s desítkami zaměstnanců. Jsem řemeslník, který si stojí za svou prací osobně.</p>
+
+      <ul class="why-list reveal">
+        <li class="why-item">
+          <span class="why-num">01</span>
+          <div>
+            <div class="why-title">Zakázky na míru</div>
+            <p class="why-desc">Každý projekt beru jako jedinečný. Přizpůsobím se vašim požadavkům, rozpočtu i termínu — a pokud to nejde, řeknu to rovnou.</p>
+          </div>
+        </li>
+        <li class="why-item">
+          <span class="why-num">02</span>
+          <div>
+            <div class="why-title">Čistota na stavbě</div>
+            <p class="why-desc">Pracuji pořádně a po sobě uklidím. Váš byt nebo dům nebude vypadat jako válečná zóna — ani uprostřed rekonstrukce.</p>
+          </div>
+        </li>
+        <li class="why-item">
+          <span class="why-num">03</span>
+          <div>
+            <div class="why-title">Přímá komunikace</div>
+            <p class="why-desc">Cenu řeknu předem, termín dodržím. Žádné skryté náklady, žádné překvapení na konci. Jen čistá dohoda a splněný závazek.</p>
+          </div>
+        </li>
+        <li class="why-item">
+          <span class="why-num">04</span>
+          <div>
+            <div class="why-title">12 let v oboru</div>
+            <p class="why-desc">Za ta léta jsem viděl dost špatně odvedené práce. Vím, co se nesmí dělat — a vím, jak to udělat správně napoprvé.</p>
+          </div>
+        </li>
+      </ul>
+    </div>
+
+    <div class="why-visual">
+      <img src="https://images.unsplash.com/photo-1581578731548-c64695cc6952?w=700&q=80" alt="Lukáš Zelený při práci">
+      <div class="why-visual-frame"></div>
+      <div class="why-tag">Poctivá práce</div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- CONTACT -->
+<section id="kontakt">
+  <div class="section-label">Nezávazně</div>
+  <h2 class="section-title">Chci <span>Cenovou Nabídku</span></h2>
+  <p class="section-desc">Napište mi, co potřebujete. Ozvu se do 24 hodin s nezávaznou nabídkou.</p>
+
+  <div class="contact-grid">
+    <div class="contact-info reveal">
+      <div class="contact-item">
+        <div class="contact-icon">
+          <svg viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 013.95 13a19.79 19.79 0 01-3.07-8.67A2 2 0 012.86 2h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L7.09 9.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 16.92z"/></svg>
+        </div>
+        <div>
+          <div class="contact-label">Telefon</div>
+          <div class="contact-value"><a href="tel:+420777666999">777 666 999</a></div>
+        </div>
+      </div>
+
+      <div class="contact-item">
+        <div class="contact-icon">
+          <svg viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+        </div>
+        <div>
+          <div class="contact-label">E-mail</div>
+          <div class="contact-value"><a href="mailto:lukaszeleny@lukaszeleny.cz">lukaszeleny@lukaszeleny.cz</a></div>
+        </div>
+      </div>
+
+      <div class="contact-item">
+        <div class="contact-icon">
+          <svg viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
+        </div>
+        <div>
+          <div class="contact-label">Oblast působení</div>
+          <div class="contact-value">Praha a Středočeský kraj</div>
+        </div>
+      </div>
+
+      <div class="contact-guarantee">
+        <div class="guarantee-title">✓ Odpovídám do 24 hodin</div>
+        <p class="guarantee-text">Nezávazná nabídka zdarma. Přijedu se podívat, popovídáme si a domluvíme se — bez závazků, bez skrytých poplatků.</p>
+      </div>
+    </div>
+
+    <form id="contactForm" class="reveal">
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label" for="name">Jméno a příjmení</label>
+          <input type="text" id="name" placeholder="Jan Novák" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="phone">Telefon</label>
+          <input type="tel" id="phone" placeholder="777 000 111">
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="email">E-mail</label>
+        <input type="email" id="email" placeholder="vas@email.cz" required>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="service">Typ zakázky</label>
+        <select id="service">
+          <option value="">Vyberte typ práce...</option>
+          <option>Rekonstrukce koupelny</option>
+          <option>Sádrokartonové příčky</option>
+          <option>Pokládka dlažby / obkladů</option>
+          <option>Stavba plotu / zdi</option>
+          <option>Oprava fasády / omítky</option>
+          <option>Hodinový manžel / drobné opravy</option>
+          <option>Jiné</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="message">Popis zakázky</label>
+        <textarea id="message" placeholder="Popište co nejvíce detailů — rozsah, materiály, termín, lokalita..." required></textarea>
+      </div>
+
+      <button type="submit" class="btn-submit">
+        <svg viewBox="0 0 24 24"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+        Chci Cenovou Nabídku
+      </button>
+    </form>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-brand">Lukáš <span>Zelený</span> — Zednické Práce</div>
+  <div class="footer-copy">© 2025 · Praha a Středočeský kraj · 777 666 999</div>
+</footer>
+
+<script>
+  // Hamburger
+  const hamburger = document.getElementById('hamburger');
+  const navLinks = document.getElementById('navLinks');
+  hamburger.addEventListener('click', () => navLinks.classList.toggle('open'));
+  navLinks.querySelectorAll('a').forEach(a => a.addEventListener('click', () => navLinks.classList.remove('open')));
+
+  // Scroll reveal
+  const revealEls = document.querySelectorAll('.reveal');
+  const observer = new IntersectionObserver(entries => {
+    entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('visible'); observer.unobserve(e.target); } });
+  }, { threshold: 0.12 });
+  revealEls.forEach(el => observer.observe(el));
+
+  // Form submit
+  document.getElementById('contactForm').addEventListener('submit', e => {
+    e.preventDefault();
+    const btn = e.target.querySelector('.btn-submit');
+    btn.textContent = '✓ Odesláno! Ozvu se do 24 hodin.';
+    btn.style.background = '#2a7a2a';
+    btn.style.color = '#fff';
+    btn.style.pointerEvents = 'none';
+  });
+</script>
+</body>
+</html>
