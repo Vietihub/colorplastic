@@ -807,10 +807,13 @@ tbody td{padding:11px 14px;font-size:13px;}
     <div class="fgrid">
       <div class="frow">
         <div class="fg"><label class="fl">Forma č.</label><input type="text" class="fi" id="pm-forma" placeholder="napr. č. 128"></div>
-        <div class="fg"><label class="fl">Počet kusů</label><input type="number" class="fi" id="pm-qty" placeholder="0" min="0"></div>
+        <div class="fg"><label class="fl">Čas výměny</label><input type="time" class="fi" id="pm-cas"></div>
       </div>
       <div class="frow">
-        <div class="fg"><label class="fl">Materiál</label>
+        <div class="fg"><label class="fl">Počet kusů</label><input type="number" class="fi" id="pm-qty" placeholder="0" min="0"></div>
+        <div class="fg"><label class="fl">Barva</label><input type="text" class="fi" id="pm-barva" placeholder="napr. RAL 9005 černá"></div>
+      </div>
+      <div class="fg"><label class="fl">Materiál</label>
           <select class="fs" id="pm-mat">
             <option value="">— Nevyplněno —</option>
             <option>Lukablend 7400 (PC/ABS)</option>
@@ -818,8 +821,6 @@ tbody td{padding:11px 14px;font-size:13px;}
             <option>Bayblend TX65 (PC/ABS)</option>
             <option>Lukablend 8500 (PC/ABS)</option>
           </select>
-        </div>
-        <div class="fg"><label class="fl">Barva</label><input type="text" class="fi" id="pm-barva" placeholder="napr. RAL 9005 černá"></div>
       </div>
       <label style="display:flex;align-items:center;gap:9px;font-size:13px;cursor:pointer">
         <input type="checkbox" id="pm-susen" style="width:15px;height:15px;accent-color:var(--red)">
@@ -1338,6 +1339,7 @@ function renderPlan() {
         if (p && (p.forma || p.qty)) {
           html += '<td style="'+bg+'"><div id="'+cellId+'" class="plan-cell has-plan" style="border-left:2px solid '+smenyColors[si]+'">';
           if (p.forma) html += '<div class="plan-cell-forma">'+p.forma+'</div>';
+          if (p.cas)   html += '<div class="plan-cell-mat" style="color:#4a9eff">⏰ '+p.cas+'</div>';
           if (p.mat)   html += '<div class="plan-cell-mat">'+p.mat+'</div>';
           if (p.qty)   html += '<div class="plan-cell-qty">'+p.qty+' ks</div>';
           if (p.barva) html += '<div class="plan-cell-note">🎨 '+p.barva+'</div>';
@@ -1432,6 +1434,8 @@ function openPlanModal(planKey, mach, dk, smena) {
   document.getElementById('pm-forma').value = p.forma || '';
   document.getElementById('pm-mat').value = p.mat || '';
   document.getElementById('pm-qty').value = p.qty || '';
+  var casEl = document.getElementById('pm-cas');
+  if (casEl) casEl.value = p.cas || '';
   var barvaEl = document.getElementById('pm-barva');
   if (barvaEl) barvaEl.value = p.barva || '';
   var susenEl = document.getElementById('pm-susen');
@@ -1444,11 +1448,12 @@ function savePlan() {
   var forma = document.getElementById('pm-forma').value.trim();
   var mat   = document.getElementById('pm-mat').value.trim();
   var qty   = document.getElementById('pm-qty').value.trim();
-  var barva = document.getElementById('pm-barva').value.trim();
+  var cas   = document.getElementById('pm-cas') ? document.getElementById('pm-cas').value : '';
+  var barva = document.getElementById('pm-barva') ? document.getElementById('pm-barva').value.trim() : '';
   var susen = document.getElementById('pm-susen').checked;
   var note  = document.getElementById('pm-note').value.trim();
   if (!forma && !qty) { toast('err','Chyba','Zadejte formu nebo počet kusů.'); return; }
-  var entry = {forma:forma, mat:mat, qty:qty, barva:barva, susen:susen, note:note, updatedAt:now()};
+  var entry = {forma:forma, mat:mat, qty:qty, barva:barva, cas:cas, susen:susen, note:note, updatedAt:now()};
   fbSet('plan/'+editPlanKey, entry);
   // Notifikace o sušení
   if (susen && mat) {
