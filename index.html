@@ -804,7 +804,10 @@ tbody td{padding:11px 14px;font-size:13px;}
       <button class="btn bwarn bsm" onclick="deletePlanEntry()" style="margin-top:2px">✕ Smazat</button>
     </div>
     <div class="fgrid">
-      <div class="fg"><label class="fl">Forma č.</label><input type="text" class="fi" id="pm-forma" placeholder="napr. č. 128"></div>
+      <div class="frow">
+        <div class="fg"><label class="fl">Forma č.</label><input type="text" class="fi" id="pm-forma" placeholder="napr. č. 128"></div>
+        <div class="fg"><label class="fl">Počet kusů</label><input type="number" class="fi" id="pm-qty" placeholder="0" min="0"></div>
+      </div>
       <div class="frow">
         <div class="fg"><label class="fl">Materiál</label>
           <select class="fs" id="pm-mat">
@@ -815,9 +818,13 @@ tbody td{padding:11px 14px;font-size:13px;}
             <option>Lukablend 8500 (PC/ABS)</option>
           </select>
         </div>
-        <div class="fg"><label class="fl">Počet kusů</label><input type="number" class="fi" id="pm-qty" placeholder="0" min="0"></div>
+        <div class="fg"><label class="fl">Barva</label><input type="text" class="fi" id="pm-barva" placeholder="napr. RAL 9005 černá"></div>
       </div>
-      <div class="fg"><label class="fl">Poznámka</label><textarea class="fta" id="pm-note" placeholder="Objednávka, zákazník..."></textarea></div>
+      <label style="display:flex;align-items:center;gap:9px;font-size:13px;cursor:pointer">
+        <input type="checkbox" id="pm-susen" style="width:15px;height:15px;accent-color:var(--red)">
+        <span>Nutno sušit materiál <span style="color:var(--text3);font-size:11px">(pošle notifikaci Mistrovi a Seřizovači)</span></span>
+      </label>
+      <div class="fg"><label class="fl">Poznámka / Objednávka</label><textarea class="fta" id="pm-note" placeholder="Číslo objednávky, zákazník..."></textarea></div>
     </div>
     <div class="mact">
       <button class="btn bg" onclick="closeModal('mod-plan')">Zrušit</button>
@@ -954,7 +961,7 @@ var curReqKey = null;
 var curProdMachine = null;
 var D = {
   requests:[], scrap:[], skladAlerts:[], formaChanges:[],
-  objednavky:[], dovolene:[], materialy:[], plan:{},
+  objednavky:[], dovolene:[], materialy:[], plan:{}, notifications:[],
   production:[
     {machine:'Engel duo 300T',forma:null,mat:null,running:false,updated:null},
     {machine:'Engel duo 550T',forma:null,mat:null,running:false,updated:null},
@@ -1302,48 +1309,42 @@ function renderPlan() {
   var smenyShort = ['R','O','N'];
   var smenyColors = ['#4a9eff','var(--orange)','#a070ff'];
 
-  // Header row 1 - days (colspan 3)
-  var html = '<thead>';
-  html += '<tr><th class="mach-col" rowspan="2">Lis</th>';
+  var html = '<thead><tr><th class="mach-col" rowspan="2">Lis</th>';
   dates.forEach(function(d, i) {
     var today = isToday(d);
-    html += '<th colspan="3" style="text-align:center;border-bottom:1px solid var(--border)">';
+    html += '<th colspan="3" style="text-align:center">';
     html += '<div class="day-header'+(today?' today-hdr':'')+'">' + DAY_FULL[i] + '</div>';
-    html += '<div class="day-date">' + d.getDate()+'.'+(d.getMonth()+1)+'.' + '</div>';
-    html += '</th>';
+    html += '<div class="day-date">' + d.getDate()+'.'+(d.getMonth()+1)+'.' + '</div></th>';
   });
-  html += '</tr>';
-
-  // Header row 2 - smeny
-  html += '<tr>';
+  html += '</tr><tr>';
   dates.forEach(function(d) {
     smeny.forEach(function(s, si) {
-      html += '<th style="font-size:9px;padding:4px 6px;color:'+smenyColors[si]+';border-top:none;min-width:70px">'+smenyShort[si]+'</th>';
+      html += '<th style="font-size:9px;padding:4px 6px;color:'+smenyColors[si]+';border-top:none;min-width:72px">'+smenyShort[si]+'</th>';
     });
   });
   html += '</tr></thead><tbody>';
 
-  // Rows - machines
-  MACHINES_LIST.forEach(function(mach) {
+  MACHINES_LIST.forEach(function(mach, mi) {
     html += '<tr><td class="mach-cell">'+mach+'</td>';
-    dates.forEach(function(d) {
+    dates.forEach(function(d, di) {
       var dk = dateKey(d);
       var today = isToday(d);
+      var bg = today ? 'background:rgba(74,158,255,.04);' : '';
       smeny.forEach(function(smena, si) {
         var planKey = mach.replace(/ /g,'_')+'_'+dk+'_'+smena;
         var p = D.plan[planKey];
-        var todayCls = today ? ' style="background:rgba(74,158,255,.04)"' : '';
+        var cellId = 'pc-'+mi+'-'+di+'-'+si;
         if (p && (p.forma || p.qty)) {
-          html += '<td'+todayCls+'>';
-          html += '<div class="plan-cell has-plan" data-k="'+planKey+'" onclick="openPlanModal(this.dataset.k,\''+mach+'\',\''+dk+'\',\''+smena+'\')" style="border-left:2px solid '+smenyColors[si]+'">';
+          html += '<td style="'+bg+'"><div id="'+cellId+'" class="plan-cell has-plan" style="border-left:2px solid '+smenyColors[si]+'">';
           if (p.forma) html += '<div class="plan-cell-forma">'+p.forma+'</div>';
-          if (p.mat) html += '<div class="plan-cell-mat">'+p.mat+'</div>';
-          if (p.qty) html += '<div class="plan-cell-qty">'+p.qty+' ks</div>';
-          if (p.note) html += '<div class="plan-cell-note">'+p.note+'</div>';
+          if (p.mat)   html += '<div class="plan-cell-mat">'+p.mat+'</div>';
+          if (p.qty)   html += '<div class="plan-cell-qty">'+p.qty+' ks</div>';
+          if (p.barva) html += '<div class="plan-cell-note">🎨 '+p.barva+'</div>';
+          if (p.susen) html += '<div class="plan-cell-note" style="color:var(--orange)">🔥 Sušit</div>';
+          if (p.note)  html += '<div class="plan-cell-note">'+p.note+'</div>';
           html += '</div></td>';
         } else {
-          html += '<td'+todayCls+'>';
-          html += '<div class="plan-cell-empty" data-k="'+planKey+'" onclick="openPlanModal(this.dataset.k,\''+mach+'\',\''+dk+'\',\''+smena+'\')">';
+          html += '<td style="'+bg+'"><div id="'+cellId+'" class="plan-cell-empty">';
           html += role==='vedouci' ? '+' : '–';
           html += '</div></td>';
         }
@@ -1353,7 +1354,43 @@ function renderPlan() {
   });
   html += '</tbody>';
   grid.innerHTML = html;
+
+  // Attach click handlers after DOM is ready
+  if (role !== 'vedouci') return;
+  MACHINES_LIST.forEach(function(mach, mi) {
+    dates.forEach(function(d, di) {
+      var dk = dateKey(d);
+      smeny.forEach(function(smena, si) {
+        var planKey = mach.replace(/ /g,'_')+'_'+dk+'_'+smena;
+        var cellId = 'pc-'+mi+'-'+di+'-'+si;
+        var el = document.getElementById(cellId);
+        if (el) {
+          el.addEventListener('click', (function(k, m, date, s) {
+            return function() { openPlanModal(k, m, date, s); };
+          })(planKey, mach, dk, smena));
+        }
+      });
+    });
+  });
 }
+
+function handlePlanClick(el) {
+  if (role !== 'vedouci') return;
+  var k = el.getAttribute('data-k');
+  var m = el.getAttribute('data-m');
+  var d = el.getAttribute('data-d');
+  var s = el.getAttribute('data-s');
+  openPlanModal(k, m, d, s);
+}
+
+// Event delegation for plan grid
+document.addEventListener('click', function(e) {
+  var el = e.target.closest('[data-k][data-m][data-d][data-s]');
+  if (!el) return;
+  var grid = document.getElementById('plan-grid');
+  if (!grid || !grid.contains(el)) return;
+  handlePlanClick(el);
+});
 
 function renderPlanToday() {
   var el = document.getElementById('plan-today-section'); if (!el) return;
@@ -1375,7 +1412,8 @@ function renderPlanToday() {
         '<div class="plan-today-meta">' +
           (p.mat ? '<span>🎨 '+p.mat+'</span>' : '') +
           (p.qty ? '<span style="color:var(--green-text);font-weight:700">'+p.qty+' ks</span>' : '') +
-          (p.smena ? '<span class="'+smenaClass(p.smena)+'" style="font-weight:700">'+p.smena+'</span>' : '') +
+          (p.barva ? '<span style="color:var(--text2)">🎨 '+p.barva+'</span>' : '') +
+          (p.susen ? '<span style="color:var(--orange);font-weight:700">🔥 Sušit</span>' : '') +
           (p.note ? '<span style="color:var(--text3);font-style:italic">'+p.note+'</span>' : '') +
         '</div>' +
       '</div>';
@@ -1387,14 +1425,17 @@ function openPlanModal(planKey, mach, dk, smena) {
   if (role !== 'vedouci') return;
   editPlanKey = planKey;
   var p = D.plan[planKey] || {};
+  var smenaLabels = {'ranní':'Ranní','odpolední':'Odpolední','noční':'Noční'};
   document.getElementById('pm-title').textContent = mach;
-  var smenaLabel = {'ranní':'Ranní','odpolední':'Odpolední','noční':'Noční'}[smena||'ranní'];
-  document.getElementById('pm-date').textContent = dk.split('-').reverse().join('.')+' · '+smenaLabel;
-  document.getElementById('pm-forma').value = p.forma||'';
-  document.getElementById('pm-mat').value = p.mat||'';
-  document.getElementById('pm-qty').value = p.qty||'';
-  document.getElementById('pm-smena').value = p.smena||'ranní';
-  document.getElementById('pm-note').value = p.note||'';
+  document.getElementById('pm-date').textContent = dk.split('-').reverse().join('.') + ' · ' + (smenaLabels[smena] || smena);
+  document.getElementById('pm-forma').value = p.forma || '';
+  document.getElementById('pm-mat').value = p.mat || '';
+  document.getElementById('pm-qty').value = p.qty || '';
+  var barvaEl = document.getElementById('pm-barva');
+  if (barvaEl) barvaEl.value = p.barva || '';
+  var susenEl = document.getElementById('pm-susen');
+  if (susenEl) susenEl.checked = !!p.susen;
+  document.getElementById('pm-note').value = p.note || '';
   document.getElementById('mod-plan').classList.add('on');
 }
 
@@ -1402,17 +1443,54 @@ function savePlan() {
   var forma = document.getElementById('pm-forma').value.trim();
   var mat   = document.getElementById('pm-mat').value.trim();
   var qty   = document.getElementById('pm-qty').value.trim();
+  var barva = document.getElementById('pm-barva').value.trim();
+  var susen = document.getElementById('pm-susen').checked;
   var note  = document.getElementById('pm-note').value.trim();
   if (!forma && !qty) { toast('err','Chyba','Zadejte formu nebo počet kusů.'); return; }
-  fbSet('plan/'+editPlanKey, {forma:forma, mat:mat, qty:qty, note:note});
+  var entry = {forma:forma, mat:mat, qty:qty, barva:barva, susen:susen, note:note, updatedAt:now()};
+  fbSet('plan/'+editPlanKey, entry);
+  // Notifikace o sušení
+  if (susen && mat) {
+    fbPush('notifications', {
+      typ:'susen', mat:mat, forma:forma,
+      planKey:editPlanKey, msg:'Nutno sušit materiál '+mat+(forma?' pro formu '+forma:''),
+      time:now(), read:false
+    });
+  }
   closeModal('mod-plan');
-  toast('ok','Plán uložen', forma || qty+' ks');
+  toast('ok','Plán uložen', (forma||'')+(qty?' · '+qty+' ks':''));
 }
 
 function deletePlanEntry() {
   db.ref('plan/'+editPlanKey).remove();
   closeModal('mod-plan');
   toast('ok','Smazáno','Plán odstraněn');
+}
+
+function renderSusenBanners() {
+  if (role !== 'mistr' && role !== 'serizovac') return;
+  var susenNotifs = D.notifications.filter(function(n){return n.typ==='susen';});
+  var containers = ['unavail-prehled','unavail-ser'];
+  containers.forEach(function(id){
+    var el = document.getElementById(id); if (!el) return;
+    if (!susenNotifs.length) return;
+    var html = susenNotifs.map(function(n){
+      return '<div class="banner ban-o" style="margin-bottom:10px">' +
+        '<div><div style="display:flex;align-items:center;gap:8px">' +
+          '<span style="font-size:17px">🔥</span>' +
+          '<span class="ban-title" style="color:var(--orange)">Nutno sušit materiál</span>' +
+        '</div>' +
+        '<div class="ban-body">'+n.msg+'</div>' +
+        '<div class="ban-meta">Plán výroby · '+n.time+'</div></div>' +
+        '<button class="ban-x" data-k="'+n.fbKey+'" onclick="dismissSusen(this.dataset.k)">✕</button>' +
+      '</div>';
+    }).join('');
+    el.innerHTML = html + el.innerHTML;
+  });
+}
+
+function dismissSusen(key) {
+  db.ref('notifications/'+key+'/read').set(true);
 }
 
 function startFirebase() {
@@ -1439,6 +1517,10 @@ function startFirebase() {
   fbOn('dovolene', function(val){
     D.dovolene = fromFb(val).reverse();
     afterUpdate();
+  });
+  fbOn('notifications', function(val){
+    D.notifications = val ? fromFb(val).filter(function(n){return !n.read;}).reverse() : [];
+    renderSusenBanners();
   });
   fbOn('plan', function(val){
     D.plan = val || {};
