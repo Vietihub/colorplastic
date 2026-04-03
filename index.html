@@ -1426,6 +1426,2172 @@ function renderPlanTodayIn(containerId) {
     smeny.forEach(function(smena, si) {
       var k = mach.replace(/ /g,'_') + '_' + today + '_' + smena;
       var p = D.plan[k];
+      var bgColors = ['rgba(74,158,255,.08)','rgba(255,156,0,.08)','rgba(180,180,255,.05)'];
+      var accentColors = ['#4a9eff','var(--orange)','#a070ff'];
+      if (p && (p.forma || p.qty)) {
+        machHasAny = true; hasAny = true;
+        cells += '<td style="padding:10px 12px;vertical-align:top;background:'+bgColors[si]+'">';
+        cells += '<div style="font-size:16px;font-weight:700;color:var(--text);line-height:1;margin-bottom:4px">'+(p.forma||'')+'</div>';
+        if (p.cas) cells += '<div style="font-size:12px;color:'+accentColors[si]+';font-weight:700;margin-bottom:4px">'+p.cas+'</div>';
+        if (p.mat) cells += '<div style="font-size:11px;color:var(--text2);margin-bottom:2px;line-height:1.3">'+p.mat.split('(')[0].trim()+'</div>';
+        if (p.qty) cells += '<div style="font-size:12px;color:var(--green-text);font-weight:700;margin-top:3px">'+parseInt(p.qty).toLocaleString()+' ks</div>';
+        if (p.susen) cells += '<div style="font-size:10px;color:var(--orange);font-weight:700;margin-top:3px;letter-spacing:.5px">SUŠIT</div>';
+        if (p.note) cells += '<div style="font-size:10px;color:var(--text3);margin-top:3px;font-style:italic">'+p.note+'</div>';
+        cells += '</td>';
+      } else {
+        cells += '<td style="padding:10px 12px;vertical-align:middle;text-align:center;background:'+bgColors[si]+'">';
+        cells += '<span style="font-size:13px;color:var(--text3)">—</span>';
+        cells += '</td>';
+      }
+    });
+    if (machHasAny) {
+      rows += '<tr style="border-bottom:2px solid var(--bg)">';
+      rows += '<td style="padding:12px 14px;vertical-align:middle;background:rgba(255,255,255,.03);border-right:1px solid var(--border)">';
+      rows += '<div style="font-size:12px;font-weight:700;color:var(--text2);white-space:nowrap;line-height:1.3">' + mach.replace('Engel duo ','') + '<br><span style="font-size:10px;font-weight:400;color:var(--text3)">Engel duo</span></div>';
+      rows += '</td>';
+      rows += cells + '</tr>';
+    }
+  });
+
+  if (!hasAny) { el.innerHTML=''; return; }
+
+  el.innerHTML =
+    '<div class="stitle">Dnešní plán výroby</div>' +
+    '<div class="card" style="overflow-x:auto;padding:0;margin-bottom:18px">' +
+      '<table style="width:100%;border-collapse:collapse;table-layout:auto">' +
+        '<thead>' +
+          '<tr style="border-bottom:2px solid var(--bg)">' +
+            '<th style="padding:10px 14px;text-align:left;font-size:10px;font-weight:700;color:var(--text3);background:rgba(255,255,255,.03);white-space:nowrap;width:70px;border-right:1px solid var(--border)">Lis</th>' +
+            '<th style="padding:10px 12px;text-align:left;font-size:11px;font-weight:700;color:#4a9eff;background:rgba(74,158,255,.08)">Ranní<br><span style="font-size:9px;font-weight:400;opacity:.7">06:00 – 14:00</span></th>' +
+            '<th style="padding:10px 12px;text-align:left;font-size:11px;font-weight:700;color:var(--orange);background:rgba(255,156,0,.08)">Odpolední<br><span style="font-size:9px;font-weight:400;opacity:.7">14:00 – 22:00</span></th>' +
+            '<th style="padding:10px 12px;text-align:left;font-size:11px;font-weight:700;color:#a070ff;background:rgba(180,180,255,.05)">Noční<br><span style="font-size:9px;font-weight:400;opacity:.7">22:00 – 06:00</span></th>' +
+          '</tr>' +
+        '</thead>' +
+        '<tbody>' + rows + '</tbody>' +
+      '</table>' +
+    '</div>';
+}
+
+function openPlanModal(planKey, mach, dk, smena) {
+  if (role !== 'vedouci') return;
+  editPlanKey = planKey;
+  var p = D.plan[planKey] || {};
+  var smenaLabels = {'ranní':'Ranní','odpolední':'Odpolední','noční':'Noční'};
+  document.getElementById('pm-title').textContent = mach;
+  document.getElementById('pm-date').textContent = dk.split('-').reverse().join('.') + ' · ' + (smenaLabels[smena] || smena);
+  document.getElementById('pm-forma').value = p.forma || '';
+  document.getElementById('pm-mat').value = p.mat || '';
+  document.getElementById('pm-qty').value = p.qty || '';
+  var casEl = document.getElementById('pm-cas');
+  if (casEl) casEl.value = p.cas || '';
+  var barvaEl = document.getElementById('pm-barva');
+  if (barvaEl) barvaEl.value = p.barva || '';
+  var susenEl = document.getElementById('pm-susen');
+  if (susenEl) susenEl.checked = !!p.susen;
+  document.getElementById('pm-note').value = p.note || '';
+  document.getElementById('mod-plan').classList.add('on');
+}
+
+function savePlan() {
+  var forma = document.getElementById('pm-forma').value.trim();
+  var mat   = document.getElementById('pm-mat').value.trim();
+  var qty   = document.getElementById('pm-qty').value.trim();
+  var cas   = document.getElementById('pm-cas') ? document.getElementById('pm-cas').value : '';
+  var barva = document.getElementById('pm-barva') ? document.getElementById('pm-barva').value.trim() : '';
+  var susen = document.getElementById('pm-susen').checked;
+  var note  = document.getElementById('pm-note').value.trim();
+  if (!forma && !qty) { toast('err','Chyba','Zadejte formu nebo počet kusů.'); return; }
+  var entry = {forma:forma, mat:mat, qty:qty, barva:barva, cas:cas, susen:susen, note:note, updatedAt:now()};
+  fbSet('plan/'+editPlanKey, entry);
+  // Notifikace o sušení
+  if (susen && mat) {
+    fbPush('notifications', {
+      typ:'susen', mat:mat, forma:forma,
+      planKey:editPlanKey, msg:'Nutno sušit materiál '+mat+(forma?' pro formu '+forma:''),
+      time:now(), read:false
+    });
+  }
+  closeModal('mod-plan');
+  toast('ok','Plán uložen', (forma||'')+(qty?' · '+qty+' ks':''));
+}
+
+function deletePlanEntry() {
+  db.ref('plan/'+editPlanKey).remove();
+  closeModal('mod-plan');
+  toast('ok','Smazáno','Plán odstraněn');
+}
+
+function renderSusenBanners() {
+  if (role !== 'mistr' && role !== 'serizovac') return;
+  var susenNotifs = D.notifications.filter(function(n){return n.typ==='susen';});
+  var containers = ['unavail-prehled','unavail-ser'];
+  containers.forEach(function(id){
+    var el = document.getElementById(id); if (!el) return;
+    if (!susenNotifs.length) return;
+    var html = susenNotifs.map(function(n){
+      return '<div class="banner ban-o" style="margin-bottom:10px">' +
+        '<div><div style="display:flex;align-items:center;gap:8px">' +
+          '<span style="font-size:17px">🔥</span>' +
+          '<span class="ban-title" style="color:var(--orange)">Nutno sušit materiál</span>' +
+        '</div>' +
+        '<div class="ban-body">'+n.msg+'</div>' +
+        '<div class="ban-meta">Plán výroby · '+n.time+'</div></div>' +
+        '<button class="ban-x" data-k="'+n.fbKey+'" onclick="dismissSusen(this.dataset.k)">✕</button>' +
+      '</div>';
+    }).join('');
+    el.innerHTML = html + el.innerHTML;
+  });
+}
+
+function dismissSusen(key) {
+  db.ref('notifications/'+key+'/read').set(true);
+}
+
+function initDemoPlan() {
+  var entries = {"Engel_duo_900T_2026-03-23_ranní": {"forma": "č. 128", "mat": "Lukablend 7400 (PC/ABS)", "barva": "", "qty": "6567", "cas": "05:30", "susen": true, "note": "", "updatedAt": "13:00"}, "Engel_duo_550T_2026-03-23_odpolední": {"forma": "č. 150", "mat": "Lukablend 7400 (PC/ABS)", "barva": "RAL 3020 červená", "qty": "2128", "cas": "14:30", "susen": true, "note": "", "updatedAt": "13:00"}, "Engel_duo_2000T_2026-03-23_noční": {"forma": "č. 131", "mat": "Bayblend TX65 (PC/ABS)", "barva": "RAL 9016 bílá", "qty": "2263", "cas": "22:00", "susen": true, "note": "", "updatedAt": "13:00"}, "Engel_duo_900T_2026-03-24_odpolední": {"forma": "č. 141", "mat": "Lukablend 7400 (PC/ABS)", "barva": "RAL 3020 červená", "qty": "2901", "cas": "14:00", "susen": true, "note": "", "updatedAt": "13:00"}, "Engel_duo_900T_2026-03-25_ranní": {"forma": "č. 131", "mat": "Enflex 120 (PP)", "barva": "RAL 7016 antracit", "qty": "3410", "cas": "05:30", "susen": false, "note": "ZAK-2024-005", "updatedAt": "13:00"}, "Engel_duo_700T_2026-03-25_odpolední": {"forma": "č. 175", "mat": "Enflex 120 (PP)", "barva": "", "qty": "3156", "cas": "13:00", "susen": false, "note": "", "updatedAt": "13:00"}, "Engel_duo_1700T_2026-03-25_noční": {"forma": "č. 151", "mat": "Bayblend TX65 (PC/ABS)", "barva": "RAL 9016 bílá", "qty": "5869", "cas": "22:30", "susen": true, "note": "SKODA-Q2", "updatedAt": "13:00"}, "Engel_duo_1700T_2026-03-26_ranní": {"forma": "č. 141", "mat": "Lukablend 8500 (PC/ABS)", "barva": "RAL 7016 antracit", "qty": "2296", "cas": "06:00", "susen": true, "note": "", "updatedAt": "13:00"}, "Engel_duo_550T_2026-03-26_odpolední": {"forma": "č. 128", "mat": "Lukablend 8500 (PC/ABS)", "barva": "RAL 3020 červená", "qty": "1020", "cas": "14:30", "susen": true, "note": "VW-2024-03", "updatedAt": "13:00"}, "Engel_duo_550T_2026-03-26_noční": {"forma": "č. 150", "mat": "Bayblend TX65 (PC/ABS)", "barva": "", "qty": "3286", "cas": "21:30", "susen": true, "note": "OBJ-45124", "updatedAt": "13:00"}, "Engel_duo_550T_2026-03-27_ranní": {"forma": "č. 127", "mat": "Bayblend TX65 (PC/ABS)", "barva": "", "qty": "4658", "cas": "06:00", "susen": true, "note": "", "updatedAt": "13:00"}, "Engel_duo_900T_2026-03-27_odpolední": {"forma": "č. 127", "mat": "Bayblend TX65 (PC/ABS)", "barva": "RAL 7016 antracit", "qty": "2461", "cas": "13:00", "susen": true, "note": "VW-2024-03", "updatedAt": "13:00"}, "Engel_duo_550T_2026-03-27_noční": {"forma": "č. 149", "mat": "Enflex 120 (PP)", "barva": "RAL 7016 antracit", "qty": "4822", "cas": "22:30", "susen": false, "note": "", "updatedAt": "13:00"}, "Engel_duo_300T_2026-03-28_ranní": {"forma": "č. 175", "mat": "Bayblend TX65 (PC/ABS)", "barva": "RAL 5010 modrá", "qty": "7869", "cas": "06:00", "susen": true, "note": "ZAK-2024-002", "updatedAt": "13:00"}, "Engel_duo_2000T_2026-03-28_odpolední": {"forma": "č. 126", "mat": "Lukablend 7400 (PC/ABS)", "barva": "", "qty": "5669", "cas": "13:00", "susen": true, "note": "ZAK-2024-002", "updatedAt": "13:00"}, "Engel_duo_1700T_2026-03-28_noční": {"forma": "č. 128", "mat": "Lukablend 8500 (PC/ABS)", "barva": "RAL 9016 bílá", "qty": "6927", "cas": "21:30", "susen": true, "note": "OBJ-45124", "updatedAt": "13:00"}, "Engel_duo_1700T_2026-03-29_ranní": {"forma": "č. 126", "mat": "Lukablend 7400 (PC/ABS)", "barva": "RAL 9005 černá", "qty": "3798", "cas": "05:30", "susen": true, "note": "", "updatedAt": "13:00"}, "Engel_duo_300T_2026-03-29_odpolední": {"forma": "č. 128", "mat": "Bayblend TX65 (PC/ABS)", "barva": "RAL 5010 modrá", "qty": "2546", "cas": "13:00", "susen": true, "note": "", "updatedAt": "13:00"}, "Engel_duo_300T_2026-03-30_ranní": {"forma": "č. 141", "mat": "Lukablend 7400 (PC/ABS)", "barva": "RAL 9016 bílá", "qty": "3604", "cas": "06:30", "susen": true, "note": "OBJ-45124", "updatedAt": "13:00"}, "Engel_duo_300T_2026-03-30_odpolední": {"forma": "č. 130", "mat": "Enflex 120 (PP)", "barva": "RAL 9005 černá", "qty": "5244", "cas": "13:00", "susen": false, "note": "", "updatedAt": "13:00"}, "Engel_duo_1700T_2026-03-30_noční": {"forma": "č. 150", "mat": "Enflex 120 (PP)", "barva": "RAL 9005 černá", "qty": "4660", "cas": "21:00", "susen": false, "note": "ZAK-2024-003", "updatedAt": "13:00"}, "Engel_duo_2000T_2026-03-31_odpolední": {"forma": "č. 151", "mat": "Bayblend TX65 (PC/ABS)", "barva": "RAL 7016 antracit", "qty": "2173", "cas": "14:00", "susen": true, "note": "", "updatedAt": "13:00"}, "Engel_duo_1700T_2026-03-31_noční": {"forma": "č. 127", "mat": "Lukablend 7400 (PC/ABS)", "barva": "RAL 5010 modrá", "qty": "5588", "cas": "21:00", "susen": true, "note": "", "updatedAt": "13:00"}, "Engel_duo_2000T_2026-04-01_ranní": {"forma": "č. 131", "mat": "Lukablend 7400 (PC/ABS)", "barva": "RAL 9016 bílá", "qty": "3527", "cas": "06:30", "susen": true, "note": "OBJ-45125", "updatedAt": "13:00"}, "Engel_duo_1700T_2026-04-01_noční": {"forma": "č. 128", "mat": "Bayblend TX65 (PC/ABS)", "barva": "RAL 7016 antracit", "qty": "5454", "cas": "21:30", "susen": true, "note": "OBJ-45123", "updatedAt": "13:00"}, "Engel_duo_1700T_2026-04-02_ranní": {"forma": "č. 141", "mat": "Bayblend TX65 (PC/ABS)", "barva": "RAL 9005 černá", "qty": "529", "cas": "06:30", "susen": true, "note": "ZAK-2024-003", "updatedAt": "13:00"}, "Engel_duo_2000T_2026-04-02_odpolední": {"forma": "č. 128", "mat": "Lukablend 7400 (PC/ABS)", "barva": "RAL 7016 antracit", "qty": "5271", "cas": "13:30", "susen": true, "note": "OBJ-45124", "updatedAt": "13:00"}, "Engel_duo_900T_2026-04-02_noční": {"forma": "č. 129", "mat": "Lukablend 7400 (PC/ABS)", "barva": "RAL 7016 antracit", "qty": "6890", "cas": "21:30", "susen": true, "note": "OBJ-45124", "updatedAt": "13:00"}, "Engel_duo_700T_2026-04-03_ranní": {"forma": "č. 131", "mat": "Lukablend 8500 (PC/ABS)", "barva": "", "qty": "7578", "cas": "06:00", "susen": true, "note": "", "updatedAt": "13:00"}, "Engel_duo_1700T_2026-04-04_ranní": {"forma": "č. 130", "mat": "Lukablend 7400 (PC/ABS)", "barva": "RAL 7016 antracit", "qty": "3376", "cas": "07:00", "susen": true, "note": "", "updatedAt": "13:00"}, "Engel_duo_1700T_2026-04-04_noční": {"forma": "č. 131", "mat": "Bayblend TX65 (PC/ABS)", "barva": "RAL 5010 modrá", "qty": "5466", "cas": "21:00", "susen": true, "note": "", "updatedAt": "13:00"}, "Engel_duo_700T_2026-04-05_ranní": {"forma": "č. 126", "mat": "Enflex 120 (PP)", "barva": "RAL 7016 antracit", "qty": "4033", "cas": "06:30", "susen": false, "note": "SKODA-Q2", "updatedAt": "13:00"}, "Engel_duo_900T_2026-04-05_odpolední": {"forma": "č. 175", "mat": "Lukablend 8500 (PC/ABS)", "barva": "RAL 7016 antracit", "qty": "3796", "cas": "13:30", "susen": true, "note": "", "updatedAt": "13:00"}, "Engel_duo_2000T_2026-04-05_noční": {"forma": "č. 130", "mat": "Lukablend 8500 (PC/ABS)", "barva": "RAL 3020 červená", "qty": "7329", "cas": "21:30", "susen": true, "note": "ZAK-2024-005", "updatedAt": "13:00"}, "Engel_duo_300T_2026-04-06_ranní": {"forma": "č. 129", "mat": "Lukablend 8500 (PC/ABS)", "barva": "", "qty": "1890", "cas": "06:30", "susen": true, "note": "", "updatedAt": "13:00"}, "Engel_duo_550T_2026-04-06_odpolední": {"forma": "č. 129", "mat": "Enflex 120 (PP)", "barva": "RAL 9016 bílá", "qty": "700", "cas": "13:00", "susen": false, "note": "OBJ-45125", "updatedAt": "13:00"}, "Engel_duo_300T_2026-04-06_noční": {"forma": "č. 129", "mat": "Enflex 120 (PP)", "barva": "", "qty": "6133", "cas": "22:30", "susen": false, "note": "ZAK-2024-002", "updatedAt": "13:00"}, "Engel_duo_550T_2026-04-08_odpolední": {"forma": "č. 127", "mat": "Bayblend TX65 (PC/ABS)", "barva": "RAL 9016 bílá", "qty": "2725", "cas": "13:00", "susen": true, "note": "BMW-2024-Q1", "updatedAt": "13:00"}, "Engel_duo_700T_2026-04-08_noční": {"forma": "č. 127", "mat": "Lukablend 8500 (PC/ABS)", "barva": "RAL 5010 modrá", "qty": "3210", "cas": "21:00", "susen": true, "note": "OBJ-45124", "updatedAt": "13:00"}, "Engel_duo_700T_2026-04-09_odpolední": {"forma": "č. 141", "mat": "Lukablend 8500 (PC/ABS)", "barva": "RAL 3020 červená", "qty": "6623", "cas": "13:30", "susen": true, "note": "", "updatedAt": "13:00"}, "Engel_duo_300T_2026-04-09_noční": {"forma": "č. 131", "mat": "Lukablend 8500 (PC/ABS)", "barva": "", "qty": "1852", "cas": "21:30", "susen": true, "note": "", "updatedAt": "13:00"}, "Engel_duo_700T_2026-04-10_ranní": {"forma": "č. 141", "mat": "Enflex 120 (PP)", "barva": "RAL 5010 modrá", "qty": "1988", "cas": "06:30", "susen": false, "note": "OBJ-45124", "updatedAt": "13:00"}, "Engel_duo_300T_2026-04-10_odpolední": {"forma": "č. 141", "mat": "Bayblend TX65 (PC/ABS)", "barva": "RAL 9005 černá", "qty": "4352", "cas": "13:00", "susen": true, "note": "BMW-2024-Q1", "updatedAt": "13:00"}, "Engel_duo_1700T_2026-04-11_ranní": {"forma": "č. 149", "mat": "Lukablend 7400 (PC/ABS)", "barva": "RAL 3020 červená", "qty": "2285", "cas": "06:30", "susen": true, "note": "ZAK-2024-005", "updatedAt": "13:00"}, "Engel_duo_700T_2026-04-11_odpolední": {"forma": "č. 126", "mat": "Bayblend TX65 (PC/ABS)", "barva": "RAL 3020 červená", "qty": "6048", "cas": "14:30", "susen": true, "note": "", "updatedAt": "13:00"}, "Engel_duo_1700T_2026-04-11_noční": {"forma": "č. 130", "mat": "Lukablend 7400 (PC/ABS)", "barva": "RAL 3020 červená", "qty": "6911", "cas": "22:30", "susen": true, "note": "BMW-2024-Q1", "updatedAt": "13:00"}, "Engel_duo_900T_2026-04-12_ranní": {"forma": "č. 141", "mat": "Lukablend 8500 (PC/ABS)", "barva": "RAL 9005 černá", "qty": "4051", "cas": "07:00", "susen": true, "note": "", "updatedAt": "13:00"}, "Engel_duo_700T_2026-04-12_odpolední": {"forma": "č. 150", "mat": "Lukablend 8500 (PC/ABS)", "barva": "RAL 5010 modrá", "qty": "4068", "cas": "14:00", "susen": true, "note": "", "updatedAt": "13:00"}, "Engel_duo_900T_2026-04-12_noční": {"forma": "č. 149", "mat": "Lukablend 8500 (PC/ABS)", "barva": "RAL 7016 antracit", "qty": "735", "cas": "21:30", "susen": true, "note": "OBJ-45123", "updatedAt": "13:00"}, "Engel_duo_300T_2026-04-13_ranní": {"forma": "č. 151", "mat": "Bayblend TX65 (PC/ABS)", "barva": "RAL 3020 červená", "qty": "583", "cas": "05:30", "susen": true, "note": "ZAK-2024-004", "updatedAt": "13:00"}, "Engel_duo_2000T_2026-04-13_odpolední": {"forma": "č. 175", "mat": "Lukablend 8500 (PC/ABS)", "barva": "RAL 5010 modrá", "qty": "6995", "cas": "13:30", "susen": true, "note": "ZAK-2024-005", "updatedAt": "13:00"}, "Engel_duo_300T_2026-04-13_noční": {"forma": "č. 150", "mat": "Bayblend TX65 (PC/ABS)", "barva": "RAL 5010 modrá", "qty": "6610", "cas": "22:30", "susen": true, "note": "OBJ-45123", "updatedAt": "13:00"}, "Engel_duo_550T_2026-04-14_ranní": {"forma": "č. 131", "mat": "Lukablend 7400 (PC/ABS)", "barva": "", "qty": "4889", "cas": "06:00", "susen": true, "note": "", "updatedAt": "13:00"}, "Engel_duo_1700T_2026-04-14_noční": {"forma": "č. 150", "mat": "Enflex 120 (PP)", "barva": "RAL 7016 antracit", "qty": "872", "cas": "22:00", "susen": false, "note": "", "updatedAt": "13:00"}, "Engel_duo_1700T_2026-04-15_ranní": {"forma": "č. 149", "mat": "Lukablend 8500 (PC/ABS)", "barva": "RAL 5010 modrá", "qty": "3291", "cas": "06:30", "susen": true, "note": "ZAK-2024-001", "updatedAt": "13:00"}, "Engel_duo_2000T_2026-04-15_odpolední": {"forma": "č. 175", "mat": "Lukablend 7400 (PC/ABS)", "barva": "RAL 9016 bílá", "qty": "1722", "cas": "14:00", "susen": true, "note": "", "updatedAt": "13:00"}, "Engel_duo_900T_2026-04-15_noční": {"forma": "č. 151", "mat": "Enflex 120 (PP)", "barva": "RAL 3020 červená", "qty": "3616", "cas": "22:00", "susen": false, "note": "OBJ-45125", "updatedAt": "13:00"}, "Engel_duo_550T_2026-04-16_ranní": {"forma": "č. 127", "mat": "Enflex 120 (PP)", "barva": "", "qty": "2228", "cas": "06:00", "susen": false, "note": "ZAK-2024-002", "updatedAt": "13:00"}, "Engel_duo_1700T_2026-04-16_odpolední": {"forma": "č. 151", "mat": "Lukablend 8500 (PC/ABS)", "barva": "RAL 7016 antracit", "qty": "767", "cas": "14:30", "susen": true, "note": "ZAK-2024-005", "updatedAt": "13:00"}, "Engel_duo_1700T_2026-04-16_noční": {"forma": "č. 150", "mat": "Enflex 120 (PP)", "barva": "", "qty": "1720", "cas": "21:30", "susen": false, "note": "", "updatedAt": "13:00"}, "Engel_duo_1700T_2026-04-17_ranní": {"forma": "č. 149", "mat": "Bayblend TX65 (PC/ABS)", "barva": "", "qty": "3797", "cas": "07:00", "susen": true, "note": "", "updatedAt": "13:00"}, "Engel_duo_2000T_2026-04-17_odpolední": {"forma": "č. 126", "mat": "Lukablend 7400 (PC/ABS)", "barva": "RAL 9016 bílá", "qty": "6023", "cas": "13:00", "susen": true, "note": "", "updatedAt": "13:00"}, "Engel_duo_1700T_2026-04-17_noční": {"forma": "č. 149", "mat": "Bayblend TX65 (PC/ABS)", "barva": "RAL 9016 bílá", "qty": "5295", "cas": "21:00", "susen": true, "note": "OBJ-45125", "updatedAt": "13:00"}, "Engel_duo_300T_2026-04-18_ranní": {"forma": "č. 128", "mat": "Bayblend TX65 (PC/ABS)", "barva": "RAL 5010 modrá", "qty": "6182", "cas": "07:00", "susen": true, "note": "SKODA-Q2", "updatedAt": "13:00"}, "Engel_duo_700T_2026-04-18_odpolední": {"forma": "č. 127", "mat": "Lukablend 8500 (PC/ABS)", "barva": "RAL 3020 červená", "qty": "7257", "cas": "14:30", "susen": true, "note": "", "updatedAt": "13:00"}, "Engel_duo_1700T_2026-04-18_noční": {"forma": "č. 149", "mat": "Lukablend 8500 (PC/ABS)", "barva": "RAL 9005 černá", "qty": "2167", "cas": "22:00", "susen": true, "note": "ZAK-2024-003", "updatedAt": "13:00"}, "Engel_duo_550T_2026-04-19_ranní": {"forma": "č. 130", "mat": "Lukablend 7400 (PC/ABS)", "barva": "RAL 3020 červená", "qty": "3842", "cas": "07:00", "susen": true, "note": "ZAK-2024-002", "updatedAt": "13:00"}, "Engel_duo_2000T_2026-04-19_odpolední": {"forma": "č. 130", "mat": "Lukablend 8500 (PC/ABS)", "barva": "RAL 5010 modrá", "qty": "4368", "cas": "13:30", "susen": true, "note": "BMW-2024-Q1", "updatedAt": "13:00"}};
+  var keys = Object.keys(entries);
+  var i = 0;
+  function next() {
+    if (i >= keys.length) {
+      toast('ok', 'Hotovo', keys.length + ' zápisů vloženo do plánu');
+      return;
+    }
+    fbSet('plan/' + keys[i], entries[keys[i]]);
+    i++;
+    if (i % 20 === 0) setTimeout(next, 100);
+    else next();
+  }
+  next();
+}
+
+// ── UPOZORNĚNÍ NA SUŠENÍ ──────────────────────────────────────────
+var susenCheckInterval = null;
+
+function startSusenCheck() {
+  if (role !== 'mistr' && role !== 'serizovac') return;
+  checkSusenAlerts();
+  susenCheckInterval = setInterval(checkSusenAlerts, 60000); // každou minutu
+}
+
+function checkSusenAlerts() {
+  if (role !== 'mistr' && role !== 'serizovac') return;
+  var now = new Date();
+  var today = dateKey(now);
+  var nowMins = now.getHours() * 60 + now.getMinutes();
+  var ADVANCE = 120; // 2 hodiny = 120 minut
+
+  // Shift start times in minutes from midnight
+  var smenyStartMins = {'ranní': 6*60, 'odpolední': 14*60, 'noční': 22*60}; // R:06-14, O:14-22, N:22-06
+
+  var alerts = [];
+  MACHINES_LIST.forEach(function(mach) {
+    Object.keys(smenyStartMins).forEach(function(smena) {
+      var k = mach.replace(/ /g,'_') + '_' + today + '_' + smena;
+      var p = D.plan[k];
+      if (!p || !p.susen) return;
+      var shiftStart = smenyStartMins[smena];
+      // Also consider custom cas if set
+      if (p.cas) {
+        var parts = p.cas.split(':');
+        shiftStart = parseInt(parts[0])*60 + parseInt(parts[1]);
+      }
+      var diff = shiftStart - nowMins;
+      if (diff > 0 && diff <= ADVANCE) {
+        alerts.push({mach:mach, smena:smena, forma:p.forma, mat:p.mat, cas:p.cas, diff:diff});
+      }
+    });
+  });
+
+  renderSusenAlerts(alerts);
+}
+
+function renderSusenAlerts(alerts) {
+  var containers = ['susen-alert-prehled', 'susen-alert-ser'];
+  containers.forEach(function(id) {
+    var el = document.getElementById(id); if (!el) return;
+    if (!alerts.length) { el.innerHTML=''; return; }
+    el.innerHTML = alerts.map(function(a) {
+      var hoursLeft = Math.floor(a.diff/60);
+      var minsLeft  = a.diff % 60;
+      var timeStr = hoursLeft > 0 ? hoursLeft+'h '+minsLeft+'min' : minsLeft+' min';
+      return '<div class="banner ban-o" style="margin-bottom:10px">' +
+        '<div style="display:flex;align-items:center;gap:10px;flex:1">' +
+          '<span style="font-size:22px">🔥</span>' +
+          '<div>' +
+            '<div class="ban-title" style="color:var(--orange)">Nutno sušit materiál — výměna zhruba za '+timeStr+'</div>' +
+            '<div class="ban-body"><strong>'+(a.mat||'')+'</strong>'+(a.forma?' · '+a.forma:'')+' · '+a.mach+'</div>' +
+            '<div class="ban-meta">Směna: '+a.smena+(a.cas?' · výměna v '+a.cas:'')+'</div>' +
+          '</div>' +
+        '</div>' +
+      '</div>';
+    }).join('');
+  });
+}
+
+function startFirebase() {
+  fbOn('requests', function(val){
+    D.requests = fromFb(val).reverse();
+    afterUpdate();
+  });
+  fbOn('scrap', function(val){
+    D.scrap = fromFb(val).map(function(s){ s.weight=parseFloat(s.weight)||0; return s; }).reverse();
+    afterUpdate();
+  });
+  fbOn('skladAlerts', function(val){
+    D.skladAlerts = fromFb(val);
+    afterUpdate();
+  });
+  fbOn('formaChanges', function(val){
+    D.formaChanges = fromFb(val).reverse();
+    afterUpdate();
+  });
+  fbOn('objednavky', function(val){
+    D.objednavky = fromFb(val).reverse();
+    afterUpdate();
+  });
+  fbOn('dovolene', function(val){
+    D.dovolene = fromFb(val).reverse();
+    afterUpdate();
+  });
+  fbOn('notifications', function(val){
+    D.notifications = val ? fromFb(val).filter(function(n){return !n.read;}).reverse() : [];
+    renderSusenBanners();
+  });
+  fbOn('plan', function(val){
+    D.plan = val || {};
+    var ab=document.querySelector('.nb.on');
+    if(ab && ab.dataset.page==='plan') renderPlan();
+    renderPlanToday();
+  });
+  fbOn('materialy', function(val){
+    if (val) {
+      D.materialy = fromFb(val);
+    } else {
+      // First run - load defaults into Firebase
+      DEFAULT_MATS.forEach(function(m){ fbPush('materialy', m); });
+    }
+    var ab=document.querySelector('.nb.on');
+    if(ab && ab.dataset.page==='materialy') renderMaterialy();
+  });
+  fbOn('production', function(val){
+    if (val) {
+      D.production = fromFb(val);
+    } else {
+      D.production.forEach(function(p,i){ fbSet('production/'+i, p); });
+    }
+    afterUpdate();
+  });
+}
+
+function afterUpdate() {
+  var ab = document.querySelector('.nb.on');
+  if (ab) render(ab.dataset.page);
+  updateBadges();
+}
+
+function updateBadges() {
+  var pendReq = D.requests.filter(function(r){ return r.status==='pending'; }).length;
+  var pendObj = D.objednavky.filter(function(o){ return o.status==='pending'; }).length;
+  var pendDov = D.dovolene.filter(function(d){ return d.status==='pending'; }).length;
+  document.querySelectorAll('.nb').forEach(function(btn){
+    var p = btn.dataset.page;
+    var badge = btn.querySelector('.bdg');
+    var n = 0;
+    if (p==='sklad') n = pendReq + pendObj;
+    if (p==='dovolene-vedouci') n = pendDov;
+    if (n>0) {
+      if (badge) badge.textContent=n;
+      else btn.innerHTML += '<span class="bdg">'+n+'</span>';
+    } else {
+      if (badge) badge.remove();
+    }
+  });
+}
+
+// ═══════════════════════════════════════════════
+//  BANNERS
+// ═══════════════════════════════════════════════
+function renderBanners() {
+  // Unavailable material banner
+  var unavailHtml = buildUnavailBanner();
+  ['prehled','ser','sklad-p'].forEach(function(id){
+    var el = document.getElementById('unavail-'+id);
+    if (el) el.innerHTML = unavailHtml;
+  });
+  // Forma change banner
+  var formaHtml = buildFormaBanner();
+  ['prehled','ser','sklad-p'].forEach(function(id){
+    var el = document.getElementById('forma-'+id);
+    if (el) el.innerHTML = formaHtml;
+  });
+  // Dovolena banner for vedouci on prehled
+  var el = document.getElementById('dov-banner-top');
+  if (el) el.innerHTML = buildDovBanner();
+}
+
+function buildUnavailBanner() {
+  if (!D.skladAlerts.length || role==='sklad') return '';
+  return D.skladAlerts.map(function(a){
+    var dismissed = a.dismissedBy || [];
+    if (dismissed.indexOf(role)>=0) return '';
+    var k = a.fbKey||'';
+    return '<div class="banner ban-r">' +
+      '<div><div style="display:flex;align-items:center;gap:8px">' +
+        '<span style="font-size:17px">⛔</span>' +
+        '<span class="ban-title" style="color:#ff4545">Materiál nedostupný ve skladu</span>' +
+      '</div>' +
+      '<div class="ban-body"><strong>'+a.material+'</strong> · '+a.qty+' kg · '+a.machine+'</div>' +
+      (a.note?'<div class="ban-meta">'+a.note+'</div>':'')+
+      '<div class="ban-meta">Hlásí sklad · '+a.time+'</div></div>' +
+      '<button class="ban-x" data-key="'+k+'" onclick="dismissUnavail(this.dataset.key)">✕</button>' +
+    '</div>';
+  }).join('');
+}
+
+function buildFormaBanner() {
+  if (!D.formaChanges.length || role==='vedouci') return '';
+  return D.formaChanges.map(function(f){
+    var dismissed = f.dismissedBy||[];
+    if (dismissed.indexOf(role)>=0) return '';
+    var k = f.fbKey||'';
+    return '<div class="banner ban-o">' +
+      '<div><div style="display:flex;align-items:center;gap:8px">' +
+        '<span style="font-size:17px">🔔</span>' +
+        '<span class="ban-title" style="color:var(--orange)">Plánovaná změna formy</span>' +
+      '</div>' +
+      '<div class="ban-body"><strong>'+f.machine+'</strong> · v <strong>'+f.changeTime+'</strong> · '+f.formOff+' → '+f.formOn+'</div>' +
+      (f.dry?'<div style="margin-top:5px;display:inline-flex;align-items:center;gap:4px;background:var(--orange-dim);border:1px solid rgba(255,156,0,.3);border-radius:4px;padding:2px 7px;font-size:11px;font-weight:700;color:var(--orange)">🔥 Nutno nasušit</div>':'')+
+      '<div class="ban-meta">Vydal vedoucí · '+f.issuedAt+'</div></div>' +
+      '<button class="ban-x" data-key="'+k+'" onclick="dismissForma(this.dataset.key)">✕</button>' +
+    '</div>';
+  }).join('');
+}
+
+function buildDovBanner() {
+  if (role!=='vedouci') return '';
+  var pending = D.dovolene.filter(function(d){ return d.status==='pending'; });
+  if (!pending.length) return '';
+  return pending.map(function(d){
+    var k = d.fbKey||'';
+    return '<div class="banner ban-b">' +
+      '<div><div style="display:flex;align-items:center;gap:8px">' +
+        '<span style="font-size:17px">🏖</span>' +
+        '<span class="ban-title" style="color:var(--blue)">'+dovTypLbl(d.typ)+'</span>' +
+      '</div>' +
+      '<div class="ban-body"><strong>'+d.jmeno+'</strong> · '+d.pozice+' · '+fmtD(d.od)+' – '+fmtD(d.doo)+'</div>' +
+      '<div class="ban-meta">Podal '+d.podal+' v '+d.podalAt+'</div></div>' +
+      '<div style="display:flex;gap:7px;flex-shrink:0">' +
+        '<button class="btn bwarn bsm" data-key="'+k+'" data-act="rejected" onclick="respondDov(this.dataset.key,this.dataset.act)">❌ Zamítnout</button>' +
+        '<button class="btn br bsm" data-key="'+k+'" data-act="approved" onclick="respondDov(this.dataset.key,this.dataset.act)">✅ Schválit</button>' +
+      '</div>' +
+    '</div>';
+  }).join('');
+}
+
+function dismissUnavail(key) {
+  var a = D.skladAlerts.find(function(x){ return x.fbKey===key; });
+  if (!a) return;
+  if (!a.dismissedBy) a.dismissedBy=[];
+  if (a.dismissedBy.indexOf(role)<0) a.dismissedBy.push(role);
+  fbSet('skladAlerts/'+key, a);
+}
+function dismissForma(key) {
+  var f = D.formaChanges.find(function(x){ return x.fbKey===key; });
+  if (!f) return;
+  if (!f.dismissedBy) f.dismissedBy=[];
+  if (f.dismissedBy.indexOf(role)<0) f.dismissedBy.push(role);
+  fbSet('formaChanges/'+key, f);
+}
+
+// ═══════════════════════════════════════════════
+//  RENDER FUNCTIONS
+// ═══════════════════════════════════════════════
+function now() { return new Date().toTimeString().slice(0,5); }
+function fmtD(s) {
+  if (!s) return '–';
+  var p=s.split('-'); return p[2]+'.'+p[1]+'.'+p[0];
+}
+function sbadge(s) {
+  var m={pending:'sp Čeká',ready:'sr Připraveno',unavailable:'su2 Nedostupné',done:'sd Hotovo',approved:'sr Schváleno',rejected:'su2 Zamítnuto'};
+  var v=(m[s]||'sd '+s).split(' ');
+  return '<span class="s '+v[0]+'">'+v.slice(1).join(' ')+'</span>';
+}
+function dovTypLbl(t) {
+  return {d:'Dovolená',l:'K lékaři',n:'Nemocenská',v:'Náhradní volno',j:'Jiné'}[t]||t||'Dovolená';
+}
+function dovTypClass(t) {
+  return 'dtbadge dt-'+(t||'j');
+}
+
+function renderPrehled() {
+  var totalScrap = D.scrap.reduce(function(a,s){return a+s.weight;},0);
+  var pendReq = D.requests.filter(function(r){return r.status==='pending';}).length;
+  var running = D.production.filter(function(p){return p.running;}).length;
+  var el = document.getElementById('stats-prehled');
+  if (el) el.innerHTML =
+    '<div class="stat"><div class="sl">Aktivní požadavky</div><div class="sv">'+pendReq+' <span class="su">čeká</span></div></div>'+
+    '<div class="stat"><div class="sl">Dnešní scrap</div><div class="sv">'+totalScrap.toFixed(1)+' <span class="su">kg</span></div><div class="sm">'+D.scrap.length+' zápisů</div></div>'+
+    '<div class="stat"><div class="sl">Aktivní stroje</div><div class="sv">'+running+' <span class="su">/ 6</span></div></div>';
+  renderProd('prod-prehled');
+  renderPlanToday();
+  var tr = document.getElementById('tbl-req-p');
+  if (tr) tr.innerHTML = D.requests.slice(0,10).map(function(r){
+    return '<tr><td class="mono">'+r.time+'</td><td class="bold">'+r.material+'</td><td>'+r.qty+' kg</td><td>'+sbadge(r.status)+'</td></tr>';
+  }).join('') || '<tr><td colspan="4" style="text-align:center;color:var(--text3);padding:18px">Žádné požadavky</td></tr>';
+  var ts = document.getElementById('tbl-scrap-p');
+  if (ts) ts.innerHTML = D.scrap.slice(0,8).map(function(s){
+    return '<tr><td class="mono">'+s.time+'</td><td class="bold">'+s.material+'</td><td style="font-weight:700;color:var(--green-text)">'+s.weight+' kg</td><td><span class="tbadge">'+s.type+'</span></td></tr>';
+  }).join('') || '<tr><td colspan="4" style="text-align:center;color:var(--text3);padding:18px">Žádný scrap</td></tr>';
+}
+
+function renderProd(containerId) {
+  var el = document.getElementById(containerId); if (!el) return;
+  var canEdit = (role==='vedouci'||role==='serizovac'||role==='technolog'||role==='mistr');
+  el.innerHTML = D.production.map(function(p){
+    return '<div class="pc'+(p.running?' run':'')+'">' +
+      '<div class="pc-mach"><span>'+p.machine+'</span><div class="dot'+(p.running?' on':'')+'"></div></div>' +
+      (p.forma ? '<div class="pc-forma">'+p.forma+'</div><div class="pc-flbl">Nasazená forma</div>' : '<div class="pc-idle">Lis stojí</div>') +
+      (p.mat ? '<div class="pc-mat">🎨 '+p.mat+'</div>' : '') +
+      (p.updated ? '<div class="pc-upd">Aktualizováno v '+p.updated+'</div>' : '') +
+      (canEdit ? '<button class="pc-edit" data-m="'+p.machine+'" onclick="openProdModal(this.dataset.m)">✏ Upravit</button>' : '') +
+    '</div>';
+  }).join('');
+}
+
+function renderPozadavky() {
+  var t = document.getElementById('tbl-my-req'); if (!t) return;
+  t.innerHTML = D.requests.map(function(r){
+    return '<tr><td class="mono">'+r.time+'</td><td class="bold">'+r.material+'</td><td>'+r.qty+' kg</td><td>'+sbadge(r.status)+'</td></tr>';
+  }).join('') || '<tr><td colspan="4" style="text-align:center;color:var(--text3);padding:18px">Žádné požadavky</td></tr>';
+}
+
+function renderScrap() {
+  var sf = document.getElementById('scrap-form');
+  if (sf) sf.style.display = (role==='mistr') ? 'none' : 'block';
+  var t = document.getElementById('tbl-scrap'); if (!t) return;
+  t.innerHTML = D.scrap.map(function(s){
+    return '<tr><td class="mono">'+s.time+'</td><td class="bold">'+s.material+'</td><td><span class="tbadge">'+s.type+'</span></td><td style="font-weight:700;color:var(--green-text)">'+s.weight+' kg</td><td class="dim">'+s.machine+'</td></tr>';
+  }).join('') || '<tr><td colspan="5" style="text-align:center;color:var(--text3);padding:18px">Žádné záznamy</td></tr>';
+}
+
+function renderSklad() {
+  // Požadavky
+  var pendReq = D.requests.filter(function(r){return r.status==='pending';});
+  var doneReq = D.requests.filter(function(r){return r.status!=='pending';});
+  var pe = document.getElementById('sklad-prio');
+  if (pe) pe.innerHTML = pendReq.length
+    ? '<div class="prio"><div class="prio-icon">🚨</div><div class="prio-txt"><div class="prio-title">Nové požadavky</div><div class="prio-sub">Výroba čeká na materiál</div></div><div><div class="prio-n">'+pendReq.length+'</div><div class="prio-lbl">čekající</div></div></div>'
+    : '<div style="background:rgba(57,211,83,.07);border:1px solid rgba(57,211,83,.2);border-radius:8px;padding:14px 18px;margin-bottom:14px;display:flex;align-items:center;gap:10px"><span style="font-size:20px">✅</span><span style="font-weight:700;color:var(--green-text)">Vše odbaveno</span></div>';
+  var ce = document.getElementById('sklad-cards');
+  if (ce) ce.innerHTML = pendReq.map(function(r){
+    return '<div class="rc"><div><div class="rc-time">'+r.time+'</div><div class="rc-lbl">čeká</div></div>'+
+      '<div><div class="rc-mat">'+r.material+'</div><div class="rc-meta"><span>⚖️ '+r.qty+' kg</span><span>🏭 '+r.machine+'</span></div></div>'+
+      '<div><button class="btn br bsm" data-k="'+r.fbKey+'" onclick="openSkladModal(this.dataset.k)">Reagovat</button></div></div>';
+  }).join('');
+  var dt = document.getElementById('tbl-sklad-done');
+  if (dt) dt.innerHTML = doneReq.map(function(r){
+    return '<tr><td class="mono">'+r.time+'</td><td class="bold">'+r.material+'</td><td>'+r.qty+' kg</td><td class="dim">'+r.machine+'</td><td class="mono">'+(r.resolvedTime||'–')+'</td><td>'+sbadge(r.status)+'</td></tr>';
+  }).join('') || '<tr><td colspan="6" style="text-align:center;color:var(--text3);padding:18px">Žádné vyřízené</td></tr>';
+
+  // Objednávky
+  var pendObj = D.objednavky.filter(function(o){return o.status==='pending';});
+  var doneObj = D.objednavky.filter(function(o){return o.status!=='pending';});
+  var ope = document.getElementById('obj-prio');
+  if (ope) ope.innerHTML = pendObj.length
+    ? '<div class="prio"><div class="prio-icon">🛒</div><div class="prio-txt"><div class="prio-title">Nové objednávky</div><div class="prio-sub">Požadavky od mistrů</div></div><div><div class="prio-n">'+pendObj.length+'</div><div class="prio-lbl">čekající</div></div></div>'
+    : '<div style="background:rgba(57,211,83,.07);border:1px solid rgba(57,211,83,.2);border-radius:8px;padding:14px 18px;margin-bottom:14px;display:flex;align-items:center;gap:10px"><span style="font-size:20px">✅</span><span style="font-weight:700;color:var(--green-text)">Vše vyřízeno</span></div>';
+  var oce = document.getElementById('obj-cards');
+  if (oce) oce.innerHTML = pendObj.map(function(o){
+    return '<div class="rc" style="border-left-color:var(--blue)"><div><div class="rc-time">'+o.time+'</div><div class="rc-lbl">čeká</div></div>'+
+      '<div><div class="rc-mat">'+o.item+'</div><div class="rc-meta"><span>'+o.qty+' '+o.unit+'</span>'+(o.note?'<span>'+o.note+'</span>':'')+'</div></div>'+
+      '<div style="display:flex;gap:6px">'+
+        '<button class="btn bwarn bsm" data-k="'+o.fbKey+'" data-a="unavailable" onclick="respondObj(this.dataset.k,this.dataset.a)">❌</button>'+
+        '<button class="btn br bsm" data-k="'+o.fbKey+'" data-a="done" onclick="respondObj(this.dataset.k,this.dataset.a)">✅ Vyřízeno</button>'+
+      '</div></div>';
+  }).join('');
+  var odt = document.getElementById('tbl-obj-done');
+  if (odt) odt.innerHTML = doneObj.map(function(o){
+    return '<tr><td class="mono">'+o.time+'</td><td class="bold">'+o.item+'</td><td>'+o.qty+' '+o.unit+'</td><td class="dim">'+(o.note||'–')+'</td><td>'+sbadge(o.status)+'</td></tr>';
+  }).join('') || '<tr><td colspan="5" style="text-align:center;color:var(--text3);padding:18px">Žádné vyřízené</td></tr>';
+}
+
+function renderScrapReport() {
+  var total = D.scrap.reduce(function(a,s){return a+s.weight;},0);
+  var el = document.getElementById('stats-scrap');
+  if (el) el.innerHTML =
+    '<div class="stat"><div class="sl">Dnešní scrap</div><div class="sv">'+total.toFixed(1)+' <span class="su">kg</span></div><div class="sm">'+D.scrap.length+' zápisů</div></div>'+
+    '<div class="stat"><div class="sl">Průměr / zápis</div><div class="sv">'+(D.scrap.length?(total/D.scrap.length).toFixed(1):0)+' <span class="su">kg</span></div></div>'+
+    '<div class="stat"><div class="sl">Typy zmetků</div><div class="sv">'+new Set(D.scrap.map(function(s){return s.type;})).size+' <span class="su">druhy</span></div></div>';
+  var t = document.getElementById('tbl-scrap-r');
+  if (t) t.innerHTML = D.scrap.map(function(s){
+    return '<tr><td class="mono">'+s.time+'</td><td class="bold">'+s.material+'</td><td><span class="tbadge">'+s.type+'</span></td><td style="font-weight:700;color:var(--green-text)">'+s.weight+' kg</td><td class="dim">'+s.machine+'</td><td class="dim">'+s.reason+'</td></tr>';
+  }).join('') || '<tr><td colspan="6" style="text-align:center;color:var(--text3);padding:18px">Žádné záznamy</td></tr>';
+  renderRepTables();
+}
+
+function renderRepTables() {
+  var bM={}, bT={}, tot=0;
+  D.scrap.forEach(function(s){
+    bM[s.material]=(bM[s.material]||0)+s.weight; tot+=s.weight;
+    if(!bT[s.type]) bT[s.type]={n:0,w:0};
+    bT[s.type].n++; bT[s.type].w+=s.weight;
+  });
+  var mt=document.getElementById('tbl-rep-mat');
+  if(mt) mt.innerHTML=Object.entries(bM).sort(function(a,b){return b[1]-a[1];}).map(function(e){
+    return '<tr><td class="bold">'+e[0]+'</td><td>'+D.scrap.filter(function(s){return s.material===e[0];}).length+'</td><td style="font-weight:700">'+e[1].toFixed(1)+' kg</td><td class="dim">'+(tot>0?(e[1]/tot*100).toFixed(0):0)+'%</td></tr>';
+  }).join('') || '<tr><td colspan="4" style="text-align:center;color:var(--text3);padding:14px">Žádné záznamy</td></tr>';
+  var rt=document.getElementById('tbl-rep-type');
+  if(rt) rt.innerHTML=Object.entries(bT).sort(function(a,b){return b[1].w-a[1].w;}).map(function(e){
+    return '<tr><td><span class="tbadge">'+e[0]+'</span></td><td>'+e[1].n+'×</td><td style="font-weight:700">'+e[1].w.toFixed(1)+' kg</td></tr>';
+  }).join('') || '<tr><td colspan="3" style="text-align:center;color:var(--text3);padding:14px">Žádné záznamy</td></tr>';
+}
+
+function renderFormy() {
+  var el = document.getElementById('formy-list'); if (!el) return;
+  if (!D.formaChanges.length) {
+    el.innerHTML='<div style="text-align:center;padding:40px;color:var(--text3)">Zadna aktivni oznameni</div>'; return;
+  }
+  var html = '';
+  D.formaChanges.forEach(function(f) {
+    var k = f.fbKey || '';
+    html += '<div class="card cpad" style="margin-bottom:12px">';
+    html += '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">';
+    html += '<span style="font-family:\'Barlow Condensed\',sans-serif;font-size:18px;font-weight:700">🏭 ' + f.machine + '</span>';
+    html += '<div style="display:flex;align-items:center;gap:10px">';
+    html += '<span style="font-family:\'JetBrains Mono\',monospace;font-size:17px;color:#ff6b6b">⏰ ' + f.changeTime + '</span>';
+    if (role === 'vedouci') {
+      html += '<button class="btn bg bsm" style="color:#ff4545;border-color:rgba(255,69,69,.3)" data-k="' + k + '" onclick="deleteForma(this.dataset.k)">✕ Zrušit</button>';
+    }
+    html += '</div></div>';
+    html += '<div style="font-size:13px;color:var(--text2)">Sundat <strong style="color:#ff4545">c. ' + f.formOff + '</strong> &rarr; Nasadit <strong style="color:var(--green-text)">c. ' + f.formOn + '</strong>' + (f.mat ? ' &middot; ' + f.mat : '') + '</div>';
+    if (f.dry) html += '<div style="margin-top:7px;display:inline-flex;align-items:center;gap:4px;background:var(--orange-dim);border:1px solid rgba(255,156,0,.3);border-radius:4px;padding:2px 8px;font-size:11px;font-weight:700;color:var(--orange)">Nutno nasu&#353;it</div>';
+    if (f.note) html += '<div style="font-size:12px;color:var(--text3);margin-top:7px;padding-top:7px;border-top:1px solid var(--border)">' + f.note + '</div>';
+    html += '</div>';
+  });
+  el.innerHTML = html;
+}
+
+function renderObjednavky() {
+  var t=document.getElementById('tbl-obj-mistr'); if(!t) return;
+  t.innerHTML=D.objednavky.map(function(o){
+    return '<tr><td class="mono">'+o.time+'</td><td class="bold">'+o.item+'</td><td>'+o.qty+' '+o.unit+'</td><td>'+sbadge(o.status)+'</td></tr>';
+  }).join('') || '<tr><td colspan="4" style="text-align:center;color:var(--text3);padding:18px">Žádné objednávky</td></tr>';
+}
+
+function renderDovMistr() {
+  var t=document.getElementById('tbl-dov-mistr'); if(!t) return;
+  t.innerHTML=D.dovolene.map(function(d){
+    return '<tr><td class="bold">'+d.jmeno+'</td><td><span class="'+dovTypClass(d.typ)+'">'+dovTypLbl(d.typ)+'</span></td><td class="mono">'+fmtD(d.od)+'</td><td class="mono">'+fmtD(d.doo)+'</td><td>'+sbadge(d.status)+'</td></tr>';
+  }).join('') || '<tr><td colspan="5" style="text-align:center;color:var(--text3);padding:18px">Žádné žádosti</td></tr>';
+}
+
+function renderDovVedouci() {
+  var pending=D.dovolene.filter(function(d){return d.status==='pending';});
+  var rest=D.dovolene.filter(function(d){return d.status!=='pending';});
+  var pl=document.getElementById('dov-pending'); if(!pl) return;
+  if(!pending.length) {
+    pl.innerHTML='<div style="background:rgba(57,211,83,.07);border:1px solid rgba(57,211,83,.2);border-radius:8px;padding:14px 18px;margin-bottom:14px;display:flex;align-items:center;gap:10px"><span style="font-size:20px">✅</span><span style="font-weight:700;color:var(--green-text)">Žádné čekající žádosti</span></div>';
+  } else {
+    pl.innerHTML=pending.map(function(d){
+      return '<div class="dov-card">' +
+        '<div class="dov-info">' +
+          '<div class="dov-name">'+d.jmeno+' <span style="font-size:13px;font-weight:400;color:var(--text2)">· '+d.pozice+'</span> <span class="'+dovTypClass(d.typ)+'">'+dovTypLbl(d.typ)+'</span></div>' +
+          '<div class="dov-meta">📅 '+fmtD(d.od)+' – '+fmtD(d.doo)+(d.note?' · '+d.note:'')+'</div>' +
+          '<div class="dov-sub">Podal '+d.podal+' v '+d.podalAt+'</div>' +
+        '</div>' +
+        '<div style="display:flex;gap:7px;flex-shrink:0">' +
+          '<button class="btn bwarn bsm" data-k="'+d.fbKey+'" data-a="rejected" onclick="respondDov(this.dataset.k,this.dataset.a)">❌ Zamítnout</button>' +
+          '<button class="btn br bsm" data-k="'+d.fbKey+'" data-a="approved" onclick="respondDov(this.dataset.k,this.dataset.a)">✅ Schválit</button>' +
+        '</div>' +
+      '</div>';
+    }).join('');
+  }
+  var t=document.getElementById('tbl-dov-hist'); if(!t) return;
+  t.innerHTML=rest.map(function(d){
+    var cb = d.status==='rejected'
+      ? '<button class="btn bg bsm" data-k="'+d.fbKey+'" data-a="approved" onclick="respondDov(this.dataset.k,this.dataset.a)">✅ Schválit</button>'
+      : '<button class="btn bg bsm" data-k="'+d.fbKey+'" data-a="rejected" onclick="respondDov(this.dataset.k,this.dataset.a)">❌ Zamítnout</button>';
+    return '<tr><td class="bold">'+d.jmeno+'</td><td><span class="'+dovTypClass(d.typ)+'">'+dovTypLbl(d.typ)+'</span></td><td class="dim">'+d.pozice+'</td><td class="mono">'+fmtD(d.od)+'</td><td class="mono">'+fmtD(d.doo)+'</td><td>'+sbadge(d.status)+'</td><td>'+cb+'</td></tr>';
+  }).join('') || '<tr><td colspan="7" style="text-align:center;color:var(--text3);padding:18px">Žádná historie</td></tr>';
+}
+
+// ═══════════════════════════════════════════════
+//  ACTIONS
+// ═══════════════════════════════════════════════
+function submitReq() {
+  var mat=document.getElementById('req-mat').value;
+  var qty=document.getElementById('req-qty').value;
+  var stroj=document.getElementById('req-stroj').value;
+  var prior=document.getElementById('req-prior').value;
+  var note=document.getElementById('req-note').value;
+  if(!mat||!qty||!stroj){toast('err','Chyba','Vyplňte materiál, množství a stroj.');return;}
+  fbPush('requests',{time:now(),material:mat,qty:parseInt(qty),machine:stroj,priority:prior,note:note,status:'pending',worker:'Seřizovač',resolvedTime:null});
+  document.getElementById('req-mat').value='';
+  document.getElementById('req-qty').value='';
+  document.getElementById('req-stroj').value='';
+  document.getElementById('req-note').value='';
+  toast('ok','Požadavek odeslán',mat+' ('+qty+' kg)');
+}
+
+function submitScrap() {
+  var mat=document.getElementById('sc-mat').value;
+  var wt=document.getElementById('sc-wt').value;
+  var stroj=document.getElementById('sc-stroj').value;
+  var typ=document.getElementById('sc-typ').value;
+  var reason=document.getElementById('sc-reason').value;
+  if(!mat||!wt||!stroj||!typ){toast('err','Chyba','Vyplňte všechna povinná pole.');return;}
+  fbPush('scrap',{time:now(),material:mat,weight:parseFloat(wt),machine:stroj,type:typ,reason:reason||'–',worker:LABELS[role]});
+  document.getElementById('sc-mat').value='';
+  document.getElementById('sc-wt').value='';
+  document.getElementById('sc-stroj').value='';
+  document.getElementById('sc-typ').value='';
+  document.getElementById('sc-reason').value='';
+  toast('ok','Scrap zapsán',mat+' – '+wt+' kg');
+}
+
+function openSkladModal(reqKey) {
+  curReqKey=reqKey;
+  var r=D.requests.find(function(x){return x.fbKey===reqKey;});
+  if(!r) return;
+  document.getElementById('ms-title').textContent=r.material;
+  document.getElementById('ms-sub').textContent=r.qty+' kg · '+r.machine;
+  document.getElementById('ms-note').value='';
+  document.getElementById('mod-sklad').classList.add('on');
+}
+function respondReq(action) {
+  var r=D.requests.find(function(x){return x.fbKey===curReqKey;});
+  if(!r||!r.fbKey){closeModal('mod-sklad');return;}
+  var note=document.getElementById('ms-note').value;
+  r.status=action; r.resolvedTime=now(); r.note=note;
+  fbSet('requests/'+r.fbKey,r);
+  if(action==='unavailable') {
+    fbPush('skladAlerts',{material:r.material,qty:r.qty,machine:r.machine,time:now(),note:note,dismissedBy:[]});
+  }
+  closeModal('mod-sklad');
+  toast(action==='ready'?'ok':'err',action==='ready'?'Připraveno':'Nedostupné',r.material);
+}
+
+function submitObj() {
+  var item=document.getElementById('obj-item').value;
+  var qty=document.getElementById('obj-qty').value;
+  var unit=document.getElementById('obj-unit').value;
+  var note=document.getElementById('obj-note').value.trim();
+  if(!item||!qty){toast('err','Chyba','Vyberte položku a množství.');return;}
+  fbPush('objednavky',{time:now(),item:item,qty:parseInt(qty),unit:unit,note:note,status:'pending',podal:LABELS[role]});
+  document.getElementById('obj-item').value='';
+  document.getElementById('obj-qty').value='';
+  document.getElementById('obj-note').value='';
+  toast('ok','Objednávka odeslána',item+' – '+qty+' '+unit);
+}
+function respondObj(key,action) {
+  var o=D.objednavky.find(function(x){return x.fbKey===key;});
+  if(!o) return;
+  o.status=action; o.resolvedAt=now();
+  fbSet('objednavky/'+key,o);
+  toast(action==='done'?'ok':'err',action==='done'?'Vyřízeno':'Nedostupné',o.item);
+}
+
+function submitDov() {
+  var jmeno=document.getElementById('dov-jmeno').value.trim();
+  var pozice=document.getElementById('dov-pozice').value;
+  var typ=document.getElementById('dov-typ').value;
+  var od=document.getElementById('dov-od').value;
+  var doo=document.getElementById('dov-do').value;
+  var note=document.getElementById('dov-note').value.trim();
+  if(!jmeno||!od||!doo){toast('err','Chyba','Vyplňte jméno a datum.');return;}
+  if(od>doo){toast('err','Chyba','Datum "Do" musí být po "Od".');return;}
+  fbPush('dovolene',{jmeno:jmeno,pozice:pozice,typ:typ,od:od,doo:doo,note:note,status:'pending',podal:LABELS[role],podalAt:now()});
+  document.getElementById('dov-jmeno').value='';
+  document.getElementById('dov-od').value='';
+  document.getElementById('dov-do').value='';
+  document.getElementById('dov-note').value='';
+  toast('ok','Žádost odeslána',jmeno);
+}
+function respondDov(key,action) {
+  var d=D.dovolene.find(function(x){return x.fbKey===key;});
+  if(!d) return;
+  d.status=action; d.resolvedAt=now(); d.resolvedBy=LABELS[role];
+  fbSet('dovolene/'+key,d);
+  toast(action==='approved'?'ok':'err',action==='approved'?'Schváleno':'Zamítnuto',d.jmeno);
+}
+
+function submitForma() {
+  var stroj=document.getElementById('f-stroj').value;
+  var cas=document.getElementById('f-cas').value;
+  var off=document.getElementById('f-off').value.trim();
+  var on=document.getElementById('f-on').value.trim();
+  if(!stroj||!cas||!off||!on){toast('err','Chyba','Vyplňte stroj, čas a formy.');return;}
+  fbPush('formaChanges',{machine:stroj,changeTime:cas,formOff:off,formOn:on,mat:document.getElementById('f-mat').value,dry:document.getElementById('f-dry').checked,note:document.getElementById('f-note').value,issuedAt:now(),dismissedBy:[]});
+  document.getElementById('f-stroj').value='';
+  document.getElementById('f-off').value='';
+  document.getElementById('f-on').value='';
+  document.getElementById('f-mat').value='';
+  document.getElementById('f-dry').checked=false;
+  document.getElementById('f-note').value='';
+  toast('ok','Oznámení vydáno',stroj+' · '+cas);
+}
+
+function openProdModal(machine) {
+  curProdMachine=machine;
+  var p=D.production.find(function(x){return x.machine===machine;});
+  document.getElementById('mp-title').textContent=machine;
+  document.getElementById('mp-forma').value=p&&p.forma?p.forma:'';
+  document.getElementById('mp-mat').value=p&&p.mat?p.mat:'';
+  document.getElementById('mod-prod').classList.add('on');
+}
+function saveProd() {
+  var p=D.production.find(function(x){return x.machine===curProdMachine;});
+  if(!p) return;
+  var forma=document.getElementById('mp-forma').value.trim();
+  var mat=document.getElementById('mp-mat').value;
+  p.forma=forma||null; p.mat=mat||null; p.running=!!forma; p.updated=now();
+  var idx=D.production.indexOf(p);
+  fbSet(p.fbKey?'production/'+p.fbKey:'production/'+idx, p);
+  closeModal('mod-prod');
+  toast('ok','Uloženo',curProdMachine);
+}
+
+function deleteForma(key) {
+  if (!key) return;
+  db.ref('formaChanges/' + key).remove();
+  toast('ok', 'Výměna zrušena', 'Oznámení bylo odstraněno');
+}
+
+function closeModal(id) { document.getElementById(id).classList.remove('on'); }
+
+// ═══════════════════════════════════════════════
+//  REPORT
+// ═══════════════════════════════════════════════
+function buildRepText() {
+  var month=(document.getElementById('rep-month')||{value:'?'}).value;
+  var dept=(document.getElementById('rep-dept')||{value:'?'}).value;
+  var total=D.scrap.reduce(function(a,s){return a+s.weight;},0);
+  var bM={},bT={};
+  D.scrap.forEach(function(s){
+    bM[s.material]=(bM[s.material]||0)+s.weight;
+    if(!bT[s.type]) bT[s.type]={n:0,w:0};
+    bT[s.type].n++; bT[s.type].w+=s.weight;
+  });
+  var lines=[
+    'SUMARIZACE SCRAPU – '+month.toUpperCase(),
+    'Středisko: '+dept,
+    'Generováno: '+new Date().toLocaleString('cs-CZ'),
+    '─'.repeat(46),
+    'CELKOVÝ SCRAP:   '+total.toFixed(1)+' kg',
+    'POČET ZÁPISŮ:    '+D.scrap.length+' ks',
+    '─'.repeat(46),
+    'DLE MATERIÁLU:'
+  ];
+  Object.entries(bM).sort(function(a,b){return b[1]-a[1];}).forEach(function(e){
+    lines.push('  '+e[0].padEnd(26)+e[1].toFixed(1).padStart(8)+' kg');
+  });
+  lines.push('─'.repeat(46),'DLE DŮVODU:');
+  Object.entries(bT).sort(function(a,b){return b[1].w-a[1].w;}).forEach(function(e){
+    lines.push('  '+e[0].padEnd(26)+e[1].n+'x '+e[1].w.toFixed(1)+' kg');
+  });
+  lines.push('─'.repeat(46),'ColorPlastic Automotive');
+  return lines.join('\n');
+}
+function showRep() {
+  var el=document.getElementById('rep-preview'); if(!el) return;
+  el.style.display='block';
+  el.textContent=buildRepText();
+}
+function dlRep() {
+  var text=buildRepText();
+  var month=(document.getElementById('rep-month')||{value:'report'}).value;
+  var fname='scrap-'+month.replace(/ /g,'-').toLowerCase()+'.txt';
+  var blob=new Blob([text],{type:'text/plain;charset=utf-8'});
+  var url=URL.createObjectURL(blob);
+  var a=document.createElement('a');
+  a.href=url; a.download=fname;
+  document.body.appendChild(a); a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+  toast('ok','Staženo',fname);
+}
+
+// ═══════════════════════════════════════════════
+//  TOAST
+// ═══════════════════════════════════════════════
+function toast(type, title, msg) {
+  var c=document.getElementById('toasts');
+  var t=document.createElement('div');
+  t.className='toast '+(type==='ok'?'tok':'terr');
+  t.innerHTML='<div class="ticon">'+(type==='ok'?'✅':'❌')+'</div><div class="ttxt"><strong>'+title+'</strong>'+(msg||'')+'</div>';
+  c.appendChild(t);
+  setTimeout(function(){ t.style.opacity='0'; t.style.transform='translateX(14px)'; t.style.transition='all .3s'; setTimeout(function(){ t.remove(); },300); },3500);
+}
+
+// Clear PIN on load
+document.getElementById('pin').value='';
+
+// Auto-restore session
+(function() {
+  var saved = sessionStorage.getItem('cp_role');
+  if (saved && PINS[saved]) {
+    role = saved;
+    selR = saved;
+    document.getElementById('login').style.display='none';
+    document.getElementById('app').style.display='flex';
+    startApp();
+  }
+})();
+
+// Clock
+setInterval(function(){
+  var e=document.getElementById('clk');
+  if(e) e.textContent=new Date().toTimeString().slice(0,8);
+},1000);
+</script>
+</body>
+</html>
+/* STATS */
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:18px;}
+.stat{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:16px 18px;position:relative;overflow:hidden;}
+.stat::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:var(--red);}
+.sl{font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--text2);margin-bottom:7px;}
+.sv{font-family:'Barlow Condensed',sans-serif;font-size:32px;font-weight:700;line-height:1;}
+.su{font-size:12px;color:var(--text2);font-weight:400;}
+.sm{font-size:11px;color:var(--text2);margin-top:5px;}
+
+/* CARD */
+.card{background:var(--card);border:1px solid var(--border);border-radius:8px;overflow:hidden;margin-bottom:16px;}
+.chdr{padding:12px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;}
+.ct{font-size:12px;font-weight:700;letter-spacing:1px;text-transform:uppercase;}
+.cpad{padding:20px;}
+.ctitle2{font-family:'Barlow Condensed',sans-serif;font-size:16px;font-weight:700;letter-spacing:1px;text-transform:uppercase;margin-bottom:16px;padding-bottom:12px;border-bottom:1px solid var(--border);}
+
+/* TABLE */
+.tw{overflow-x:auto;}
+table{width:100%;border-collapse:collapse;}
+thead th{padding:9px 14px;text-align:left;font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--text3);background:rgba(255,255,255,.02);border-bottom:1px solid var(--border);white-space:nowrap;}
+tbody tr{border-bottom:1px solid var(--border);}
+tbody tr:last-child{border-bottom:none;}
+tbody tr:hover{background:rgba(255,255,255,.02);}
+tbody td{padding:11px 14px;font-size:13px;}
+.mono{font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--text2);}
+.bold{font-weight:700;}
+.dim{color:var(--text2);font-size:12px;}
+
+/* STATUS */
+.s{display:inline-flex;align-items:center;gap:4px;font-size:11px;font-weight:700;padding:3px 8px;border-radius:4px;text-transform:uppercase;letter-spacing:.5px;}
+.s::before{content:'';width:5px;height:5px;border-radius:50%;background:currentColor;}
+.sp{background:var(--orange-dim);color:var(--orange);}
+.sr{background:var(--green-dim);color:var(--green-text);}
+.su2{background:rgba(255,69,69,.15);color:#ff4545;}
+.sd{background:rgba(255,255,255,.05);color:var(--text2);}
+
+/* BADGE */
+.tbadge{font-size:11px;font-weight:700;padding:2px 7px;border-radius:3px;background:rgba(255,255,255,.06);color:var(--text2);font-family:'JetBrains Mono',monospace;}
+
+/* FORMS */
+.fgrid{display:grid;gap:13px;}
+.frow{display:grid;grid-template-columns:1fr 1fr;gap:13px;}
+.fg{display:flex;flex-direction:column;gap:5px;}
+.fl{font-size:11px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--text2);}
+.fi,.fs,.fta{background:var(--bg4);border:1px solid var(--border2);border-radius:6px;padding:9px 12px;font-family:'Barlow',sans-serif;font-size:14px;color:var(--text);outline:none;width:100%;transition:border-color .15s;}
+.fi:focus,.fs:focus,.fta:focus{border-color:var(--red);}
+.fs option{background:var(--bg4);}
+.fta{resize:vertical;min-height:75px;}
+.ww{position:relative;}
+.ww .fi{padding-right:42px;}
+.ws{position:absolute;right:11px;top:50%;transform:translateY(-50%);font-size:12px;font-weight:600;color:var(--text2);pointer-events:none;}
+
+/* BUTTONS */
+.btn{border:none;border-radius:6px;padding:8px 15px;font-family:'Barlow',sans-serif;font-size:12px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;cursor:pointer;transition:all .15s;display:inline-flex;align-items:center;gap:5px;}
+.br{background:var(--red);color:#fff;}
+.br:hover{background:var(--red2);}
+.bg{background:var(--bg4);border:1px solid var(--border);color:var(--text2);}
+.bg:hover{color:var(--text);}
+.bsm{padding:5px 10px;font-size:11px;}
+.bful{width:100%;justify-content:center;}
+.bwarn{background:rgba(255,69,69,.15);border:1px solid rgba(255,69,69,.3);color:#ff4545;}
+
+/* BANNERS */
+.banner{border-radius:8px;padding:14px 18px;margin-bottom:12px;position:relative;overflow:hidden;display:flex;align-items:flex-start;justify-content:space-between;gap:12px;}
+.ban-r{background:linear-gradient(135deg,#1a0a0a,#22100f);border:1px solid rgba(255,69,69,.4);}
+.ban-r::before{content:'';position:absolute;left:0;top:0;bottom:0;width:4px;background:#ff4545;}
+.ban-o{background:linear-gradient(135deg,#1a1400,#221e00);border:1px solid rgba(255,156,0,.35);}
+.ban-o::before{content:'';position:absolute;left:0;top:0;bottom:0;width:4px;background:var(--orange);}
+.ban-b{background:linear-gradient(135deg,#0a1020,#101828);border:1px solid rgba(74,158,255,.3);}
+.ban-b::before{content:'';position:absolute;left:0;top:0;bottom:0;width:4px;background:var(--blue);}
+.ban-title{font-size:13px;font-weight:700;letter-spacing:1px;text-transform:uppercase;}
+.ban-body{font-size:13px;color:var(--text);margin-top:3px;}
+.ban-meta{font-size:11px;color:var(--text3);margin-top:5px;font-family:'JetBrains Mono',monospace;}
+.ban-x{background:none;border:none;color:var(--text3);cursor:pointer;font-size:17px;line-height:1;padding:0 2px;flex-shrink:0;}
+.ban-x:hover{color:var(--text2);}
+
+/* PRIORITY */
+.prio{background:linear-gradient(135deg,#ff4545,#cc0000);border-radius:8px;padding:16px 20px;margin-bottom:16px;display:flex;align-items:center;gap:14px;}
+.prio-icon{font-size:28px;}
+.prio-txt{flex:1;}
+.prio-title{font-family:'Barlow Condensed',sans-serif;font-size:17px;font-weight:900;letter-spacing:2px;text-transform:uppercase;color:#fff;}
+.prio-sub{font-size:13px;color:rgba(255,255,255,.8);margin-top:2px;}
+.prio-n{font-family:'Barlow Condensed',sans-serif;font-size:42px;font-weight:900;color:#fff;line-height:1;text-align:center;}
+.prio-lbl{font-size:11px;color:rgba(255,255,255,.7);letter-spacing:1px;text-transform:uppercase;text-align:center;}
+
+/* REQ CARD */
+.rc{background:var(--card);border:1px solid var(--border);border-left:4px solid var(--orange);border-radius:8px;padding:16px 18px;margin-bottom:10px;display:grid;grid-template-columns:72px 1fr auto;gap:14px;align-items:center;}
+.rc-time{font-family:'JetBrains Mono',monospace;font-size:16px;font-weight:500;text-align:center;}
+.rc-lbl{font-size:11px;color:var(--red);font-weight:700;text-align:center;}
+.rc-mat{font-family:'Barlow Condensed',sans-serif;font-size:19px;font-weight:700;}
+.rc-meta{display:flex;flex-wrap:wrap;gap:10px;margin-top:4px;font-size:12px;color:var(--text2);}
+
+/* PROD GRID */
+.pgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:11px;margin-bottom:16px;}
+@media(max-width:900px){.pgrid{grid-template-columns:1fr 1fr;}}
+.pc{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:13px 15px;position:relative;overflow:hidden;}
+.pc.run{border-color:rgba(57,211,83,.3);}
+.pc::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--text3);}
+.pc.run::before{background:var(--green);}
+.pc-mach{font-family:'Barlow Condensed',sans-serif;font-size:13px;font-weight:700;color:var(--text2);display:flex;align-items:center;justify-content:space-between;margin-bottom:5px;}
+.dot{width:7px;height:7px;border-radius:50%;background:var(--text3);}
+.dot.on{background:var(--green);animation:p 1.5s infinite;}
+.pc-forma{font-family:'Barlow Condensed',sans-serif;font-size:26px;font-weight:900;line-height:1;}
+.pc-flbl{font-size:10px;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;color:var(--text3);margin-top:1px;}
+.pc-mat{font-size:12px;color:var(--text2);margin-top:6px;padding-top:6px;border-top:1px solid var(--border);}
+.pc-upd{font-size:10px;color:var(--text3);margin-top:4px;}
+.pc-edit{background:none;border:1px solid var(--border);border-radius:4px;color:var(--text3);font-size:11px;padding:3px 7px;cursor:pointer;margin-top:7px;}
+.pc-edit:hover{color:var(--text);border-color:var(--border2);}
+.pc-idle{font-size:13px;color:var(--text3);font-style:italic;}
+
+/* MODAL */
+.moverlay{position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:500;display:none;align-items:center;justify-content:center;backdrop-filter:blur(3px);}
+.moverlay.on{display:flex;}
+.modal{background:var(--bg3);border:1px solid var(--border2);border-radius:10px;padding:26px;width:430px;max-width:95vw;}
+.mtitle{font-family:'Barlow Condensed',sans-serif;font-size:18px;font-weight:700;letter-spacing:1px;text-transform:uppercase;margin-bottom:3px;}
+.msub{font-size:13px;color:var(--text2);margin-bottom:16px;}
+.mact{display:flex;gap:8px;justify-content:flex-end;margin-top:16px;}
+
+/* TOAST */
+.toasts{position:fixed;bottom:18px;right:18px;z-index:1000;display:flex;flex-direction:column;gap:7px;}
+.toast{background:var(--bg3);border:1px solid var(--border2);border-radius:8px;padding:11px 15px;min-width:270px;display:flex;align-items:center;gap:9px;box-shadow:0 6px 24px rgba(0,0,0,.4);animation:tin .25s ease;}
+.tok{border-color:rgba(57,211,83,.3);}
+.terr{border-color:rgba(255,69,69,.3);}
+@keyframes tin{from{opacity:0;transform:translateX(14px);}to{opacity:1;transform:none;}}
+.ticon{font-size:17px;}
+.ttxt{font-size:13px;line-height:1.4;}
+.ttxt strong{display:block;font-weight:700;}
+
+/* DOV */
+.dov-card{background:var(--card);border:1px solid var(--blue-dim);border-radius:8px;padding:16px 18px;margin-bottom:10px;display:flex;align-items:center;gap:16px;}
+.dov-info{flex:1;}
+.dov-name{font-family:'Barlow Condensed',sans-serif;font-size:18px;font-weight:700;}
+.dov-meta{font-size:13px;color:var(--text2);margin-top:3px;}
+.dov-sub{font-size:11px;color:var(--text3);margin-top:2px;font-family:'JetBrains Mono',monospace;}
+.dtbadge{font-size:11px;font-weight:700;padding:2px 7px;border-radius:3px;font-family:'JetBrains Mono',monospace;}
+.dt-d{background:rgba(74,158,255,.12);color:#6ab0ff;}
+.dt-l{background:rgba(255,200,50,.12);color:#ffc832;}
+.dt-n{background:rgba(255,100,100,.12);color:#ff7070;}
+.dt-v{background:rgba(150,100,255,.12);color:#a070ff;}
+.dt-j{background:rgba(255,255,255,.06);color:var(--text2);}
+
+/* SECTION DIVIDER */
+.sdiv{border-top:1px solid var(--border);margin:22px 0;}
+.stitle{font-family:'Barlow Condensed',sans-serif;font-size:17px;font-weight:700;letter-spacing:1px;text-transform:uppercase;margin-bottom:14px;display:flex;align-items:center;gap:10px;}
+
+
+
+/* SCROLLBAR */
+::-webkit-scrollbar{width:5px;height:5px;}
+::-webkit-scrollbar-track{background:transparent;}
+::-webkit-scrollbar-thumb{background:var(--bg4);border-radius:3px;}
+
+/* TABLET 768px */
+@media(max-width:768px){
+  .lw{width:100%;padding:0 16px;}
+  .logo-big{font-size:54px;}
+  .lcard{padding:22px 18px;}
+  .topbar{padding:0 10px;gap:8px;height:50px;}
+  .tl-p{display:none;}
+  .clk{display:none;}
+  .nb{padding:5px 8px;font-size:12px;}
+  .nb span{display:none;}
+  .rbadge{font-size:10px;padding:3px 7px;}
+  .lout{padding:5px 9px;font-size:11px;}
+  .content{padding:12px;}
+  .two{grid-template-columns:1fr;}
+  .stats{grid-template-columns:1fr 1fr;gap:10px;}
+  .pgrid{grid-template-columns:1fr 1fr 1fr;gap:10px;}
+  .frow{grid-template-columns:1fr;}
+  .cpad{padding:14px;}
+}
+
+/* MOBIL 480px */
+@media(max-width:480px){
+  #login{align-items:flex-start;padding:20px 0;}
+  .lw{padding:0 12px;}
+  .logo-big{font-size:46px;}
+  .logo-pl{font-size:20px;letter-spacing:4px;}
+  .logo-au{margin-bottom:20px;}
+  .lcard{padding:18px 14px;}
+  .roles{gap:6px;}
+  .rb{padding:10px 5px;}
+  .ri{font-size:17px;}
+  .rn{font-size:10px;}
+  .rp{font-size:10px;}
+  .pin{font-size:18px;letter-spacing:6px;}
+  .topbar{padding:0 8px;gap:6px;height:48px;}
+  .tl-c,.tl-r{font-size:19px;}
+  .rbadge{display:none;}
+  .content{padding:10px;}
+  .stats{grid-template-columns:1fr;}
+  .pgrid{grid-template-columns:1fr 1fr;gap:8px;}
+  .two{grid-template-columns:1fr;}
+  .three{grid-template-columns:1fr 1fr;}
+  .ptitle{font-size:18px;}
+  .psub{font-size:12px;margin-bottom:10px;}
+  .stitle{font-size:14px;}
+  .cpad{padding:12px;}
+  .ctitle2{font-size:14px;margin-bottom:10px;}
+  .frow{grid-template-columns:1fr;}
+  .fi,.fs,.fta{font-size:16px;}
+  .rc{grid-template-columns:1fr;gap:8px;padding:12px;}
+  .dov-card{flex-direction:column;align-items:flex-start;}
+  .modal{padding:16px;}
+  .mact{flex-wrap:wrap;}
+  .mact .btn{flex:1;justify-content:center;}
+  .toasts{bottom:10px;right:8px;left:8px;}
+  .toast{min-width:unset;}
+  .sdiv{margin:14px 0;}
+  .pc-forma{font-size:20px;}
+  .pc-mach{font-size:11px;}
+  thead th{padding:7px 10px;font-size:9px;}
+  tbody td{padding:9px 10px;font-size:12px;}
+}
+
+/* PLÁN */
+.plan-table { width:100%; border-collapse:collapse; border-spacing:0; }
+.plan-table th { padding:9px 10px; text-align:center; font-size:10px; font-weight:700; letter-spacing:1px; text-transform:uppercase; color:var(--text3); background:rgba(255,255,255,.02); border:1px solid var(--border); white-space:nowrap; }
+.plan-table th.mach-col { text-align:left; min-width:130px; padding-left:14px; }
+.plan-table td { padding:0; border:1px solid var(--border); vertical-align:top; min-width:90px; }
+.plan-cell { padding:9px 10px; min-height:72px; cursor:pointer; transition:background .15s; position:relative; }
+.plan-cell:hover { background:rgba(255,255,255,.04); }
+.plan-cell.has-plan { background:rgba(232,0,30,.06); }
+.plan-cell.today { background:rgba(74,158,255,.06); border:1px solid rgba(74,158,255,.2); }
+.plan-cell.today.has-plan { background:rgba(74,158,255,.1); }
+.plan-cell-forma { font-family:'Barlow Condensed',sans-serif; font-size:17px; font-weight:700; color:var(--text); line-height:1; }
+.plan-cell-mat { font-size:11px; color:var(--text2); margin-top:2px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:110px; }
+.plan-cell-qty { font-size:11px; color:var(--green-text); font-weight:600; margin-top:3px; }
+.plan-cell-smena { font-size:10px; font-weight:700; letter-spacing:.5px; text-transform:uppercase; margin-top:3px; }
+.smena-r { color:#4a9eff; }
+.smena-o { color:var(--orange); }
+.smena-n { color:#a070ff; }
+.plan-cell-note { font-size:10px; color:var(--text3); margin-top:3px; font-style:italic; }
+.plan-cell-empty { font-size:11px; color:var(--text3); padding:8px 10px; min-height:70px; display:flex; align-items:center; justify-content:center; cursor:pointer; }
+.plan-cell-empty:hover { color:var(--text2); }
+.day-header { font-size:12px; font-weight:700; }
+.day-header.today-hdr { color:var(--blue); }
+.day-date { font-size:10px; font-weight:400; margin-top:1px; opacity:.7; }
+.mach-cell { padding:10px 14px; font-family:'Barlow Condensed',sans-serif; font-size:14px; font-weight:700; color:var(--text2); background:rgba(255,255,255,.02); white-space:nowrap; }
+/* Dnešní plán karty */
+.plan-today-card { background:var(--card); border:1px solid var(--blue-dim); border-left:3px solid var(--blue); border-radius:8px; padding:12px 14px; margin-bottom:10px; }
+.plan-today-mach { font-family:'Barlow Condensed',sans-serif; font-size:13px; font-weight:700; color:var(--text2); margin-bottom:6px; }
+.plan-today-forma { font-family:'Barlow Condensed',sans-serif; font-size:22px; font-weight:900; color:var(--text); line-height:1; }
+.plan-today-meta { font-size:12px; color:var(--text2); margin-top:5px; display:flex; flex-wrap:wrap; gap:10px; }
+
+/* iOS time input fix */
+input[type="time"] { -webkit-appearance: none; appearance: none; min-height: 42px; color: var(--text); }
+input[type="time"]::-webkit-date-and-time-value { text-align: left; }
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div id="login">
+  <div class="lw">
+    <div class="logo-big"><span class="logo-c">C</span><span>OLOR</span></div>
+    <div class="logo-pl">PLASTIC</div>
+    <div class="logo-au">AUTOMOTIVE</div>
+    <div class="lcard">
+      <div class="ll">Vyberte roli a zadejte PIN</div>
+      <div class="roles">
+        <div class="rb" onclick="selRole('vedouci')" id="rb-vedouci"><div class="ri">📊</div><span class="rn">Vedoucí</span><span class="rp">1111</span></div>
+        <div class="rb" onclick="selRole('mistr')" id="rb-mistr"><div class="ri">🔧</div><span class="rn">Mistr</span><span class="rp">2222</span></div>
+        <div class="rb" onclick="selRole('serizovac')" id="rb-serizovac"><div class="ri">⚙️</div><span class="rn">Seřizovač</span><span class="rp">3333</span></div>
+        <div class="rb" onclick="selRole('sklad')" id="rb-sklad"><div class="ri">📦</div><span class="rn">Sklad</span><span class="rp">4444</span></div>
+        <div class="rb" onclick="selRole('technolog')" id="rb-technolog"><div class="ri">🔬</div><span class="rn">Technolog</span><span class="rp">5555</span></div>
+        <div class="rb" onclick="selRole('udrzba')" id="rb-udrzba"><div class="ri">🔩</div><span class="rn">Údržba</span><span class="rp">6666</span></div>
+      </div>
+      <input type="password" class="pin" id="pin" maxlength="4" placeholder="PIN" onfocus="this.placeholder=''" onblur="if(!this.value)this.placeholder='PIN'" autocomplete="off" onkeydown="if(event.key==='Enter')doLogin()">
+      <button class="lbtn" onclick="doLogin()">Přihlásit se →</button>
+      <div class="lerr" id="lerr">Nesprávný PIN nebo nevybraná role</div>
+    </div>
+  </div>
+</div>
+
+<!-- APP -->
+<div id="app">
+  <header class="topbar">
+    <div class="tlogo"><span class="tl-c">C</span><span class="tl-r">OLOR</span><span class="tl-p">PLASTIC</span></div>
+    <div class="tdiv"></div>
+    <nav class="tnav" id="tnav"></nav>
+    <div class="tr2">
+      <div class="live">Live</div>
+      <div class="clk" id="clk">--:--:--</div>
+      <div class="rbadge" id="rbadge">–</div>
+      <button class="lout" onclick="doLogout()">Odhlásit</button>
+    </div>
+  </header>
+  <div class="content">
+
+    <!-- PŘEHLED -->
+    <div class="page" id="page-prehled">
+      <div id="susen-alert-prehled"></div>
+      <div id="dov-banner-top"></div>
+      <div id="unavail-prehled"></div>
+      <div id="forma-prehled"></div>
+      <div class="ptitle">Přehled</div>
+      <div class="psub">Aktuální výroba, požadavky a scrap</div>
+      <div class="stats" id="stats-prehled"></div>
+      <div class="stitle">🏭 Aktuální výroba</div>
+      <div class="pgrid" id="prod-prehled"></div>
+      <div id="plan-today-section" style="margin-bottom:16px"></div>
+      <div class="two">
+        <div class="card">
+          <div class="chdr"><span class="ct">Materiálové požadavky</span><div class="live">Live</div></div>
+          <div class="tw"><table>
+            <thead><tr><th>Čas</th><th>Materiál</th><th>kg</th><th>Stav</th></tr></thead>
+            <tbody id="tbl-req-p"></tbody>
+          </table></div>
+        </div>
+        <div class="card">
+          <div class="chdr"><span class="ct">Dnešní scrap</span><div class="live">Live</div></div>
+          <div class="tw"><table>
+            <thead><tr><th>Čas</th><th>Materiál</th><th>kg</th><th>Typ</th></tr></thead>
+            <tbody id="tbl-scrap-p"></tbody>
+          </table></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- PLÁNOVÁNÍ -->
+    <div class="page" id="page-plan">
+      <div style="display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:4px">
+        <div><div class="ptitle">Plánování výroby</div><div class="psub">Týdenní plán pro všechny lisy – klikni na buňku pro zadání</div></div>
+        <div style="display:flex;gap:8px;align-items:center">
+          <button class="btn bg bsm" onclick="planPrevWeek()">← Předchozí</button>
+          <span id="plan-week-label" style="font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--text2)"></span>
+          <button class="btn bg bsm" onclick="planNextWeek()">Další →</button>
+          <button class="btn br bsm" onclick="planThisWeek()">Tento týden</button>
+          <button class="btn bg bsm" onclick="initDemoPlan()" style="border-color:rgba(255,156,0,.4);color:var(--orange)">⚡ Načíst demo data</button>
+        </div>
+      </div>
+      <div class="card" style="overflow-x:auto;padding:0">
+        <table class="plan-table" id="plan-grid"></table>
+      </div>
+      <div style="display:flex;gap:16px;margin-top:10px;font-size:12px;color:var(--text2)">
+        <span style="display:flex;align-items:center;gap:6px"><span style="width:12px;height:12px;background:rgba(74,158,255,.2);border:1px solid rgba(74,158,255,.3);border-radius:2px;display:inline-block"></span>Dnes</span>
+        <span style="display:flex;align-items:center;gap:6px"><span style="width:12px;height:12px;background:rgba(232,0,30,.1);border:1px solid rgba(232,0,30,.2);border-radius:2px;display:inline-block"></span>Naplánováno</span>
+        <span class="smena-r">■ R = Ranní</span>
+        <span class="smena-o">■ O = Odpolední</span>
+        <span class="smena-n" style="color:#a070ff">■ N = Noční</span>
+      </div>
+    </div>
+
+    <!-- PŘEHLED SEŘIZOVAČ / SKLAD / TECH / ÚDRŽBA -->
+    <div class="page" id="page-ser-prehled">
+      <div id="susen-alert-ser"></div>
+      <div id="unavail-ser"></div><div id="forma-ser"></div>
+      <div class="ptitle">Přehled</div><div class="psub">Aktuální výroba a oznámení</div>
+      <div class="stitle">🏭 Aktuální výroba</div>
+      <div class="pgrid" id="prod-ser"></div>
+      <div id="plan-today-section-ser"></div>
+    </div>
+    <div class="page" id="page-sklad-prehled">
+      <div id="unavail-sklad-p"></div><div id="forma-sklad-p"></div>
+      <div class="ptitle">Přehled</div><div class="psub">Aktuální výroba a požadavky</div>
+      <div class="stitle">🏭 Aktuální výroba</div>
+      <div class="pgrid" id="prod-sklad-p"></div>
+
+      <div id="sklad-p-req-section">
+        <div class="stitle">📦 Materiálové požadavky <div class="live" style="margin-left:8px">Live</div></div>
+        <div id="sklad-p-req-cards"></div>
+        <div class="card">
+          <div class="chdr"><span class="ct">Vyřízené požadavky</span></div>
+          <div class="tw"><table>
+            <thead><tr><th>Čas</th><th>Materiál</th><th>kg</th><th>Stav</th></tr></thead>
+            <tbody id="tbl-sklad-p-done"></tbody>
+          </table></div>
+        </div>
+        <div class="stitle" style="margin-top:16px">🛒 Objednávky materiálu <div class="live" style="margin-left:8px">Live</div></div>
+        <div id="sklad-p-obj-cards"></div>
+        <div class="card">
+          <div class="chdr"><span class="ct">Vyřízené objednávky</span></div>
+          <div class="tw"><table>
+            <thead><tr><th>Čas</th><th>Položka</th><th>Množství</th><th>Stav</th></tr></thead>
+            <tbody id="tbl-sklad-p-obj-done"></tbody>
+          </table></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- POŽADAVKY (seřizovač) -->
+    <div class="page" id="page-pozadavky">
+      <div class="ptitle">Požadavky na materiál</div>
+      <div class="psub">Odeslat nový požadavek do skladu</div>
+      <div class="two">
+        <div class="card cpad">
+          <div class="ctitle2">Nový požadavek</div>
+          <div class="fgrid">
+            <div class="frow">
+              <div class="fg"><label class="fl">Materiál</label>
+                <select class="fs" id="req-mat"><option value="">Vyberte...</option>
+                  <option>Lukablend 7400 (PC/ABS)</option>
+                  <option>Enflex 120 (PP)</option>
+                  <option>Bayblend TX65 (PC/ABS)</option>
+                  <option>Lukablend 8500 (PC/ABS)</option>
+                </select>
+              </div>
+              <div class="fg"><label class="fl">Množství (kg)</label>
+                <div class="ww"><input type="number" class="fi" id="req-qty" placeholder="0" min="1"><span class="ws">kg</span></div>
+              </div>
+            </div>
+            <div class="frow">
+              <div class="fg"><label class="fl">Stroj</label>
+                <select class="fs" id="req-stroj"><option value="">Vyberte...</option>
+                  <option>Engel duo 300T</option><option>Engel duo 550T</option><option>Engel duo 700T</option>
+                  <option>Engel duo 900T</option><option>Engel duo 1700T</option><option>Engel duo 2000T</option>
+                </select>
+              </div>
+              <div class="fg"><label class="fl">Priorita</label>
+                <select class="fs" id="req-prior"><option value="normal">Normální</option><option value="urgent">Urgentní</option></select>
+              </div>
+            </div>
+            <div class="fg"><label class="fl">Poznámka</label><textarea class="fta" id="req-note" placeholder="Volitelná..."></textarea></div>
+            <button class="btn br bful" onclick="submitReq()">📤 Odeslat do skladu</button>
+          </div>
+        </div>
+        <div class="card">
+          <div class="chdr"><span class="ct">Moje požadavky dnes</span><div class="live">Live</div></div>
+          <div class="tw"><table>
+            <thead><tr><th>Čas</th><th>Materiál</th><th>kg</th><th>Stav</th></tr></thead>
+            <tbody id="tbl-my-req"></tbody>
+          </table></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SCRAP -->
+    <div class="page" id="page-scrap">
+      <div class="ptitle">Evidence scrapu</div>
+      <div class="psub">Zápis zmetkovitosti z výroby</div>
+      <div class="two">
+        <div class="card cpad" id="scrap-form">
+          <div class="ctitle2">Zápis nového scrapu</div>
+          <div class="fgrid">
+            <div class="frow">
+              <div class="fg"><label class="fl">Materiál</label>
+                <select class="fs" id="sc-mat"><option value="">Vyberte...</option>
+                  <option>Lukablend 7400 (PC/ABS)</option>
+                  <option>Enflex 120 (PP)</option>
+                  <option>Bayblend TX65 (PC/ABS)</option>
+                  <option>Lukablend 8500 (PC/ABS)</option>
+                </select>
+              </div>
+              <div class="fg"><label class="fl">Hmotnost</label>
+                <div class="ww"><input type="number" class="fi" id="sc-wt" placeholder="0.0" min="0" step="0.1"><span class="ws">kg</span></div>
+              </div>
+            </div>
+            <div class="frow">
+              <div class="fg"><label class="fl">Stroj</label>
+                <select class="fs" id="sc-stroj"><option value="">Vyberte...</option>
+                  <option>Engel duo 300T</option><option>Engel duo 550T</option><option>Engel duo 700T</option>
+                  <option>Engel duo 900T</option><option>Engel duo 1700T</option><option>Engel duo 2000T</option>
+                </select>
+              </div>
+              <div class="fg"><label class="fl">Typ zmetku</label>
+                <select class="fs" id="sc-typ"><option value="">Vyberte...</option>
+                  <option>Startovní zmetek</option><option>Technologický zmetek</option>
+                  <option>Rozjezdový odpad</option><option>Vtokový zbytek</option>
+                  <option>Zkouška kvality</option><option>Havárie stroje</option><option>Jiný</option>
+                </select>
+              </div>
+            </div>
+            <div class="fg"><label class="fl">Důvod</label><textarea class="fta" id="sc-reason" placeholder="Popis..."></textarea></div>
+            <button class="btn br bful" onclick="submitScrap()">⚖️ Zapsat scrap</button>
+          </div>
+        </div>
+        <div class="card">
+          <div class="chdr"><span class="ct">Dnešní záznamy</span><div class="live">Live</div></div>
+          <div class="tw"><table>
+            <thead><tr><th>Čas</th><th>Materiál</th><th>Typ</th><th>kg</th><th>Stroj</th></tr></thead>
+            <tbody id="tbl-scrap"></tbody>
+          </table></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SKLAD (požadavky + objednávky) -->
+    <div class="page" id="page-sklad">
+      <div class="ptitle">Sklad – Požadavky & Objednávky</div>
+      <div class="psub">Materiálové požadavky z výroby a objednávky pomocného materiálu</div>
+      <div class="stitle">📦 Požadavky výroby <div class="live" style="margin-left:8px">Live</div></div>
+      <div id="sklad-prio"></div>
+      <div id="sklad-cards"></div>
+      <div class="card" style="margin-bottom:24px">
+        <div class="chdr"><span class="ct">Vyřízené požadavky</span></div>
+        <div class="tw"><table>
+          <thead><tr><th>Čas</th><th>Materiál</th><th>kg</th><th>Stroj</th><th>Vyřízeno</th><th>Stav</th></tr></thead>
+          <tbody id="tbl-sklad-done"></tbody>
+        </table></div>
+      </div>
+      <div class="sdiv"></div>
+      <div class="stitle">🛒 Objednávky pomocného materiálu <div class="live" style="margin-left:8px">Live</div></div>
+      <div id="obj-prio"></div>
+      <div id="obj-cards"></div>
+      <div class="card">
+        <div class="chdr"><span class="ct">Vyřízené objednávky</span></div>
+        <div class="tw"><table>
+          <thead><tr><th>Čas</th><th>Položka</th><th>Množství</th><th>Poznámka</th><th>Stav</th></tr></thead>
+          <tbody id="tbl-obj-done"></tbody>
+        </table></div>
+      </div>
+    </div>
+
+    <!-- SCRAP & REPORT (vedoucí) -->
+    <div class="page" id="page-scrap-report">
+      <div class="ptitle">Scrap & Reporting</div>
+      <div class="psub">Evidence odpadu a měsíční reporty</div>
+      <div class="stats" id="stats-scrap"></div>
+      <div class="card">
+        <div class="chdr"><span class="ct">♻️ Dnešní záznamy scrapu</span><div class="live">Live</div></div>
+        <div class="tw"><table>
+          <thead><tr><th>Čas</th><th>Materiál</th><th>Typ</th><th>kg</th><th>Stroj</th><th>Důvod</th></tr></thead>
+          <tbody id="tbl-scrap-r"></tbody>
+        </table></div>
+      </div>
+      <div class="sdiv"></div>
+      <div class="stitle">📧 Měsíční reporting</div>
+      <div class="two">
+        <div class="card cpad">
+          <div class="fgrid">
+            <div class="frow">
+              <div class="fg"><label class="fl">Měsíc</label>
+                <select class="fs" id="rep-month">
+                  <option>Leden 2025</option><option>Únor 2025</option><option>Březen 2025</option>
+                  <option selected>Duben 2025</option><option>Květen 2025</option>
+                </select>
+              </div>
+              <div class="fg"><label class="fl">Středisko</label>
+                <select class="fs" id="rep-dept"><option>Lisovna C7</option><option>Lisovna C9</option><option>Celý závod</option></select>
+              </div>
+            </div>
+            <div style="display:flex;gap:10px">
+              <button class="btn bg" onclick="showRep()">📋 Náhled</button>
+              <button class="btn br" onclick="dlRep()">⬇ Stáhnout .txt</button>
+            </div>
+            <div id="rep-preview" style="display:none;background:var(--bg4);border:1px solid var(--border);border-radius:6px;padding:14px;font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--text2);line-height:1.7;white-space:pre-wrap"></div>
+          </div>
+        </div>
+        <div>
+          <div class="card">
+            <div class="chdr"><span class="ct">Dle materiálu</span></div>
+            <div class="tw"><table>
+              <thead><tr><th>Materiál</th><th>Zápisů</th><th>kg</th><th>%</th></tr></thead>
+              <tbody id="tbl-rep-mat"></tbody>
+            </table></div>
+          </div>
+          <div class="card">
+            <div class="chdr"><span class="ct">Dle důvodu</span></div>
+            <div class="tw"><table>
+              <thead><tr><th>Typ</th><th>Počet</th><th>kg</th></tr></thead>
+              <tbody id="tbl-rep-type"></tbody>
+            </table></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ZMĚNY FOREM -->
+    <div class="page" id="page-formy">
+      <div class="ptitle">Změny forem</div>
+      <div class="psub">Plánované přetypování strojů</div>
+      <div class="two">
+        <div class="card cpad">
+          <div class="ctitle2">Nové oznámení</div>
+          <div class="fgrid">
+            <div class="frow">
+              <div class="fg"><label class="fl">Stroj</label>
+                <select class="fs" id="f-stroj"><option value="">Vyberte...</option>
+                  <option>Engel duo 300T</option><option>Engel duo 550T</option><option>Engel duo 700T</option>
+                  <option>Engel duo 900T</option><option>Engel duo 1700T</option><option>Engel duo 2000T</option>
+                </select>
+              </div>
+              <div class="fg"><label class="fl">Čas změny</label><input type="time" class="fi" id="f-cas" value="15:00"></div>
+            </div>
+            <div class="frow">
+              <div class="fg"><label class="fl">Sundat formu č.</label><input type="text" class="fi" id="f-off" placeholder="napr. 128"></div>
+              <div class="fg"><label class="fl">Nasadit formu č.</label><input type="text" class="fi" id="f-on" placeholder="napr. 141"></div>
+            </div>
+            <div class="fg"><label class="fl">Materiál pro novou formu</label>
+              <select class="fs" id="f-mat"><option value="">Není třeba</option>
+                <option>Lukablend 7400 (PC/ABS)</option>
+                <option>Enflex 120 (PP)</option>
+                <option>Bayblend TX65 (PC/ABS)</option>
+                <option>Lukablend 8500 (PC/ABS)</option>
+              </select>
+            </div>
+            <label style="display:flex;align-items:center;gap:9px;font-size:13px">
+              <input type="checkbox" id="f-dry" style="width:15px;height:15px;accent-color:var(--red)"> Nutno nasušit materiál
+            </label>
+            <div class="fg"><label class="fl">Poznámka</label><textarea class="fta" id="f-note" placeholder="Další pokyny..."></textarea></div>
+            <button class="btn br bful" onclick="submitForma()">🔔 Vydat oznámení</button>
+          </div>
+        </div>
+        <div id="formy-list" style="max-height:65vh;overflow-y:auto;padding-right:4px"></div>
+      </div>
+    </div>
+
+    <!-- AKTUÁLNÍ VÝROBA (edit) -->
+    <div class="page" id="page-vyroba">
+      <div class="ptitle">Aktuální výroba</div>
+      <div class="psub">Stav lisů a nasazených forem – Lisovna C7</div>
+      <div class="pgrid" id="prod-edit"></div>
+    </div>
+
+    <!-- OBJEDNÁVKY MATERIÁLU (mistr) -->
+    <div class="page" id="page-objednavky">
+      <div class="ptitle">Objednávky materiálu</div>
+      <div class="psub">Objednat proklady, miralon, klipy a další pomocný materiál</div>
+      <div class="two">
+        <div class="card cpad">
+          <div class="ctitle2">Nová objednávka</div>
+          <div class="fgrid">
+            <div class="fg"><label class="fl">Položka</label>
+              <select class="fs" id="obj-item"><option value="">Vyberte...</option>
+                <option>Proklady plastové</option><option>Proklady kartonové</option>
+                <option>Miralon</option><option>Klipy</option>
+                <option>Páska lepicí</option><option>Páska smršťovací</option>
+                <option>Sáčky PE</option><option>Kartonové krabice</option>
+                <option>Fólie stretch</option><option>Rukavice</option>
+                <option>Vázací pásky</option><option>Palety dřevěné</option>
+                <option>Jiné...</option>
+              </select>
+            </div>
+            <div class="frow">
+              <div class="fg"><label class="fl">Množství</label><input type="number" class="fi" id="obj-qty" placeholder="0" min="1"></div>
+              <div class="fg"><label class="fl">Jednotka</label>
+                <select class="fs" id="obj-unit"><option>ks</option><option>bal</option><option>role</option><option>kg</option><option>m</option><option>paleta</option></select>
+              </div>
+            </div>
+            <div class="fg"><label class="fl">Poznámka</label><textarea class="fta" id="obj-note" placeholder="Rozměr, barva, typ..."></textarea></div>
+            <button class="btn br bful" onclick="submitObj()">🛒 Odeslat objednávku</button>
+          </div>
+        </div>
+        <div class="card">
+          <div class="chdr"><span class="ct">Moje objednávky</span><div class="live">Live</div></div>
+          <div class="tw"><table>
+            <thead><tr><th>Čas</th><th>Položka</th><th>Množství</th><th>Stav</th></tr></thead>
+            <tbody id="tbl-obj-mistr"></tbody>
+          </table></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- DOVOLENÉ (mistr) -->
+    <div class="page" id="page-dovolene">
+      <div class="ptitle">Dovolené a nepřítomnosti</div>
+      <div class="psub">Nahlásit nepřítomnost zaměstnance vedoucímu</div>
+      <div class="two">
+        <div class="card cpad">
+          <div class="ctitle2">Nová žádost</div>
+          <div class="fgrid">
+            <div class="frow">
+              <div class="fg"><label class="fl">Jméno zaměstnance</label><input type="text" class="fi" id="dov-jmeno" placeholder="Jméno a příjmení"></div>
+              <div class="fg"><label class="fl">Pozice</label>
+                <select class="fs" id="dov-pozice">
+                  <option>Operátor</option><option>Seřizovač</option><option>Mistr</option>
+                  <option>Technolog</option><option>Údržba</option><option>Jiné</option>
+                </select>
+              </div>
+            </div>
+            <div class="fg"><label class="fl">Typ nepřítomnosti</label>
+              <select class="fs" id="dov-typ">
+                <option value="d">Dovolená</option>
+                <option value="l">K lékaři</option>
+                <option value="n">Nemocenská</option>
+                <option value="v">Náhradní volno</option>
+                <option value="j">Jiné</option>
+              </select>
+            </div>
+            <div class="frow">
+              <div class="fg"><label class="fl">Od</label><input type="date" class="fi" id="dov-od"></div>
+              <div class="fg"><label class="fl">Do</label><input type="date" class="fi" id="dov-do"></div>
+            </div>
+            <div class="fg"><label class="fl">Poznámka</label><textarea class="fta" id="dov-note" placeholder="Důvod, náhrada..."></textarea></div>
+            <button class="btn br bful" onclick="submitDov()">🏖 Odeslat žádost vedoucímu</button>
+          </div>
+        </div>
+        <div class="card">
+          <div class="chdr"><span class="ct">Přehled žádostí</span><div class="live">Live</div></div>
+          <div class="tw"><table>
+            <thead><tr><th>Zaměstnanec</th><th>Typ</th><th>Od</th><th>Do</th><th>Stav</th></tr></thead>
+            <tbody id="tbl-dov-mistr"></tbody>
+          </table></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- DOVOLENÉ (vedoucí) -->
+    <div class="page" id="page-dovolene-vedouci">
+      <div class="ptitle">Dovolené – schválení</div>
+      <div class="psub">Přehled žádostí od mistrů</div>
+      <div id="dov-pending"></div>
+      <div class="card">
+        <div class="chdr"><span class="ct">Historie žádostí</span></div>
+        <div class="tw"><table>
+          <thead><tr><th>Zaměstnanec</th><th>Typ</th><th>Pozice</th><th>Od</th><th>Do</th><th>Stav</th><th>Akce</th></tr></thead>
+          <tbody id="tbl-dov-hist"></tbody>
+        </table></div>
+      </div>
+    </div>
+
+
+    <!-- PŘEHLED TECHNOLOG -->
+    <div class="page" id="page-tech-prehled">
+      <div id="unavail-tech"></div><div id="forma-tech"></div>
+      <div class="ptitle">Přehled</div><div class="psub">Aktuální výroba – Lisovna C7</div>
+      <div class="stitle">🏭 Aktuální výroba</div>
+      <div class="pgrid" id="prod-tech"></div>
+    </div>
+
+    <!-- MATERIÁLY -->
+    <div class="page" id="page-materialy">
+      <div style="display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:4px">
+        <div><div class="ptitle">Materiály</div><div class="psub" id="mat-psub">Parametry zpracování materiálů</div></div>
+        <button class="btn br" id="mat-add-btn" onclick="openMatModalNew()" style="display:none;margin-top:4px">+ Přidat</button>
+      </div>
+      <div class="card">
+        <div class="tw"><table>
+          <thead><tr><th>Forma</th><th>Typ</th><th>Název</th><th>Interní č.</th><th>Teplota sušení</th><th>Čas sušení</th><th></th></tr></thead>
+          <tbody id="tbl-materialy"></tbody>
+        </table></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: Plán -->
+<div class="moverlay" id="mod-plan">
+  <div class="modal">
+    <div style="display:flex;justify-content:space-between;align-items:flex-start">
+      <div><div class="mtitle" id="pm-title">Lis</div><div class="msub" id="pm-date"></div></div>
+      <button class="btn bwarn bsm" onclick="deletePlanEntry()" style="margin-top:2px">✕ Smazat</button>
+    </div>
+    <div class="fgrid">
+      <div class="frow">
+        <div class="fg"><label class="fl">Forma č.</label><input type="text" class="fi" id="pm-forma" placeholder="napr. č. 128"></div>
+        <div class="fg"><label class="fl">Čas výměny</label><input type="time" class="fi" id="pm-cas"></div>
+      </div>
+      <div class="frow">
+        <div class="fg"><label class="fl">Počet kusů</label><input type="number" class="fi" id="pm-qty" placeholder="0" min="0"></div>
+        <div class="fg"><label class="fl">Barva</label><input type="text" class="fi" id="pm-barva" placeholder="napr. RAL 9005 černá"></div>
+      </div>
+      <div class="fg"><label class="fl">Materiál</label>
+          <select class="fs" id="pm-mat">
+            <option value="">— Nevyplněno —</option>
+            <option>Lukablend 7400 (PC/ABS)</option>
+            <option>Enflex 120 (PP)</option>
+            <option>Bayblend TX65 (PC/ABS)</option>
+            <option>Lukablend 8500 (PC/ABS)</option>
+          </select>
+      </div>
+      <label style="display:flex;align-items:center;gap:9px;font-size:13px;cursor:pointer">
+        <input type="checkbox" id="pm-susen" style="width:15px;height:15px;accent-color:var(--red)">
+        <span>Nutno sušit materiál <span style="color:var(--text3);font-size:11px">(pošle notifikaci Mistrovi a Seřizovači)</span></span>
+      </label>
+      <div class="fg"><label class="fl">Poznámka / Objednávka</label><textarea class="fta" id="pm-note" placeholder="Číslo objednávky, zákazník..."></textarea></div>
+    </div>
+    <div class="mact">
+      <button class="btn bg" onclick="closeModal('mod-plan')">Zrušit</button>
+      <button class="btn br" onclick="savePlan()">✔ Uložit</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: Materiál -->
+<div class="moverlay" id="mod-mat">
+  <div class="modal">
+    <div class="mtitle" id="mat-modal-title">Upravit materiál</div>
+    <div class="msub">Parametry formy a materiálu</div>
+    <div class="fgrid">
+      <div class="frow">
+        <div class="fg"><label class="fl">Forma č.</label><input type="text" class="fi" id="mat-forma" placeholder="Č. 128"></div>
+        <div class="fg"><label class="fl">Typ plastu</label><input type="text" class="fi" id="mat-typ" placeholder="PC/ABS"></div>
+      </div>
+      <div class="frow">
+        <div class="fg"><label class="fl">Název materiálu</label><input type="text" class="fi" id="mat-nazev" placeholder="Lukablend 7400"></div>
+        <div class="fg"><label class="fl">Interní číslo</label><input type="text" class="fi" id="mat-cislo" placeholder="1.131"></div>
+      </div>
+      <div class="frow">
+        <div class="fg"><label class="fl">Teplota sušení (°C)</label><input type="number" class="fi" id="mat-teplota" placeholder="110"></div>
+        <div class="fg"><label class="fl">Čas sušení (hod)</label><input type="number" class="fi" id="mat-cas" placeholder="2"></div>
+      </div>
+    </div>
+    <div class="mact">
+      <button class="btn bg" onclick="closeModal('mod-mat')">Zrušit</button>
+      <button class="btn br" onclick="saveMat()">✔ Uložit</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: sklad reakce -->
+<div class="moverlay" id="mod-sklad">
+  <div class="modal">
+    <div class="mtitle" id="ms-title">Reagovat</div>
+    <div class="msub" id="ms-sub"></div>
+    <div class="fg"><label class="fl">Poznámka</label><input type="text" class="fi" id="ms-note" placeholder="Volitelná..."></div>
+    <div class="mact">
+      <button class="btn bg" onclick="closeModal('mod-sklad')">Zrušit</button>
+      <button class="btn bwarn bsm" onclick="respondReq('unavailable')">❌ Nedostupné</button>
+      <button class="btn br bsm" onclick="respondReq('ready')">✅ Připraveno</button>
+    </div>
+
+    <!-- PŘEHLED TECHNOLOG -->
+    <div class="page" id="page-tech-prehled">
+      <div id="unavail-tech"></div><div id="forma-tech"></div>
+      <div class="ptitle">Přehled</div><div class="psub">Aktuální výroba – Lisovna C7</div>
+      <div class="stitle">🏭 Aktuální výroba</div>
+      <div class="pgrid" id="prod-tech"></div>
+    </div>
+
+    <!-- MATERIÁLY -->
+    <div class="page" id="page-materialy">
+      <div style="display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:4px">
+        <div><div class="ptitle">Materiály</div><div class="psub" id="mat-psub">Parametry zpracování materiálů</div></div>
+        <button class="btn br" id="mat-add-btn" onclick="openMatModalNew()" style="display:none;margin-top:4px">+ Přidat</button>
+      </div>
+      <div class="card">
+        <div class="tw"><table>
+          <thead><tr><th>Forma</th><th>Typ</th><th>Název</th><th>Interní č.</th><th>Teplota sušení</th><th>Čas sušení</th><th></th></tr></thead>
+          <tbody id="tbl-materialy"></tbody>
+        </table></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: výroba edit -->
+<div class="moverlay" id="mod-prod">
+  <div class="modal">
+    <div class="mtitle" id="mp-title">Aktualizovat lis</div>
+    <div class="msub">Forma a materiál</div>
+    <div class="fgrid">
+      <div class="fg"><label class="fl">Nasazená forma č.</label><input type="text" class="fi" id="mp-forma" placeholder="napr. 128 (prázdné = lis stojí)"></div>
+      <div class="fg"><label class="fl">Materiál</label>
+        <select class="fs" id="mp-mat"><option value="">— Nevyplněno —</option>
+          <option>Lukablend 7400 (PC/ABS)</option>
+          <option>Enflex 120 (PP)</option>
+          <option>Bayblend TX65 (PC/ABS)</option>
+          <option>Lukablend 8500 (PC/ABS)</option>
+        </select>
+      </div>
+    </div>
+    <div class="mact">
+      <button class="btn bg" onclick="closeModal('mod-prod')">Zrušit</button>
+      <button class="btn br" onclick="saveProd()">✔ Uložit</button>
+    </div>
+  </div>
+</div>
+
+<div class="toasts" id="toasts"></div>
+
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+<script>
+// ═══════════════════════════════════════════════
+//  FIREBASE
+// ═══════════════════════════════════════════════
+if (!firebase.apps.length) {
+  firebase.initializeApp({
+    apiKey:"AIzaSyBfxSMeAWZaLcrbiGqG9uv8wYyW_H9-sQ8",
+    authDomain:"colorplastic-87a1c.firebaseapp.com",
+    databaseURL:"https://colorplastic-87a1c-default-rtdb.europe-west1.firebasedatabase.app",
+    projectId:"colorplastic-87a1c",
+    storageBucket:"colorplastic-87a1c.firebasestorage.app",
+    messagingSenderId:"283651673468",
+    appId:"1:283651673468:web:07da20b37db6bd3857a8f9"
+  });
+}
+var db = firebase.database();
+function fbPush(path, data, cb) {
+  db.ref(path).push(data).then(function(r){ if(cb) cb(r.key); }).catch(function(e){ console.error('fbPush',path,e); });
+}
+function fbSet(path, data) {
+  db.ref(path).set(data).catch(function(e){ console.error('fbSet',path,e); });
+}
+function fbOn(path, cb) {
+  db.ref(path).on('value', function(s){ cb(s.val()); }, function(e){ console.error('fbOn',path,e); });
+}
+function fromFb(val) {
+  if (!val) return [];
+  return Object.keys(val).map(function(k){ var o=Object.assign({},val[k]); o.fbKey=k; return o; });
+}
+
+// ═══════════════════════════════════════════════
+//  STATE
+// ═══════════════════════════════════════════════
+var role = null;
+var selR = null;
+var curReqKey = null;
+var curProdMachine = null;
+var D = {
+  requests:[], scrap:[], skladAlerts:[], formaChanges:[],
+  objednavky:[], dovolene:[], materialy:[], plan:{}, notifications:[],
+  production:[
+    {machine:'Engel duo 300T',forma:null,mat:null,running:false,updated:null},
+    {machine:'Engel duo 550T',forma:null,mat:null,running:false,updated:null},
+    {machine:'Engel duo 700T',forma:null,mat:null,running:false,updated:null},
+    {machine:'Engel duo 900T',forma:null,mat:null,running:false,updated:null},
+    {machine:'Engel duo 1700T',forma:null,mat:null,running:false,updated:null},
+    {machine:'Engel duo 2000T',forma:null,mat:null,running:false,updated:null}
+  ]
+};
+
+// ═══════════════════════════════════════════════
+//  CONFIG
+// ═══════════════════════════════════════════════
+var PINS = {vedouci:'1111',mistr:'2222',serizovac:'3333',sklad:'4444',technolog:'5555',udrzba:'6666'};
+var LABELS = {vedouci:'Vedoucí výroby',mistr:'Mistr',serizovac:'Seřizovač',sklad:'Sklad',technolog:'Technolog',udrzba:'Údržba'};
+var SHORT = {vedouci:'Vedoucí',mistr:'Mistr',serizovac:'Seřizovač',sklad:'Sklad',technolog:'Technolog',udrzba:'Údržba'};
+var NAV = {
+  vedouci:  [{id:'prehled',lbl:'Přehled',ic:'📊'},{id:'plan',lbl:'Plánování',ic:'📅'},{id:'formy',lbl:'Změny forem',ic:'🔔'},{id:'dovolene-vedouci',lbl:'Dovolené',ic:'🏖'},{id:'vyroba',lbl:'Výroba',ic:'🏭'},{id:'scrap-report',lbl:'Scrap & Reporting',ic:'♻️'}],
+  mistr:    [{id:'prehled',lbl:'Přehled',ic:'📊'},{id:'scrap',lbl:'Scrap',ic:'♻️'},{id:'vyroba',lbl:'Výroba',ic:'🏭'},{id:'objednavky',lbl:'Objednávky mat.',ic:'🛒'},{id:'dovolene',lbl:'Dovolené',ic:'🏖'}],
+  serizovac:[{id:'ser-prehled',lbl:'Přehled',ic:'📊'},{id:'pozadavky',lbl:'Požadavky',ic:'📤'},{id:'scrap',lbl:'Scrap',ic:'♻️'},{id:'vyroba',lbl:'Výroba',ic:'🏭'},{id:'materialy',lbl:'Materiály',ic:'🧪'}],
+  sklad:    [{id:'sklad-prehled',lbl:'Přehled',ic:'📊'},{id:'sklad',lbl:'Požadavky & Objednávky',ic:'📦'}],
+  technolog:[{id:'tech-prehled',lbl:'Přehled',ic:'📊'},{id:'vyroba',lbl:'Výroba',ic:'🏭'},{id:'materialy',lbl:'Materiály',ic:'🧪'}],
+  udrzba:   [{id:'sklad-prehled',lbl:'Přehled',ic:'📊'},{id:'vyroba',lbl:'Výroba',ic:'🏭'}]
+};
+
+// ═══════════════════════════════════════════════
+//  LOGIN
+// ═══════════════════════════════════════════════
+function selRole(r) {
+  selR = r;
+  document.querySelectorAll('.rb').forEach(function(b){ b.classList.remove('on'); });
+  document.getElementById('rb-'+r).classList.add('on');
+  document.getElementById('pin').focus();
+}
+function doLogin() {
+  var pin = document.getElementById('pin').value.trim();
+  var err = document.getElementById('lerr');
+  if (!selR || PINS[selR] !== pin) {
+    err.style.display='block';
+    document.getElementById('pin').value='';
+    return;
+  }
+  err.style.display='none';
+  role = selR;
+  sessionStorage.setItem('cp_role', role);
+  document.getElementById('login').style.display='none';
+  document.getElementById('app').style.display='flex';
+  startApp();
+}
+function doLogout() {
+  sessionStorage.removeItem('cp_role');
+  role=null; selR=null;
+  document.getElementById('pin').value='';
+  document.querySelectorAll('.rb').forEach(function(b){ b.classList.remove('on'); });
+  document.getElementById('login').style.display='flex';
+  document.getElementById('app').style.display='none';
+}
+
+// ═══════════════════════════════════════════════
+//  APP INIT
+// ═══════════════════════════════════════════════
+function startApp() {
+  document.getElementById('rbadge').textContent = SHORT[role];
+  buildNav();
+  startFirebase();
+  switchPage(NAV[role][0].id);
+  setInterval(function(){
+    var e=document.getElementById('clk');
+    if(e) e.textContent=new Date().toTimeString().slice(0,8);
+  },1000);
+  startSusenCheck();
+}
+
+function buildNav() {
+  var nav = document.getElementById('tnav');
+  nav.innerHTML = '';
+  NAV[role].forEach(function(item, i){
+    var btn = document.createElement('button');
+    btn.className = 'nb' + (i===0?' on':'');
+    btn.dataset.page = item.id;
+    btn.innerHTML = item.ic + ' <span>' + item.lbl + '</span>';
+    btn.onclick = function(){ switchPage(item.id); };
+    nav.appendChild(btn);
+  });
+}
+
+function switchPage(pageId) {
+  document.querySelectorAll('.page').forEach(function(p){ p.classList.remove('on'); });
+  var pg = document.getElementById('page-'+pageId);
+  if (pg) pg.classList.add('on');
+  document.querySelectorAll('.nb').forEach(function(b){ b.classList.toggle('on', b.dataset.page===pageId); });
+  render(pageId);
+}
+
+function render(pageId) {
+  switch(pageId) {
+    case 'prehled':          renderPrehled(); break;
+    case 'ser-prehled':      renderProd('prod-ser'); break;
+    case 'sklad-prehled':    renderSkladPrehled(); break;
+    case 'pozadavky':        renderPozadavky(); break;
+    case 'scrap':            renderScrap(); break;
+    case 'sklad':            renderSklad(); break;
+    case 'scrap-report':     renderScrapReport(); break;
+    case 'formy':            renderFormy(); break;
+    case 'vyroba':           renderProd('prod-edit'); break;
+    case 'objednavky':       renderObjednavky(); break;
+    case 'dovolene':         renderDovMistr(); break;
+    case 'dovolene-vedouci': renderDovVedouci(); break;
+    case 'materialy':         renderMaterialy(); break;
+    case 'tech-prehled':      renderTechPrehled(); break;
+    case 'plan':              renderPlan(); break;
+  }
+  renderBanners();
+}
+
+// ═══════════════════════════════════════════════
+//  FIREBASE LISTENERS
+// ═══════════════════════════════════════════════
+function renderSkladPrehled() {
+  renderProd('prod-sklad-p');
+
+  var pendReq = D.requests.filter(function(r){return r.status==='pending';});
+  var doneReq = D.requests.filter(function(r){return r.status!=='pending';});
+  var pendObj = D.objednavky.filter(function(o){return o.status==='pending';});
+  var doneObj = D.objednavky.filter(function(o){return o.status!=='pending';});
+
+  // ── Req cards ──
+  var rc = document.getElementById('sklad-p-req-cards');
+  if (rc) {
+    if (!pendReq.length) {
+      rc.innerHTML = '<div style="background:rgba(57,211,83,.07);border:1px solid rgba(57,211,83,.2);border-radius:8px;padding:12px 16px;margin-bottom:12px;display:flex;align-items:center;gap:10px"><span>OK</span><span style="font-weight:700;color:var(--green-text)">Žádné čekající požadavky</span></div>';
+    } else {
+      var h = '<div style="background:linear-gradient(135deg,#ff4545,#cc0000);border-radius:8px;padding:12px 16px;margin-bottom:12px;display:flex;align-items:center;gap:12px">';
+      h += '<span style="font-size:24px">!</span>';
+      h += '<div style="flex:1"><div style="font-family:\'Barlow Condensed\',sans-serif;font-size:16px;font-weight:900;letter-spacing:1px;color:#fff;text-transform:uppercase">' + pendReq.length + ' čekající</div>';
+      h += '<div style="font-size:12px;color:rgba(255,255,255,.8)">Výroba čeká na materiál</div></div></div>';
+      pendReq.forEach(function(r) {
+        h += '<div style="background:rgba(255,69,69,.08);border:1px solid rgba(255,69,69,.35);border-left:4px solid #ff4545;border-radius:8px;padding:14px 16px;margin-bottom:10px;display:grid;grid-template-columns:1fr auto;gap:12px;align-items:center">';
+        h += '<div><div style="font-family:\'Barlow Condensed\',sans-serif;font-size:20px;font-weight:700;color:var(--text)">' + r.material + '</div>';
+        h += '<div style="font-size:13px;color:var(--text2);margin-top:3px">';
+        h += '<span style="color:#ff8080;font-weight:600;margin-right:10px">x' + r.qty + ' kg</span>';
+        h += '<span style="margin-right:10px">' + r.machine + '</span>';
+        h += '<span style="font-family:monospace">' + r.time + '</span></div></div>';
+        h += '<button class="btn br bsm" data-k="' + r.fbKey + '" onclick="openSkladModal(this.dataset.k)">Reagovat</button>';
+        h += '</div>';
+      });
+      rc.innerHTML = h;
+    }
+  }
+
+  // Req done
+  var rd = document.getElementById('tbl-sklad-p-done');
+  if (rd) rd.innerHTML = doneReq.map(function(r){
+    return '<tr><td class="mono">' + r.time + '</td><td class="bold">' + r.material + '</td><td>' + r.qty + ' kg</td><td>' + sbadge(r.status) + '</td></tr>';
+  }).join('') || '<tr><td colspan="4" style="text-align:center;color:var(--text3);padding:14px">Žádné vyřízené</td></tr>';
+
+  // ── Obj cards ──
+  var oc = document.getElementById('sklad-p-obj-cards');
+  if (oc) {
+    if (!pendObj.length) {
+      oc.innerHTML = '<div style="background:rgba(57,211,83,.07);border:1px solid rgba(57,211,83,.2);border-radius:8px;padding:12px 16px;margin-bottom:12px;display:flex;align-items:center;gap:10px"><span>OK</span><span style="font-weight:700;color:var(--green-text)">Žádné čekající objednávky</span></div>';
+    } else {
+      var h2 = '<div style="background:linear-gradient(135deg,#1a1400,#2a2000);border:1px solid rgba(255,156,0,.5);border-radius:8px;padding:12px 16px;margin-bottom:12px;display:flex;align-items:center;gap:12px">';
+      h2 += '<span style="font-size:24px">!</span>';
+      h2 += '<div style="flex:1"><div style="font-family:\'Barlow Condensed\',sans-serif;font-size:16px;font-weight:900;letter-spacing:1px;color:var(--orange);text-transform:uppercase">' + pendObj.length + ' čekající</div>';
+      h2 += '<div style="font-size:12px;color:rgba(255,156,0,.7)">Požadavky od mistrů</div></div></div>';
+      pendObj.forEach(function(o) {
+        h2 += '<div style="background:rgba(255,156,0,.07);border:1px solid rgba(255,156,0,.35);border-left:4px solid var(--orange);border-radius:8px;padding:14px 16px;margin-bottom:10px;display:grid;grid-template-columns:1fr auto;gap:12px;align-items:center">';
+        h2 += '<div><div style="font-family:\'Barlow Condensed\',sans-serif;font-size:20px;font-weight:700;color:var(--text)">' + o.item + '</div>';
+        h2 += '<div style="font-size:13px;color:var(--text2);margin-top:3px">';
+        h2 += '<span style="color:var(--orange);font-weight:600;margin-right:10px">' + o.qty + ' ' + o.unit + '</span>';
+        if (o.note) h2 += '<span style="margin-right:10px">' + o.note + '</span>';
+        h2 += '<span style="font-family:monospace">' + o.time + '</span></div></div>';
+        h2 += '<div style="display:flex;gap:6px">';
+        h2 += '<button class="btn bwarn bsm" data-k="' + o.fbKey + '" data-a="unavailable" onclick="respondObj(this.dataset.k,this.dataset.a)">X</button>';
+        h2 += '<button class="btn br bsm" data-k="' + o.fbKey + '" data-a="done" onclick="respondObj(this.dataset.k,this.dataset.a)">Vyřízeno</button>';
+        h2 += '</div></div>';
+      });
+      oc.innerHTML = h2;
+    }
+  }
+
+  // Obj done
+  var od = document.getElementById('tbl-sklad-p-obj-done');
+  if (od) od.innerHTML = doneObj.map(function(o){
+    return '<tr><td class="mono">' + o.time + '</td><td class="bold">' + o.item + '</td><td>' + o.qty + ' ' + o.unit + '</td><td>' + sbadge(o.status) + '</td></tr>';
+  }).join('') || '<tr><td colspan="4" style="text-align:center;color:var(--text3);padding:14px">Žádné vyřízené</td></tr>';
+}
+
+function renderTechPrehled() {
+  renderProd('prod-tech');
+  var u=document.getElementById('unavail-tech'); if(u) u.innerHTML=buildUnavailBanner();
+  var f=document.getElementById('forma-tech'); if(f) f.innerHTML=buildFormaBanner();
+}
+
+var DEFAULT_MATS = [
+  {forma:'Č. 126',typ:'PC/ABS',nazev:'Lukablend 7400',cislo:'1.131',teplota:'110',cas:'2'},
+  {forma:'Č. 127',typ:'PC/ABS',nazev:'Lukablend 7400',cislo:'1.131',teplota:'110',cas:'2'},
+  {forma:'Č. 128',typ:'PC/ABS',nazev:'Lukablend 7400',cislo:'1.131',teplota:'110',cas:'2'},
+  {forma:'Č. 129',typ:'PC/ABS',nazev:'Lukablend 7400',cislo:'1.131',teplota:'110',cas:'2'},
+  {forma:'Č. 130',typ:'PC/ABS',nazev:'Lukablend 7400',cislo:'1.131',teplota:'110',cas:'2'},
+  {forma:'Č. 131',typ:'PC/ABS',nazev:'Lukablend 7400',cislo:'1.131',teplota:'110',cas:'2'},
+  {forma:'Č. 141',typ:'PP',    nazev:'Enflex 120',    cislo:'1.089',teplota:'80', cas:'2'},
+  {forma:'Č. 149',typ:'PP',    nazev:'Enflex 120',    cislo:'1.089',teplota:'80', cas:'2'},
+  {forma:'Č. 150',typ:'PC/ABS',nazev:'Bayblend TX65', cislo:'1.001',teplota:'110',cas:'2'},
+  {forma:'Č. 151',typ:'PC/ABS',nazev:'Bayblend TX65', cislo:'1.001',teplota:'110',cas:'2'},
+  {forma:'Č. 175',typ:'PC/ABS',nazev:'Lukablend 8500',cislo:'1.155',teplota:'110',cas:'4'}
+];
+
+var editMatKey = null;
+
+function renderMaterialy() {
+  var canEdit = role==='technolog';
+  var sub=document.getElementById('mat-psub');
+  if(sub) sub.textContent = canEdit ? 'Správa materiálů – přidat, upravit, odebrat' : 'Parametry zpracování – pouze čtení';
+
+  // Show/hide add button
+  var addBtn=document.getElementById('mat-add-btn');
+  if(addBtn) addBtn.style.display = canEdit ? 'inline-flex' : 'none';
+
+  var mats = D.materialy.length ? D.materialy : DEFAULT_MATS;
+  var tbody=document.getElementById('tbl-materialy'); if(!tbody) return;
+  tbody.innerHTML = mats.map(function(m) {
+    var k = m.fbKey||'';
+    return '<tr>' +
+      '<td class="bold">' + m.forma + '</td>' +
+      '<td><span class="tbadge">' + m.typ + '</span></td>' +
+      '<td class="bold">' + m.nazev + '</td>' +
+      '<td class="mono">' + m.cislo + '</td>' +
+      '<td style="color:var(--orange);font-weight:600">' + m.teplota + ' °C</td>' +
+      '<td style="color:var(--text2)">' + m.cas + ' hod</td>' +
+      (canEdit ?
+        '<td style="display:flex;gap:5px;padding:8px 14px">' +
+          '<button class="btn bg bsm" data-k="'+k+'" data-m="'+encodeURIComponent(JSON.stringify(m))+'" onclick="openMatModal(this)">✏</button>' +
+          '<button class="btn bwarn bsm" data-k="'+k+'" onclick="deleteMat(this.dataset.k)">✕</button>' +
+        '</td>'
+        : '<td></td>') +
+    '</tr>';
+  }).join('');
+}
+
+function openMatModal(btn) {
+  var m = JSON.parse(decodeURIComponent(btn.dataset.m));
+  editMatKey = btn.dataset.k || null;
+  document.getElementById('mat-modal-title').textContent = editMatKey ? 'Upravit materiál' : 'Přidat materiál';
+  document.getElementById('mat-forma').value = m.forma||'';
+  document.getElementById('mat-typ').value = m.typ||'';
+  document.getElementById('mat-nazev').value = m.nazev||'';
+  document.getElementById('mat-cislo').value = m.cislo||'';
+  document.getElementById('mat-teplota').value = m.teplota||'';
+  document.getElementById('mat-cas').value = m.cas||'';
+  document.getElementById('mod-mat').classList.add('on');
+}
+
+function openMatModalNew() {
+  editMatKey = null;
+  document.getElementById('mat-modal-title').textContent = 'Přidat materiál';
+  ['mat-forma','mat-typ','mat-nazev','mat-cislo','mat-teplota','mat-cas'].forEach(function(id){
+    document.getElementById(id).value='';
+  });
+  document.getElementById('mod-mat').classList.add('on');
+}
+
+function saveMat() {
+  var forma   = document.getElementById('mat-forma').value.trim();
+  var typ     = document.getElementById('mat-typ').value.trim();
+  var nazev   = document.getElementById('mat-nazev').value.trim();
+  var cislo   = document.getElementById('mat-cislo').value.trim();
+  var teplota = document.getElementById('mat-teplota').value.trim();
+  var cas     = document.getElementById('mat-cas').value.trim();
+  if(!forma||!nazev){toast('err','Chyba','Vyplňte formu a název.');return;}
+  var obj = {forma:forma,typ:typ,nazev:nazev,cislo:cislo,teplota:teplota,cas:cas};
+  if(editMatKey) {
+    fbSet('materialy/'+editMatKey, obj);
+    toast('ok','Uloženo',forma+' – '+nazev);
+  } else {
+    // Init from defaults first if empty
+    if(!D.materialy.length) {
+      DEFAULT_MATS.forEach(function(m){ fbPush('materialy', m); });
+    }
+    fbPush('materialy', obj);
+    toast('ok','Přidáno',forma+' – '+nazev);
+  }
+  closeModal('mod-mat');
+}
+
+function deleteMat(key) {
+  if(!key){toast('err','Chyba','Nelze smazat – záznam nemá klíč.');return;}
+  db.ref('materialy/'+key).remove();
+  toast('ok','Smazáno','Záznam odstraněn');
+}
+
+// ── PLÁNOVÁNÍ ─────────────────────────────────────────────────────
+var planWeekOffset = 0;
+var editPlanKey = null;
+
+var MACHINES_LIST = ['Engel duo 300T','Engel duo 550T','Engel duo 700T','Engel duo 900T','Engel duo 1700T','Engel duo 2000T'];
+var DAY_NAMES = ['Po','Út','St','Čt','Pá','So','Ne'];
+var DAY_FULL  = ['Pondělí','Úterý','Středa','Čtvrtek','Pátek','Sobota','Neděle'];
+
+function getWeekDates(offset) {
+  var now = new Date();
+  var day = now.getDay();
+  var diff = day === 0 ? -6 : 1 - day;
+  var monday = new Date(now);
+  monday.setDate(now.getDate() + diff + offset * 7);
+  monday.setHours(0,0,0,0);
+  var dates = [];
+  for (var i = 0; i < 7; i++) {
+    var d = new Date(monday);
+    d.setDate(monday.getDate() + i);
+    dates.push(d);
+  }
+  return dates;
+}
+
+function dateKey(d) {
+  return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
+}
+
+function isToday(d) {
+  var t = new Date(); t.setHours(0,0,0,0);
+  return d.getTime() === t.getTime();
+}
+
+function planPrevWeek() { planWeekOffset--; renderPlan(); }
+function planNextWeek() { planWeekOffset++; renderPlan(); }
+function planThisWeek() { planWeekOffset=0; renderPlan(); }
+
+function smenaClass(s) {
+  return s==='ranní'?'smena-r':s==='odpolední'?'smena-o':'smena-n';
+}
+function smenaLabel(s) {
+  return s==='ranní'?'R':s==='odpolední'?'O':'N';
+}
+
+function renderPlan() {
+  var dates = getWeekDates(planWeekOffset);
+  var lbl = document.getElementById('plan-week-label');
+  if (lbl) {
+    var d0=dates[0], d6=dates[6];
+    lbl.textContent = d0.getDate()+'.'+(d0.getMonth()+1)+'. – '+d6.getDate()+'.'+(d6.getMonth()+1)+'.'+d6.getFullYear();
+  }
+  var grid = document.getElementById('plan-grid'); if (!grid) return;
+  var smeny = ['ranní','odpolední','noční'];
+  var smenyShort = ['R','O','N'];
+  var smenyColors = ['#4a9eff','var(--orange)','#a070ff'];
+
+  var html = '<thead><tr><th class="mach-col" rowspan="2">Lis</th>';
+  dates.forEach(function(d, i) {
+    var today = isToday(d);
+    html += '<th colspan="3" style="text-align:center">';
+    html += '<div class="day-header'+(today?' today-hdr':'')+'">' + DAY_FULL[i] + '</div>';
+    html += '<div class="day-date">' + d.getDate()+'.'+(d.getMonth()+1)+'.' + '</div></th>';
+  });
+  html += '</tr><tr>';
+  dates.forEach(function(d) {
+    smeny.forEach(function(s, si) {
+      var smenyTimes = ['06–14','14–22','22–06'];
+      html += '<th style="font-size:9px;padding:4px 6px;color:'+smenyColors[si]+';border-top:none;min-width:72px">'+smenyShort[si]+' <span style="opacity:.6">'+smenyTimes[si]+'</span></th>';
+    });
+  });
+  html += '</tr></thead><tbody>';
+
+  MACHINES_LIST.forEach(function(mach, mi) {
+    html += '<tr><td class="mach-cell">'+mach+'</td>';
+    dates.forEach(function(d, di) {
+      var dk = dateKey(d);
+      var today = isToday(d);
+      var bg = today ? 'background:rgba(74,158,255,.04);' : '';
+      smeny.forEach(function(smena, si) {
+        var planKey = mach.replace(/ /g,'_')+'_'+dk+'_'+smena;
+        var p = D.plan[planKey];
+        var cellId = 'pc-'+mi+'-'+di+'-'+si;
+        if (p && (p.forma || p.qty)) {
+          html += '<td style="'+bg+'"><div id="'+cellId+'" class="plan-cell has-plan" style="border-left:2px solid '+smenyColors[si]+'">';
+          if (p.forma) html += '<div class="plan-cell-forma">'+p.forma+'</div>';
+          if (p.cas)   html += '<div class="plan-cell-mat" style="color:#4a9eff">⏰ '+p.cas+'</div>';
+          if (p.mat)   html += '<div class="plan-cell-mat">'+p.mat+'</div>';
+          if (p.qty)   html += '<div class="plan-cell-qty">'+p.qty+' ks</div>';
+          if (p.barva) html += '<div class="plan-cell-note">🎨 '+p.barva+'</div>';
+          if (p.susen) html += '<div class="plan-cell-note" style="color:var(--orange)">🔥 Sušit</div>';
+          if (p.note)  html += '<div class="plan-cell-note">'+p.note+'</div>';
+          html += '</div></td>';
+        } else {
+          html += '<td style="'+bg+'"><div id="'+cellId+'" class="plan-cell-empty">';
+          html += role==='vedouci' ? '+' : '–';
+          html += '</div></td>';
+        }
+      });
+    });
+    html += '</tr>';
+  });
+  html += '</tbody>';
+  grid.innerHTML = html;
+
+  // Attach click handlers after DOM is ready
+  if (role !== 'vedouci') return;
+  MACHINES_LIST.forEach(function(mach, mi) {
+    dates.forEach(function(d, di) {
+      var dk = dateKey(d);
+      smeny.forEach(function(smena, si) {
+        var planKey = mach.replace(/ /g,'_')+'_'+dk+'_'+smena;
+        var cellId = 'pc-'+mi+'-'+di+'-'+si;
+        var el = document.getElementById(cellId);
+        if (el) {
+          el.addEventListener('click', (function(k, m, date, s) {
+            return function() { openPlanModal(k, m, date, s); };
+          })(planKey, mach, dk, smena));
+        }
+      });
+    });
+  });
+}
+
+function handlePlanClick(el) {
+  if (role !== 'vedouci') return;
+  var k = el.getAttribute('data-k');
+  var m = el.getAttribute('data-m');
+  var d = el.getAttribute('data-d');
+  var s = el.getAttribute('data-s');
+  openPlanModal(k, m, d, s);
+}
+
+// Event delegation for plan grid
+document.addEventListener('click', function(e) {
+  var el = e.target.closest('[data-k][data-m][data-d][data-s]');
+  if (!el) return;
+  var grid = document.getElementById('plan-grid');
+  if (!grid || !grid.contains(el)) return;
+  handlePlanClick(el);
+});
+
+function renderPlanToday() {
+  renderPlanTodayIn('plan-today-section');
+  renderPlanTodayIn('plan-today-section-ser');
+}
+
+function renderPlanTodayIn(containerId) {
+  var el = document.getElementById(containerId); if (!el) return;
+  var today = dateKey(new Date());
+  var smeny = ['ranní','odpolední','noční'];
+
+  var hasAny = false;
+  var rows = '';
+
+  MACHINES_LIST.forEach(function(mach) {
+    var machHasAny = false;
+    var cells = '';
+    smeny.forEach(function(smena, si) {
+      var k = mach.replace(/ /g,'_') + '_' + today + '_' + smena;
+      var p = D.plan[k];
       var bgColors = ['rgba(74,158,255,.07)','rgba(255,156,0,.07)','rgba(255,255,255,.03)'];
       var textColors = ['#4a9eff','var(--orange)','var(--text2)'];
       if (p && (p.forma || p.qty)) {
