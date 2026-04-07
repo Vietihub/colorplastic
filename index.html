@@ -387,6 +387,20 @@ input[type="time"]::-webkit-date-and-time-value { text-align: left; }
   .ptitle{font-size:18px;}
   .psub{font-size:12px;}
 }
+
+.banner-group{margin-bottom:12px;}
+.banner-group-hdr{display:flex;align-items:center;justify-content:space-between;padding:10px 14px;border-radius:8px;cursor:pointer;user-select:none;transition:all .15s;}
+.banner-group-hdr.red{background:linear-gradient(135deg,#1a0a0a,#22100f);border:1px solid rgba(255,69,69,.4);}
+.banner-group-hdr.orange{background:linear-gradient(135deg,#1a1400,#221e00);border:1px solid rgba(255,156,0,.35);}
+.banner-group-title{display:flex;align-items:center;gap:8px;font-size:13px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;}
+.banner-group-meta{display:flex;align-items:center;gap:8px;}
+.banner-group-count{background:var(--red);color:#fff;font-size:10px;font-weight:700;border-radius:10px;padding:1px 6px;}
+.banner-group-count.orange{background:var(--orange);}
+.banner-group-arrow{font-size:11px;color:var(--text3);transition:transform .2s;}
+.banner-group-arrow.open{transform:rotate(180deg);}
+.banner-group-body{overflow:hidden;transition:max-height .25s ease;}
+.banner-group-body.collapsed{max-height:0;}
+.banner-group-body.expanded{max-height:2000px;}
 </style>
 </head>
 <body>
@@ -971,6 +985,7 @@ input[type="time"]::-webkit-date-and-time-value { text-align: left; }
     <div class="mact">
       <button class="btn bg" onclick="closeModal('mod-sklad')">Zrušit</button>
       <button class="btn bwarn bsm" onclick="respondReq('unavailable')">❌ Nedostupné</button>
+      <button class="btn bg bsm" style="color:var(--orange);border-color:rgba(255,156,0,.4)" onclick="respondReq('searching')">🔍 Hledá se</button>
       <button class="btn br bsm" onclick="respondReq('ready')">✅ Připraveno</button>
     </div>
 
@@ -1894,11 +1909,15 @@ function renderActivityFeed() {
       if (r.status==='pending') {
         addItem('af-req','📤','Odesláno do skladu', r.material+' · '+r.qty+' kg', r.time);
       } else {
-        addItem('af-req', r.status==='ready'?'✅':'❌', 'Sklad: '+(r.status==='ready'?'Připraveno':'Nedostupné'), r.material+' · '+r.qty+' kg', r.resolvedTime||r.time);
+        var statusLbl2 = r.status==='ready'?'Připraveno':r.status==='searching'?'Hledá se':'Nedostupné';
+        var statusIcon2 = r.status==='ready'?'✅':r.status==='searching'?'🔍':'❌';
+        addItem('af-req', statusIcon2, 'Sklad: '+statusLbl2, r.material+' · '+r.qty+' kg', r.resolvedTime||r.time);
       }
     } else if (role==='vedouci' || role==='mistr') {
       if (r.status!=='pending') {
-        addItem('af-req', r.status==='ready'?'✅':'❌', 'Materiál: '+(r.status==='ready'?'Připraveno':'Nedostupné'), r.material+' · '+r.qty+' kg', r.resolvedTime||r.time);
+        var statusLbl3 = r.status==='ready'?'Připraveno':r.status==='searching'?'Hledá se':'Nedostupné';
+        var statusIcon3 = r.status==='ready'?'✅':r.status==='searching'?'🔍':'❌';
+        addItem('af-req', statusIcon3, 'Materiál: '+statusLbl3, r.material+' · '+r.qty+' kg', r.resolvedTime||r.time);
       }
     }
   });
@@ -2007,21 +2026,61 @@ function renderBanners() {
 
 function buildUnavailBanner() {
   if (!D.skladAlerts.length || role==='sklad') return '';
-  return D.skladAlerts.map(function(a){
-    var dismissed = a.dismissedBy || [];
-    if (dismissed.indexOf(role)>=0) return '';
-    var k = a.fbKey||'';
-    return '<div class="banner ban-r">' +
-      '<div><div style="display:flex;align-items:center;gap:8px">' +
-        '<span style="font-size:17px">⛔</span>' +
-        '<span class="ban-title" style="color:#ff4545">Materiál nedostupný ve skladu</span>' +
+  var active = D.skladAlerts.filter(function(a){
+    return (a.dismissedBy||[]).indexOf(role)<0;
+  });
+  if (!active.length) return '';
+
+  var unavail = active.filter(function(a){ return a.type!=='searching'; });
+  var searching = active.filter(function(a){ return a.type==='searching'; });
+  var html = '';
+
+  function buildGroup(items, type) {
+    if (!items.length) return '';
+    var isSearch = type==='searching';
+    var icon = isSearch ? '🔍' : '⛔';
+    var title = isSearch ? 'Sklad hledá materiál' : 'Materiál nedostupný';
+    var color = isSearch ? 'orange' : 'red';
+    var titleColor = isSearch ? 'var(--orange)' : '#ff4545';
+    var groupId = 'bg-'+type+'-'+(Math.random().toString(36).slice(2));
+    var bodyItems = items.map(function(a){
+      var k = a.fbKey||'';
+      return '<div class="banner '+(isSearch?'ban-o':'ban-r')+'" style="margin:6px 0 0;border-radius:6px">' +
+        '<div><div class="ban-body"><strong>'+a.material+'</strong> · '+a.qty+' kg · '+a.machine+'</div>' +
+        (a.note?'<div class="ban-meta">'+a.note+'</div>':'')+
+        '<div class="ban-meta">'+fmtActivityTime(a.time)+'</div></div>' +
+        '<button class="ban-x" data-key="'+k+'" onclick="dismissUnavail(this.dataset.key)">✕</button>' +
+      '</div>';
+    }).join('');
+    return '<div class="banner-group">' +
+      '<div class="banner-group-hdr '+color+'" data-bgid="'+groupId+'" onclick="toggleBannerGroup(this.dataset.bgid)">' +
+        '<div class="banner-group-title" style="color:'+titleColor+'">' +
+          '<span>'+icon+'</span><span>'+title+'</span>' +
+        '</div>' +
+        '<div class="banner-group-meta">' +
+          '<span class="banner-group-count'+(isSearch?' orange':'')+'">'+items.length+'</span>' +
+          '<span class="banner-group-arrow" id="arr-'+groupId+'">▼</span>' +
+        '</div>' +
       '</div>' +
-      '<div class="ban-body"><strong>'+a.material+'</strong> · '+a.qty+' kg · '+a.machine+'</div>' +
-      (a.note?'<div class="ban-meta">'+a.note+'</div>':'')+
-      '<div class="ban-meta">Hlásí sklad · '+a.time+'</div></div>' +
-      '<button class="ban-x" data-key="'+k+'" onclick="dismissUnavail(this.dataset.key)">✕</button>' +
+      '<div class="banner-group-body expanded" id="'+groupId+'">' +
+        bodyItems +
+      '</div>' +
     '</div>';
-  }).join('');
+  }
+
+  html += buildGroup(unavail, 'unavailable');
+  html += buildGroup(searching, 'searching');
+  return html;
+}
+
+function toggleBannerGroup(id) {
+  var body = document.getElementById(id);
+  var arr = document.getElementById('arr-'+id);
+  if (!body) return;
+  var isOpen = body.classList.contains('expanded');
+  body.classList.toggle('expanded', !isOpen);
+  body.classList.toggle('collapsed', isOpen);
+  if (arr) arr.classList.toggle('open', !isOpen);
 }
 
 function buildFormaBanner() {
@@ -2101,7 +2160,7 @@ function fmtD(s) {
   var p=s.split('-'); return p[2]+'.'+p[1]+'.'+p[0];
 }
 function sbadge(s) {
-  var m={pending:'sp Čeká',ready:'sr Připraveno',unavailable:'su2 Nedostupné',done:'sd Hotovo',approved:'sr Schváleno',rejected:'su2 Zamítnuto'};
+  var m={pending:'sp Čeká',ready:'sr Připraveno',unavailable:'su2 Nedostupné',searching:'sp Hledá se',done:'sd Hotovo',approved:'sr Schváleno',rejected:'su2 Zamítnuto'};
   var v=(m[s]||'sd '+s).split(' ');
   return '<span class="s '+v[0]+'">'+v.slice(1).join(' ')+'</span>';
 }
@@ -2178,12 +2237,69 @@ function renderSklad() {
       '<div><button class="btn br bsm" data-k="'+r.fbKey+'" onclick="openSkladModal(this.dataset.k)">Reagovat</button></div></div>';
   }).join('');
   var dt = document.getElementById('tbl-sklad-done');
-  if (dt) dt.innerHTML = doneReq.map(function(r){
-    var changeBtn = r.status==='unavailable'
-      ? '<div style="margin-top:5px"><button data-k="'+r.fbKey+'" data-action="change-ready" style="background:rgba(57,211,83,.12);border:1px solid rgba(57,211,83,.35);color:var(--green-text);border-radius:5px;padding:4px 8px;font-size:11px;font-weight:700;cursor:pointer;margin-top:4px;display:inline-block">✅ Změnit na dostupné</button></div>'
-      : '';
-    return '<tr><td class="mono">'+fmtActivityTime(r.time)+'</td><td><div class="bold">'+r.material+'</div><div class="dim" style="font-size:11px;margin-top:2px">'+r.machine+'</div></td><td>'+r.qty+' kg</td><td>'+sbadge(r.status)+changeBtn+'</td></tr>';
-  }).join('') || '<tr><td colspan="4" style="text-align:center;color:var(--text3);padding:18px">Žádné vyřízené</td></tr>';
+  if (dt) {
+    dt.innerHTML = '';
+    if (!doneReq.length) {
+      var empty = document.createElement('tr');
+      empty.innerHTML = '<td colspan="5" style="text-align:center;color:var(--text3);padding:18px">Žádné vyřízené</td>';
+      dt.appendChild(empty);
+    } else {
+      doneReq.forEach(function(r) {
+        var tr = document.createElement('tr');
+        tr.style.borderBottom = '1px solid var(--border)';
+        var statusCell = document.createElement('td');
+        statusCell.style.minWidth = '160px';
+
+        var badge = document.createElement('div');
+        badge.innerHTML = sbadge(r.status);
+        statusCell.appendChild(badge);
+
+        if (r.status !== 'pending') {
+          var btnWrap = document.createElement('div');
+          btnWrap.style.cssText = 'display:flex;gap:4px;margin-top:6px;flex-wrap:wrap';
+
+          var statuses = [
+            {s:'ready',    label:'✅ Připraveno',  color:'rgba(57,211,83,.15)',  border:'rgba(57,211,83,.4)',  text:'var(--green-text)'},
+            {s:'unavailable', label:'❌ Nedostupné', color:'rgba(255,69,69,.15)', border:'rgba(255,69,69,.4)',  text:'#ff6b6b'},
+            {s:'searching', label:'🔍 Hledá se',    color:'rgba(255,156,0,.15)', border:'rgba(255,156,0,.4)',  text:'var(--orange)'}
+          ];
+
+          statuses.forEach(function(st) {
+            if (st.s === r.status) return;
+            var btn = document.createElement('button');
+            btn.textContent = st.label;
+            btn.style.cssText = 'background:'+st.color+';border:1px solid '+st.border+';color:'+st.text+';border-radius:4px;padding:3px 7px;font-size:10px;font-weight:700;cursor:pointer;';
+            (function(key, newStatus, label) {
+              btn.addEventListener('click', function(e) {
+                e.stopPropagation();
+                var req = D.requests.find(function(x){ return x.fbKey===key; });
+                if (!req) return;
+                req.status = newStatus;
+                req.resolvedTime = nowFull();
+                fbSet('requests/'+key, req);
+                toast('ok', label, req.material);
+              });
+            })(r.fbKey, st.s, st.label);
+            btnWrap.appendChild(btn);
+          });
+          statusCell.appendChild(btnWrap);
+        }
+
+        var timeTd = document.createElement('td');
+        timeTd.className = 'mono'; timeTd.textContent = fmtActivityTime(r.time);
+        var matTd = document.createElement('td');
+        matTd.innerHTML = '<div class="bold">'+r.material+'</div><div class="dim" style="font-size:11px">'+r.machine+'</div>';
+        var qtyTd = document.createElement('td');
+        qtyTd.textContent = r.qty+' kg';
+
+        tr.appendChild(timeTd);
+        tr.appendChild(matTd);
+        tr.appendChild(qtyTd);
+        tr.appendChild(statusCell);
+        dt.appendChild(tr);
+      });
+    }
+  }
 
   // Objednávky
   var pendObj = D.objednavky.filter(function(o){return o.status==='pending';});
@@ -2390,11 +2506,11 @@ function respondReq(action) {
   var note=document.getElementById('ms-note').value;
   r.status=action; r.resolvedTime=nowFull(); r.note=note;
   fbSet('requests/'+r.fbKey,r);
-  if(action==='unavailable') {
-    fbPush('skladAlerts',{material:r.material,qty:r.qty,machine:r.machine,time:now(),note:note,dismissedBy:[]});
+  if(action==='unavailable' || action==='searching') {
+    fbPush('skladAlerts',{material:r.material,qty:r.qty,machine:r.machine,time:nowFull(),note:note,type:action,dismissedBy:[]});
   }
   closeModal('mod-sklad');
-  toast(action==='ready'?'ok':'err',action==='ready'?'Připraveno':'Nedostupné',r.material);
+  var toastMsg = action==='ready'?'Připraveno':action==='searching'?'Hledá se':'Nedostupné'; toast(action==='ready'?'ok':'err', toastMsg, r.material);
 }
 
 function submitObj() {
