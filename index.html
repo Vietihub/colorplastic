@@ -7,7 +7,7 @@
 <meta http-equiv="cache-control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="pragma" content="no-cache">
 <meta http-equiv="expires" content="0">
-<title>ColorPlastic – Výrobní systém v2</title>
+<title>ColorPlastic – Výrobní systém</title>
 <link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700;900&family=Barlow+Condensed:wght@600;700;900&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
 :root {
@@ -1145,6 +1145,12 @@ function doLogin() {
   startApp();
 }
 function doLogout() {
+  // Smaž FCM token z Firebase při odhlášení
+  var tokenKey = localStorage.getItem('cp_fcm_key');
+  if (tokenKey) {
+    db.ref('fcmTokens/' + tokenKey).remove().catch(function(){});
+    localStorage.removeItem('cp_fcm_key');
+  }
   sessionStorage.removeItem('cp_role');
   role=null; selR=null;
   document.getElementById('pin').value='';
@@ -1500,7 +1506,9 @@ function registerFCMToken() {
   _fcmMessaging.getToken({ vapidKey: VAPID_KEY, serviceWorkerRegistration: _fcmReg })
     .then(function(token) {
       if (!token) return;
-      db.ref('fcmTokens/' + token.slice(-20)).set({
+      var tokenKey = token.slice(-20);
+      localStorage.setItem('cp_fcm_key', tokenKey);
+      db.ref('fcmTokens/' + tokenKey).set({
         token: token,
         role: role,
         updated: new Date().toISOString()
