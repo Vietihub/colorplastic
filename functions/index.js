@@ -117,7 +117,7 @@ exports.onSusenNotification = functions
     if (!n || n.typ !== 'susen') return null;
 
     const tokens = await getTokensForRoles(['mistr', 'serizovac']);
-    await sendPush(tokens, '🔥 Nutno sušit materiál', n.msg || '', {
+    await sendPush(tokens, 'ColorPlastic – Nutno sušit materiál 🔥', n.msg || '', {
       type: 'susen',
       key:  context.params.key
     });
@@ -136,7 +136,7 @@ exports.onNewObjednavka = functions
 
     const body = `${o.item || 'Položka'} – ${o.qty || ''} ${o.unit || ''} (podal: ${o.podal || '–'})`;
     const tokens = await getTokensForRoles(['vedouci']);
-    await sendPush(tokens, '📦 Nová objednávka', body, { type: 'objednavka' });
+    await sendPush(tokens, 'ColorPlastic – Nová objednávka', body, { type: 'objednavka' });
     return null;
   });
 
@@ -147,12 +147,13 @@ exports.onNewDovolena = functions
   .region('europe-west1')
   .database.ref('/dovolene/{key}')
   .onCreate(async (snap, context) => {
+    if (await isAlreadyProcessed(context.eventId)) return null;
     const d = snap.val();
-    if (!d || d.status !== 'pending') return null; // jen nové žádosti
+    if (!d || d.status !== 'pending') return null;
 
-    const body = `${d.jmeno || '–'} · ${d.typ || ''} od ${d.od || ''} do ${d.doo || ''}`;
+    const body = `${d.jmeno || '–'} · ${d.typ || ''}\nod ${fmtDate(d.od)} do ${fmtDate(d.doo)}`;
     const tokens = await getTokensForRoles(['vedouci']);
-    await sendPush(tokens, '🗓️ Žádost o dovolenou', body, { type: 'dovolena' });
+    await sendPush(tokens, 'ColorPlastic – Žádost o dovolenou', body, { type: 'dovolena' });
     return null;
   });
 
@@ -163,21 +164,21 @@ exports.onDovolenaStatusChange = functions
   .region('europe-west1')
   .database.ref('/dovolene/{key}/status')
   .onWrite(async (change, context) => {
+    if (await isAlreadyProcessed(context.eventId)) return null;
     const after  = change.after.val();
     const before = change.before.val();
 
-    if (!after || !before || after === before) return null;
-    if (after === 'pending') return null; // nová žádost – řeší onNewDovolena
+    if (!before || !after || after === before) return null;
+    if (after === 'pending') return null;
 
-    // Načteme celý záznam
     const snap = await db.ref(`dovolene/${context.params.key}`).once('value');
     const d    = snap.val();
     if (!d) return null;
 
-    const statusLabel = after === 'approved' ? '✅ Schválena' : '❌ Zamítnuta';
-    const body = `${d.jmeno || '–'} · ${d.typ || ''} od ${d.od || ''} do ${d.doo || ''}`;
+    const statusLabel = after === 'approved' ? 'schválena ✅' : 'zamítnuta ❌';
+    const body = `${d.jmeno || '–'} · ${d.typ || ''}\nod ${fmtDate(d.od)} do ${fmtDate(d.doo)}`;
     const tokens = await getTokensForRoles(['mistr', 'serizovac']);
-    await sendPush(tokens, `🗓️ Dovolená ${statusLabel}`, body, { type: 'dovolena_status' });
+    await sendPush(tokens, `ColorPlastic – Dovolená ${statusLabel}`, body, { type: 'dovolena_status' });
     return null;
   });
 
@@ -193,7 +194,7 @@ exports.onFormaChange = functions
 
     const body = `${f.machine || '–'}: ${f.formOff || '–'} → ${f.formOn || '–'} v ${f.changeTime || '–'}${f.dry ? ' 🔥' : ''}`;
     const tokens = await getTokensForRoles(['mistr', 'serizovac']);
-    await sendPush(tokens, '🔧 Přeseřízení formy', body, {
+    await sendPush(tokens, 'ColorPlastic – Přeseřízení formy', body, {
       type:    'forma',
       machine: f.machine || ''
     });
@@ -203,14 +204,60 @@ exports.onFormaChange = functions
 // ═════════════════════════════════════════════════════════════════════════════
 //  7. SKLAD – požadavek na materiál → notifikuje vedoucího + skladníka
 // ═════════════════════════════════════════════════════════════════════════════
+// Formátování data: 2026-04-08 → 8.4.2026
+function fmtDate(d) {
+  if (!d) return '–';
+  const p = String(d).split('-');
+  if (p.length === 3) return `${parseInt(p[2])}.${parseInt(p[1])}.${p[0]}`;
+  return d;
+}
+
+// Deduplikace – zabrání dvojímu odeslání stejné notifikace
+async function isAlreadyProcessed(eventId) {
+  const ref = db.ref(`_processedEvents/${eventId}`);
+  const snap = await ref.once('value');
+  if (snap.exists()) return true;
+  await ref.set(Date.now());
+  // Automaticky smaž po 10 minutách
+  setTimeout(() => ref.remove().catch(() => {}), 600000);
+  return false;
+}
+
+// Překlad rolí
+const ROLE_LABELS = {
+  vedouci:   'Vedoucí',
+  mistr:     'Mistr',
+  serizovac: 'Seřizovač',
+  kontrolor: 'Kontrolor',
+  skladnik:  'Skladník',
+  obsluha:   'Obsluha'
+};
+
+// Překlad stavů
+const STATUS_LABELS = {
+  pending:     '⏳ Čeká',
+  ready:       '✅ Připraveno',
+  unavailable: '❌ Nedostupné',
+  searching:   '🔍 Hledá se',
+  issued:      '📦 Vydáno',
+  ordered:     '🔄 Objednáno',
+  done:        '✅ Hotovo',
+  cancelled:   '❌ Zrušeno',
+  approved:    '✅ Schváleno',
+  rejected:    '❌ Zamítnuto'
+};
+
 exports.onNewRequest = functions
   .region('europe-west1')
   .database.ref('/requests/{key}')
   .onCreate(async (snap, context) => {
+    if (await isAlreadyProcessed(context.eventId)) return null;
     const r = snap.val();
     if (!r) return null;
 
-    const body = `${r.material || '–'} · ${r.qty || ''} ks · ${r.machine || '–'} (${r.priority === 'high' ? '🔴 Urgentní' : 'Normální'})`;
+    const worker = r.worker || '–';
+    const urgent = r.priority === 'urgent' || r.priority === 'high';
+    const body = `${r.material || '–'} · ${r.qty || ''} kg · ${r.machine || '–'}${urgent ? ' 🔴 Urgentní' : ''}\nZadal: ${worker}`;
     const tokens = await getTokensForRoles(['vedouci', 'skladnik']);
     await sendPush(tokens, '📩 Nový požadavek na materiál', body, { type: 'request' });
     return null;
@@ -223,24 +270,22 @@ exports.onRequestStatusChange = functions
   .region('europe-west1')
   .database.ref('/requests/{key}/status')
   .onWrite(async (change, context) => {
+    if (await isAlreadyProcessed(context.eventId)) return null;
     const after  = change.after.val();
     const before = change.before.val();
 
-    if (!after || !before || after === before) return null;
+    // Přeskočit: vytvoření nového záznamu (before je null) nebo beze změny
+    if (!before || !after || after === before) return null;
     if (after === 'pending') return null;
 
     const snap = await db.ref(`requests/${context.params.key}`).once('value');
     const r    = snap.val();
     if (!r) return null;
 
-    const statusLabels = {
-      issued:    '✅ Vydáno',
-      ordered:   '🔄 Objednáno',
-      cancelled: '❌ Zrušeno'
-    };
-    const body = `${r.material || '–'} ${r.qty || ''} ks → ${statusLabels[after] || after}`;
-    const tokens = await getTokensForRoles(['mistr', 'serizovac']);
-    await sendPush(tokens, '📩 Stav požadavku', body, { type: 'request_status' });
+    const statusCz = STATUS_LABELS[after] || after;
+    const body = `${r.material || '–'} · ${r.qty || ''} kg · ${r.machine || '–'}\nStav: ${statusCz}`;
+    const tokens = await getTokensForRoles(['mistr', 'serizovac', 'vedouci']);
+    await sendPush(tokens, 'ColorPlastic – Stav požadavku', body, { type: 'request_status' });
     return null;
   });
 
@@ -256,6 +301,6 @@ exports.onSkladAlert = functions
 
     const body = `${a.material || '–'} · ${a.qty || ''} ks · ${a.machine || '–'}${a.note ? ' · ' + a.note : ''}`;
     const tokens = await getTokensForRoles(['mistr', 'serizovac', 'vedouci', 'skladnik']);
-    await sendPush(tokens, '⚠️ Upozornění sklad', body, { type: 'sklad' });
+    await sendPush(tokens, 'ColorPlastic – Upozornění sklad', body, { type: 'sklad' });
     return null;
   });
