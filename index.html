@@ -458,6 +458,18 @@ input[type="time"]::-webkit-date-and-time-value { text-align: left; }
       <button class="lout-btn" onclick="doLogout()">Odhlásit</button>
     </div>
   </nav>
+  <div id="notif-banner" style="display:none;position:fixed;bottom:16px;right:16px;z-index:9999;background:#1e2126;border:1px solid rgba(74,158,255,.4);border-radius:10px;padding:14px 16px;max-width:300px;box-shadow:0 4px 20px rgba(0,0,0,.5);">
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;">
+      <span style="font-size:22px">🔔</span>
+      <div>
+        <div style="font-size:13px;font-weight:700;color:#e8eaed;">Povolit notifikace</div>
+        <div style="font-size:11px;color:#8a9099;margin-top:2px;">Dostávejte upozornění při změnách</div>
+      </div>
+      <button onclick="document.getElementById('notif-banner').style.display='none'" style="margin-left:auto;background:none;border:none;color:#555c67;font-size:18px;cursor:pointer;line-height:1;">✕</button>
+    </div>
+    <button onclick="requestNotifPermission()" style="width:100%;background:#4a9eff;color:#fff;border:none;border-radius:6px;padding:9px;font-family:Barlow,sans-serif;font-size:13px;font-weight:700;cursor:pointer;">Povolit notifikace</button>
+  </div>
+
   <div class="main-wrap" id="main-wrap">
     <div class="content-area">
     <div class="content">
@@ -1458,7 +1470,9 @@ function initFCM() {
       if (Notification.permission === 'granted') {
         registerFCMToken();
       } else if (Notification.permission === 'default') {
-        // Ukáž bell ikonku v topbaru — uživatel musí kliknout
+        // Ukáž banner pro povolení notifikací
+        var banner = document.getElementById('notif-banner');
+        if (banner) banner.style.display = 'block';
         var btn = document.getElementById('mob-notif-btn');
         if (btn) btn.style.display = 'inline-flex';
       }
@@ -1474,6 +1488,8 @@ function requestNotifPermission() {
     }
     var btn = document.getElementById('mob-notif-btn');
     if (btn) btn.style.display = 'none';
+    var banner = document.getElementById('notif-banner');
+    if (banner) banner.style.display = 'none';
     registerFCMToken();
     toast('ok', 'Notifikace povoleny', 'Budete dostávat push notifikace.');
   });
