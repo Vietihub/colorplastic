@@ -436,6 +436,7 @@ input[type="time"]::-webkit-date-and-time-value { text-align: left; }
         <div class="sb-role-info">
           <div class="sb-role-name" id="sb-role-name">–</div>
           <div class="sb-clk-sm" id="clk">--:--:--</div>
+          <div class="sb-clk-sm" id="sb-date" style="margin-top:2px;color:var(--text3)">–</div>
         </div>
       </div>
       <button class="lout-btn" onclick="doLogout()">Odhlásit</button>
@@ -647,7 +648,7 @@ input[type="time"]::-webkit-date-and-time-value { text-align: left; }
       <div class="card" style="margin-bottom:24px">
         <div class="chdr"><span class="ct">Vyřízené požadavky</span></div>
         <div class="tw tw-scroll"><table>
-          <thead><tr><th>Čas</th><th>Materiál</th><th>kg</th><th>Stroj</th><th>Vyřízeno</th><th>Stav</th></tr></thead>
+          <thead><tr><th>Čas</th><th>Materiál</th><th>kg</th><th>Stav</th></tr></thead>
           <tbody id="tbl-sklad-done"></tbody>
         </table></div>
       </div>
@@ -1134,12 +1135,16 @@ function startApp() {
   startFirebase();
   switchPage(NAV[role][0].id);
   initResponsive();
+  var DAY_CS = ['Neděle','Pondělí','Úterý','Středa','Čtvrtek','Pátek','Sobota'];
   setInterval(function(){
+    var now = new Date();
+    var t = now.toTimeString().slice(0,8);
     var e = document.getElementById('clk');
     var e2 = document.getElementById('mob-clk');
-    var t = new Date().toTimeString().slice(0,8);
+    var ed = document.getElementById('sb-date');
     if(e) e.textContent = t;
     if(e2) e2.textContent = t;
+    if(ed) ed.textContent = DAY_CS[now.getDay()]+' '+now.getDate()+'.'+(now.getMonth()+1)+'.'+now.getFullYear();
   },1000);
   startSusenCheck();
 }
@@ -1258,9 +1263,11 @@ function renderSkladPrehled() {
         h += '<div style="background:rgba(255,69,69,.08);border:1px solid rgba(255,69,69,.35);border-left:4px solid #ff4545;border-radius:8px;padding:14px 16px;margin-bottom:10px;display:grid;grid-template-columns:1fr auto;gap:12px;align-items:center">';
         h += '<div><div style="font-family:\'Barlow Condensed\',sans-serif;font-size:20px;font-weight:700;color:var(--text)">' + r.material + '</div>';
         h += '<div style="font-size:13px;color:var(--text2);margin-top:3px">';
-        h += '<span style="color:#ff8080;font-weight:600;margin-right:10px">x' + r.qty + ' kg</span>';
+        h += '<span style="color:#ff8080;font-weight:600;margin-right:10px">' + r.qty + ' kg</span>';
         h += '<span style="margin-right:10px">' + r.machine + '</span>';
-        h += '<span style="font-family:monospace">' + r.time + '</span></div></div>';
+        if (r.note) h += '<span style="color:var(--text2);display:block;margin-top:3px">📝 ' + r.note + '</span>';
+        if (r.priority==='urgent') h += '<span style="color:var(--red);font-weight:700">⚡ Urgentní</span>';
+        h += '<span style="font-family:monospace;display:block;margin-top:3px;color:var(--text3)">' + fmtActivityTime(r.time) + '</span></div></div>';
         h += '<button class="btn br bsm" data-k="' + r.fbKey + '" onclick="openSkladModal(this.dataset.k)">Reagovat</button>';
         h += '</div>';
       });
@@ -1290,7 +1297,7 @@ function renderSkladPrehled() {
         h2 += '<div style="font-size:13px;color:var(--text2);margin-top:3px">';
         h2 += '<span style="color:var(--orange);font-weight:600;margin-right:10px">' + o.qty + ' ' + o.unit + '</span>';
         if (o.note) h2 += '<span style="margin-right:10px">' + o.note + '</span>';
-        h2 += '<span style="font-family:monospace">' + o.time + '</span></div></div>';
+        h2 += '<span style="font-family:monospace">' + fmtActivityTime(o.time) + '</span></div></div>';
         h2 += '<div style="display:flex;gap:6px">';
         h2 += '<button class="btn bwarn bsm" data-k="' + o.fbKey + '" data-a="unavailable" onclick="respondObj(this.dataset.k,this.dataset.a)">X</button>';
         h2 += '<button class="btn br bsm" data-k="' + o.fbKey + '" data-a="done" onclick="respondObj(this.dataset.k,this.dataset.a)">Vyřízeno</button>';
@@ -2049,7 +2056,7 @@ function buildDovBanner() {
         '<span class="ban-title" style="color:var(--blue)">'+dovTypLbl(d.typ)+'</span>' +
       '</div>' +
       '<div class="ban-body"><strong>'+d.jmeno+'</strong> · '+d.pozice+' · '+fmtD(d.od)+' – '+fmtD(d.doo)+'</div>' +
-      '<div class="ban-meta">Podal '+d.podal+' v '+d.podalAt+'</div></div>' +
+      '<div class="ban-meta">Podal '+d.podal+' v '+fmtActivityTime(d.podalAt)+'</div></div>' +
       '<div style="display:flex;gap:7px;flex-shrink:0">' +
         '<button class="btn bwarn bsm" data-key="'+k+'" data-act="rejected" onclick="respondDov(this.dataset.key,this.dataset.act)">❌ Zamítnout</button>' +
         '<button class="btn br bsm" data-key="'+k+'" data-act="approved" onclick="respondDov(this.dataset.key,this.dataset.act)">✅ Schválit</button>' +
@@ -2168,13 +2175,16 @@ function renderSklad() {
   var ce = document.getElementById('sklad-cards');
   if (ce) ce.innerHTML = pendReq.map(function(r){
     return '<div class="rc"><div><div class="rc-time">'+r.time+'</div><div class="rc-lbl">čeká</div></div>'+
-      '<div><div class="rc-mat">'+r.material+'</div><div class="rc-meta"><span>⚖️ '+r.qty+' kg</span><span>🏭 '+r.machine+'</span></div></div>'+
+      '<div><div class="rc-mat">'+r.material+'</div><div class="rc-meta"><span>⚖️ '+r.qty+' kg</span><span>🏭 '+r.machine+'</span>'+(r.note?'<span>📝 '+r.note+'</span>':'')+(r.priority==='urgent'?'<span style="color:var(--red);font-weight:700">⚡ Urgentní</span>':'')+'</div></div>'+
       '<div><button class="btn br bsm" data-k="'+r.fbKey+'" onclick="openSkladModal(this.dataset.k)">Reagovat</button></div></div>';
   }).join('');
   var dt = document.getElementById('tbl-sklad-done');
   if (dt) dt.innerHTML = doneReq.map(function(r){
-    return '<tr><td class="mono">'+fmtActivityTime(r.time)+'</td><td class="bold">'+r.material+'</td><td>'+r.qty+' kg</td><td class="dim">'+r.machine+'</td><td class="mono">'+fmtActivityTime(r.resolvedTime||'')+'</td><td>'+sbadge(r.status)+'</td></tr>';
-  }).join('') || '<tr><td colspan="6" style="text-align:center;color:var(--text3);padding:18px">Žádné vyřízené</td></tr>';
+    var changeBtn = r.status==='unavailable'
+      ? '<div style="margin-top:5px"><button class="btn bsm" style="background:rgba(57,211,83,.12);border:1px solid rgba(57,211,83,.35);color:var(--green-text)" data-k="'+r.fbKey+'" onclick="changeReqToReady(this.dataset.k)">✅ Změnit na dostupné</button></div>'
+      : '';
+    return '<tr><td class="mono">'+fmtActivityTime(r.time)+'</td><td><div class="bold">'+r.material+'</div><div class="dim" style="font-size:11px;margin-top:2px">'+r.machine+'</div></td><td>'+r.qty+' kg</td><td>'+sbadge(r.status)+changeBtn+'</td></tr>';
+  }).join('') || '<tr><td colspan="4" style="text-align:center;color:var(--text3);padding:18px">Žádné vyřízené</td></tr>';
 
   // Objednávky
   var pendObj = D.objednavky.filter(function(o){return o.status==='pending';});
@@ -2314,7 +2324,7 @@ function renderDovVedouci() {
         '<div class="dov-info">' +
           '<div class="dov-name">'+d.jmeno+' <span style="font-size:13px;font-weight:400;color:var(--text2)">· '+d.pozice+'</span> <span class="'+dovTypClass(d.typ)+'">'+dovTypLbl(d.typ)+'</span></div>' +
           '<div class="dov-meta">📅 '+fmtD(d.od)+' – '+fmtD(d.doo)+(d.note?' · '+d.note:'')+'</div>' +
-          '<div class="dov-sub">Podal '+d.podal+' v '+d.podalAt+'</div>' +
+          '<div class="dov-sub">Podal '+d.podal+' v '+fmtActivityTime(d.podalAt)+'</div>' +
         '</div>' +
         '<div style="display:flex;gap:7px;flex-shrink:0">' +
           '<button class="btn bwarn bsm" data-k="'+d.fbKey+'" data-a="rejected" onclick="respondDov(this.dataset.k,this.dataset.a)">❌ Zamítnout</button>' +
@@ -2485,6 +2495,15 @@ function deleteForma(key) {
   if (!key) return;
   db.ref('formaChanges/' + key).remove();
   toast('ok', 'Výměna zrušena', 'Oznámení bylo odstraněno');
+}
+
+function changeReqToReady(key) {
+  var r = D.requests.find(function(x){ return x.fbKey===key; });
+  if (!r) return;
+  r.status = 'ready';
+  r.resolvedTime = nowFull();
+  fbSet('requests/'+key, r);
+  toast('ok','Stav změněn','Materiál označen jako připravený');
 }
 
 function closeModal(id) { document.getElementById(id).classList.remove('on'); }
