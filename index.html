@@ -435,6 +435,8 @@ input[type="time"]::-webkit-date-and-time-value { text-align: left; }
     <span class="mob-logo"><span class="mob-lc">C</span><span class="mob-lr">OLOR</span></span>
     <div class="mob-live">Live</div>
     <div class="mob-clk" id="mob-clk">--:--:--</div>
+    <button class="hbg" id="mob-notif-btn" onclick="requestNotifPermission()" title="Povolit notifikace" style="font-size:18px;display:none;">🔔</button>
+    <button class="hbg" onclick="doLogout()" title="Odhlásit" style="font-size:16px;">⏻</button>
   </header>
   <div class="sb-overlay" id="sb-overlay" onclick="closeSidebar()"></div>
   <nav class="sidebar" id="sidebar">
@@ -1437,31 +1439,58 @@ function deleteMat(key) {
 // ── FCM PUSH NOTIFICATIONS ────────────────────────────────────────
 var VAPID_KEY = 'BCON6lvLxriq7yGBzYBy2woLDTKb7ypazVl2LXX8Fg5dYyvG9ybA6eFJlFFSDB8SZLmSV-8ceOjq4jLbZNo1q_I';
 
+var _fcmReg = null;
+var _fcmMessaging = null;
+
 function initFCM() {
   if (!('serviceWorker' in navigator) || !('Notification' in window)) return;
   navigator.serviceWorker.register('./firebase-messaging-sw.js')
     .then(function(reg) {
-      var messaging = firebase.messaging();
-      messaging.useServiceWorker(reg);
-      Notification.requestPermission().then(function(permission) {
-        if (permission !== 'granted') return;
-        messaging.getToken({ vapidKey: VAPID_KEY, serviceWorkerRegistration: reg })
-          .then(function(token) {
-            if (!token) return;
-            db.ref('fcmTokens/' + token.slice(-20)).set({
-              token: token,
-              role: role,
-              updated: new Date().toISOString()
-            });
-            console.log('FCM token registered');
-          }).catch(function(e) { console.warn('FCM token error:', e); });
-      });
-      messaging.onMessage(function(payload) {
+      _fcmReg = reg;
+      _fcmMessaging = firebase.messaging();
+      // Poslouchej foreground zprávy
+      _fcmMessaging.onMessage(function(payload) {
         var n = payload.notification;
         if (!n) return;
         toast('ok', n.title, n.body);
       });
+      // Pokud už je povoleno, rovnou zaregistruj token
+      if (Notification.permission === 'granted') {
+        registerFCMToken();
+      } else if (Notification.permission === 'default') {
+        // Ukáž bell ikonku v topbaru — uživatel musí kliknout
+        var btn = document.getElementById('mob-notif-btn');
+        if (btn) btn.style.display = 'inline-flex';
+      }
     }).catch(function(e) { console.warn('SW register error:', e); });
+}
+
+function requestNotifPermission() {
+  if (!_fcmMessaging) return;
+  Notification.requestPermission().then(function(permission) {
+    if (permission !== 'granted') {
+      toast('err', 'Notifikace', 'Povolení zamítnuto – povolte v nastavení prohlížeče.');
+      return;
+    }
+    var btn = document.getElementById('mob-notif-btn');
+    if (btn) btn.style.display = 'none';
+    registerFCMToken();
+    toast('ok', 'Notifikace povoleny', 'Budete dostávat push notifikace.');
+  });
+}
+
+function registerFCMToken() {
+  if (!_fcmMessaging || !_fcmReg) return;
+  _fcmMessaging.getToken({ vapidKey: VAPID_KEY, serviceWorkerRegistration: _fcmReg })
+    .then(function(token) {
+      if (!token) return;
+      db.ref('fcmTokens/' + token.slice(-20)).set({
+        token: token,
+        role: role,
+        updated: new Date().toISOString()
+      });
+      console.log('FCM token registered');
+    }).catch(function(e) { console.warn('FCM token error:', e); });
 }
 
 // ── PLÁNOVÁNÍ ─────────────────────────────────────────────────────
