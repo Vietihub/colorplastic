@@ -151,7 +151,8 @@ exports.onNewDovolena = functions
     const d = snap.val();
     if (!d || d.status !== 'pending') return null;
 
-    const body = `${d.jmeno || '–'} · ${d.typ || ''}\nod ${fmtDate(d.od)} do ${fmtDate(d.doo)}`;
+    const typLbl = DOV_TYP[d.typ] || d.typ || '–';
+    const body = `${d.jmeno || '–'} · ${typLbl}\n${fmtDate(d.od)} – ${fmtDate(d.doo)}`;
     const tokens = await getTokensForRoles(['vedouci']);
     await sendPush(tokens, 'Žádost o dovolenou', body, { type: 'dovolena' });
     return null;
@@ -176,7 +177,8 @@ exports.onDovolenaStatusChange = functions
     if (!d) return null;
 
     const statusLabel = after === 'approved' ? 'schválena ✅' : 'zamítnuta ❌';
-    const body = `${d.jmeno || '–'} · ${d.typ || ''}\nod ${fmtDate(d.od)} do ${fmtDate(d.doo)}`;
+    const typLbl = DOV_TYP[d.typ] || d.typ || '–';
+    const body = `${d.jmeno || '–'} · ${typLbl}\n${fmtDate(d.od)} – ${fmtDate(d.doo)}`;
     const tokens = await getTokensForRoles(['mistr', 'serizovac']);
     await sendPush(tokens, `ColorPlastic – Dovolená ${statusLabel}`, body, { type: 'dovolena_status' });
     return null;
@@ -222,6 +224,15 @@ async function isAlreadyProcessed(eventId) {
   setTimeout(() => ref.remove().catch(() => {}), 600000);
   return false;
 }
+
+// Překlad typů dovolené
+const DOV_TYP = {
+  d: 'Dovolená',
+  l: 'K lékaři',
+  n: 'Nemocenská',
+  v: 'Náhradní volno',
+  j: 'Jiné'
+};
 
 // Překlad rolí
 const ROLE_LABELS = {
