@@ -370,8 +370,8 @@ input[type="time"]::-webkit-date-and-time-value { text-align: left; }
 .plan-scroll::-webkit-scrollbar-thumb:hover { background:var(--text3); }
 
 @media(max-width:768px){
-  .sidebar{transform:translateX(-100%);width:220px !important;top:52px;}
-  .sidebar.open{transform:translateX(0);}
+  .sidebar{transform:translateX(-100%);width:220px !important;top:52px;transition:transform .25s ease;}
+  .sidebar.open{transform:translateX(0) !important;}
   .main-wrap{margin-left:0 !important;}
   .content{padding:12px;}
   .two{grid-template-columns:1fr;}
@@ -1159,7 +1159,7 @@ function buildSidebar() {
     btn.innerHTML = '<span class="sbn-icon">'+item.ic+'</span><span class="sbn-lbl">'+item.lbl+'</span>';
     btn.onclick = function(){
       switchPage(item.id);
-      if (window.innerWidth < 768) closeSidebar();
+      if (window.innerWidth < 768) { document.getElementById("sidebar").classList.remove("open"); document.getElementById("sb-overlay").classList.remove("on"); }
     };
     nav.appendChild(btn);
   });
@@ -1170,12 +1170,18 @@ function toggleSidebar() {
   var mw = document.getElementById('main-wrap');
   var ov = document.getElementById('sb-overlay');
   if (window.innerWidth < 768) {
-    sb.classList.toggle('open');
-    ov.classList.toggle('on');
+    var isOpen = sb.classList.contains('open');
+    if (isOpen) {
+      sb.classList.remove('open');
+      ov.classList.remove('on');
+    } else {
+      sb.classList.add('open');
+      ov.classList.add('on');
+    }
   } else {
     sidebarCollapsed = !sidebarCollapsed;
     sb.classList.toggle('collapsed', sidebarCollapsed);
-    mw.classList.toggle('collapsed', sidebarCollapsed);
+    if (mw) mw.style.marginLeft = sidebarCollapsed ? '60px' : '220px';
   }
 }
 
@@ -1188,25 +1194,18 @@ function initResponsive() {
   function check() {
     var mob = window.innerWidth < 768;
     var tb = document.getElementById('mob-topbar');
-    var sb = document.getElementById('sidebar');
     var mw = document.getElementById('main-wrap');
     if (mob) {
-      tb.classList.add('show');
-      sb.style.top = '52px';
-      sb.style.transform = sb.classList.contains('open') ? 'translateX(0)' : 'translateX(-100%)';
-      mw.style.marginLeft = '0';
+      if (tb) tb.classList.add('show');
+      if (mw) mw.style.marginLeft = '0';
     } else {
-      tb.classList.remove('show');
-      sb.style.top = '0';
-      sb.style.transform = '';
-      mw.style.marginLeft = sidebarCollapsed ? '60px' : '220px';
+      if (tb) tb.classList.remove('show');
+      if (mw) mw.style.marginLeft = sidebarCollapsed ? '60px' : '220px';
+      closeSidebar();
     }
   }
   check();
   window.addEventListener('resize', check);
-  var sb = document.getElementById('sidebar');
-  var orig = sb.style.transition;
-  sb.style.transition = 'width .2s, transform .2s';
 }
 
 function switchPage(pageId) {
@@ -2181,7 +2180,7 @@ function renderSklad() {
   var dt = document.getElementById('tbl-sklad-done');
   if (dt) dt.innerHTML = doneReq.map(function(r){
     var changeBtn = r.status==='unavailable'
-      ? '<div style="margin-top:5px"><button class="btn bsm" style="background:rgba(57,211,83,.12);border:1px solid rgba(57,211,83,.35);color:var(--green-text)" data-k="'+r.fbKey+'" onclick="changeReqToReady(this.dataset.k)">✅ Změnit na dostupné</button></div>'
+      ? '<div style="margin-top:5px"><button data-k="'+r.fbKey+'" data-action="change-ready" style="background:rgba(57,211,83,.12);border:1px solid rgba(57,211,83,.35);color:var(--green-text);border-radius:5px;padding:4px 8px;font-size:11px;font-weight:700;cursor:pointer;margin-top:4px;display:inline-block">✅ Změnit na dostupné</button></div>'
       : '';
     return '<tr><td class="mono">'+fmtActivityTime(r.time)+'</td><td><div class="bold">'+r.material+'</div><div class="dim" style="font-size:11px;margin-top:2px">'+r.machine+'</div></td><td>'+r.qty+' kg</td><td>'+sbadge(r.status)+changeBtn+'</td></tr>';
   }).join('') || '<tr><td colspan="4" style="text-align:center;color:var(--text3);padding:18px">Žádné vyřízené</td></tr>';
@@ -2574,6 +2573,16 @@ function toast(type, title, msg) {
 
 // Clear PIN on load
 document.getElementById('pin').value='';
+
+// Event delegation for dynamic buttons
+document.addEventListener('click', function(e) {
+  var btn = e.target.closest('[data-action="change-ready"]');
+  if (btn) {
+    var key = btn.getAttribute('data-k');
+    if (key) changeReqToReady(key);
+    return;
+  }
+});
 
 // Auto-restore session
 (function() {
