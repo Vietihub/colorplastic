@@ -117,7 +117,7 @@ exports.onSusenNotification = functions
     if (!n || n.typ !== 'susen') return null;
 
     const tokens = await getTokensForRoles(['mistr', 'serizovac']);
-    await sendPush(tokens, 'ColorPlastic – Nutno sušit materiál 🔥', n.msg || '', {
+    await sendPush(tokens, 'Nutno sušit materiál 🔥', n.msg || '', {
       type: 'susen',
       key:  context.params.key
     });
@@ -136,7 +136,7 @@ exports.onNewObjednavka = functions
 
     const body = `${o.item || 'Položka'} – ${o.qty || ''} ${o.unit || ''} (podal: ${o.podal || '–'})`;
     const tokens = await getTokensForRoles(['vedouci']);
-    await sendPush(tokens, 'ColorPlastic – Nová objednávka', body, { type: 'objednavka' });
+    await sendPush(tokens, 'Nová objednávka', body, { type: 'objednavka' });
     return null;
   });
 
@@ -153,7 +153,7 @@ exports.onNewDovolena = functions
 
     const body = `${d.jmeno || '–'} · ${d.typ || ''}\nod ${fmtDate(d.od)} do ${fmtDate(d.doo)}`;
     const tokens = await getTokensForRoles(['vedouci']);
-    await sendPush(tokens, 'ColorPlastic – Žádost o dovolenou', body, { type: 'dovolena' });
+    await sendPush(tokens, 'Žádost o dovolenou', body, { type: 'dovolena' });
     return null;
   });
 
@@ -194,7 +194,7 @@ exports.onFormaChange = functions
 
     const body = `${f.machine || '–'}: ${f.formOff || '–'} → ${f.formOn || '–'} v ${f.changeTime || '–'}${f.dry ? ' 🔥' : ''}`;
     const tokens = await getTokensForRoles(['mistr', 'serizovac']);
-    await sendPush(tokens, 'ColorPlastic – Přeseřízení formy', body, {
+    await sendPush(tokens, 'Přeseřízení formy', body, {
       type:    'forma',
       machine: f.machine || ''
     });
@@ -285,7 +285,7 @@ exports.onRequestStatusChange = functions
     const statusCz = STATUS_LABELS[after] || after;
     const body = `${r.material || '–'} · ${r.qty || ''} kg · ${r.machine || '–'}\nStav: ${statusCz}`;
     const tokens = await getTokensForRoles(['mistr', 'serizovac', 'vedouci']);
-    await sendPush(tokens, 'ColorPlastic – Stav požadavku', body, { type: 'request_status' });
+    await sendPush(tokens, 'Stav požadavku', body, { type: 'request_status' });
     return null;
   });
 
@@ -301,6 +301,6 @@ exports.onSkladAlert = functions
 
     const body = `${a.material || '–'} · ${a.qty || ''} ks · ${a.machine || '–'}${a.note ? ' · ' + a.note : ''}`;
     const tokens = await getTokensForRoles(['mistr', 'serizovac', 'vedouci', 'skladnik']);
-    await sendPush(tokens, 'ColorPlastic – Upozornění sklad', body, { type: 'sklad' });
+    await sendPush(tokens, 'Upozornění sklad', body, { type: 'sklad' });
     return null;
   });
