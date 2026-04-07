@@ -1040,6 +1040,7 @@ input[type="time"]::-webkit-date-and-time-value { text-align: left; }
 
 <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
 <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-messaging.js"></script>
 <script>
 // ═══════════════════════════════════════════════
 //  FIREBASE
@@ -1162,6 +1163,7 @@ function startApp() {
     if(ed) ed.textContent = DAY_CS[now.getDay()]+' '+now.getDate()+'.'+(now.getMonth()+1)+'.'+now.getFullYear();
   },1000);
   startSusenCheck();
+  initFCM();
 }
 
 function buildSidebar() {
@@ -1430,6 +1432,36 @@ function deleteMat(key) {
   if(!key){toast('err','Chyba','Nelze smazat – záznam nemá klíč.');return;}
   db.ref('materialy/'+key).remove();
   toast('ok','Smazáno','Záznam odstraněn');
+}
+
+// ── FCM PUSH NOTIFICATIONS ────────────────────────────────────────
+var VAPID_KEY = 'BCON6lvLxriq7yGBzYBy2woLDTKb7ypazVl2LXX8Fg5dYyvG9ybA6eFJlFFSDB8SZLmSV-8ceOjq4jLbZNo1q_I';
+
+function initFCM() {
+  if (!('serviceWorker' in navigator) || !('Notification' in window)) return;
+  navigator.serviceWorker.register('/firebase-messaging-sw.js')
+    .then(function(reg) {
+      var messaging = firebase.messaging();
+      messaging.useServiceWorker(reg);
+      Notification.requestPermission().then(function(permission) {
+        if (permission !== 'granted') return;
+        messaging.getToken({ vapidKey: VAPID_KEY, serviceWorkerRegistration: reg })
+          .then(function(token) {
+            if (!token) return;
+            db.ref('fcmTokens/' + token.slice(-20)).set({
+              token: token,
+              role: role,
+              updated: new Date().toISOString()
+            });
+            console.log('FCM token registered');
+          }).catch(function(e) { console.warn('FCM token error:', e); });
+      });
+      messaging.onMessage(function(payload) {
+        var n = payload.notification;
+        if (!n) return;
+        toast('ok', n.title, n.body);
+      });
+    }).catch(function(e) { console.warn('SW register error:', e); });
 }
 
 // ── PLÁNOVÁNÍ ─────────────────────────────────────────────────────
