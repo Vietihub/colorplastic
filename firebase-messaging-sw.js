@@ -24,8 +24,8 @@ messaging.onBackgroundMessage(function(payload) {
   const title   = (payload.notification && payload.notification.title) || 'ColorPlastic';
   const options = {
     body:    (payload.notification && payload.notification.body) || '',
-    icon:    '/icon-192.png',   // volitelné – přidej ikonu do složky
-    badge:   '/badge-72.png',   // volitelné – malá ikonka v status baru
+    icon:    '/icon-192.png',
+    badge:   '/badge-72.png',
     tag:     payload.data && payload.data.type ? payload.data.type : 'colorplastic',
     renotify: true,
     vibrate: [200, 100, 200],
