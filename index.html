@@ -150,7 +150,7 @@ body{font-family:'Barlow',sans-serif;background:var(--bg);color:var(--text);min-
 .cpad{padding:20px;}
 .ctitle2{font-family:'Barlow Condensed',sans-serif;font-size:16px;font-weight:700;letter-spacing:1px;text-transform:uppercase;margin-bottom:16px;padding-bottom:12px;border-bottom:1px solid var(--border);}
 
-.tw{overflow-x:auto;}
+.tw{overflow-x:auto;}.tw-scroll{max-height:340px;overflow-y:auto;overflow-x:auto;}
 table{width:100%;border-collapse:collapse;}
 thead th{padding:9px 14px;text-align:left;font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--text3);background:rgba(255,255,255,.02);border-bottom:1px solid var(--border);white-space:nowrap;}
 tbody tr{border-bottom:1px solid var(--border);}
@@ -524,7 +524,7 @@ input[type="time"]::-webkit-date-and-time-value { text-align: left; }
         <div id="sklad-p-req-cards"></div>
         <div class="card">
           <div class="chdr"><span class="ct">Vyřízené požadavky</span></div>
-          <div class="tw"><table>
+          <div class="tw tw-scroll"><table>
             <thead><tr><th>Čas</th><th>Materiál</th><th>kg</th><th>Stav</th></tr></thead>
             <tbody id="tbl-sklad-p-done"></tbody>
           </table></div>
@@ -533,7 +533,7 @@ input[type="time"]::-webkit-date-and-time-value { text-align: left; }
         <div id="sklad-p-obj-cards"></div>
         <div class="card">
           <div class="chdr"><span class="ct">Vyřízené objednávky</span></div>
-          <div class="tw"><table>
+          <div class="tw tw-scroll"><table>
             <thead><tr><th>Čas</th><th>Položka</th><th>Množství</th><th>Stav</th></tr></thead>
             <tbody id="tbl-sklad-p-obj-done"></tbody>
           </table></div>
@@ -579,7 +579,7 @@ input[type="time"]::-webkit-date-and-time-value { text-align: left; }
         </div>
         <div class="card">
           <div class="chdr"><span class="ct">Moje požadavky dnes</span><div class="live">Live</div></div>
-          <div class="tw"><table>
+          <div class="tw tw-scroll"><table>
             <thead><tr><th>Čas</th><th>Materiál</th><th>kg</th><th>Stav</th></tr></thead>
             <tbody id="tbl-my-req"></tbody>
           </table></div>
@@ -646,7 +646,7 @@ input[type="time"]::-webkit-date-and-time-value { text-align: left; }
       <div id="sklad-cards"></div>
       <div class="card" style="margin-bottom:24px">
         <div class="chdr"><span class="ct">Vyřízené požadavky</span></div>
-        <div class="tw"><table>
+        <div class="tw tw-scroll"><table>
           <thead><tr><th>Čas</th><th>Materiál</th><th>kg</th><th>Stroj</th><th>Vyřízeno</th><th>Stav</th></tr></thead>
           <tbody id="tbl-sklad-done"></tbody>
         </table></div>
@@ -657,7 +657,7 @@ input[type="time"]::-webkit-date-and-time-value { text-align: left; }
       <div id="obj-cards"></div>
       <div class="card">
         <div class="chdr"><span class="ct">Vyřízené objednávky</span></div>
-        <div class="tw"><table>
+        <div class="tw tw-scroll"><table>
           <thead><tr><th>Čas</th><th>Položka</th><th>Množství</th><th>Poznámka</th><th>Stav</th></tr></thead>
           <tbody id="tbl-obj-done"></tbody>
         </table></div>
@@ -671,7 +671,7 @@ input[type="time"]::-webkit-date-and-time-value { text-align: left; }
       <div class="stats" id="stats-scrap"></div>
       <div class="card">
         <div class="chdr"><span class="ct">♻️ Dnešní záznamy scrapu</span><div class="live">Live</div></div>
-        <div class="tw"><table>
+        <div class="tw tw-scroll"><table>
           <thead><tr><th>Čas</th><th>Materiál</th><th>Typ</th><th>kg</th><th>Stroj</th><th>Důvod</th></tr></thead>
           <tbody id="tbl-scrap-r"></tbody>
         </table></div>
@@ -855,7 +855,7 @@ input[type="time"]::-webkit-date-and-time-value { text-align: left; }
       <div id="dov-pending"></div>
       <div class="card">
         <div class="chdr"><span class="ct">Historie žádostí</span></div>
-        <div class="tw"><table>
+        <div class="tw tw-scroll"><table>
           <thead><tr><th>Zaměstnanec</th><th>Typ</th><th>Pozice</th><th>Od</th><th>Do</th><th>Stav</th><th>Akce</th></tr></thead>
           <tbody id="tbl-dov-hist"></tbody>
         </table></div>
@@ -1271,7 +1271,7 @@ function renderSkladPrehled() {
   // Req done
   var rd = document.getElementById('tbl-sklad-p-done');
   if (rd) rd.innerHTML = doneReq.map(function(r){
-    return '<tr><td class="mono">' + r.time + '</td><td class="bold">' + r.material + '</td><td>' + r.qty + ' kg</td><td>' + sbadge(r.status) + '</td></tr>';
+    return '<tr><td class="mono">' + fmtActivityTime(r.time) + '</td><td class="bold">' + r.material + '</td><td>' + r.qty + ' kg</td><td>' + sbadge(r.status) + '</td></tr>';
   }).join('') || '<tr><td colspan="4" style="text-align:center;color:var(--text3);padding:14px">Žádné vyřízené</td></tr>';
 
   // ── Obj cards ──
@@ -1303,7 +1303,7 @@ function renderSkladPrehled() {
   // Obj done
   var od = document.getElementById('tbl-sklad-p-obj-done');
   if (od) od.innerHTML = doneObj.map(function(o){
-    return '<tr><td class="mono">' + o.time + '</td><td class="bold">' + o.item + '</td><td>' + o.qty + ' ' + o.unit + '</td><td>' + sbadge(o.status) + '</td></tr>';
+    return '<tr><td class="mono">' + fmtActivityTime(o.time) + '</td><td class="bold">' + o.item + '</td><td>' + o.qty + ' ' + o.unit + '</td><td>' + sbadge(o.status) + '</td></tr>';
   }).join('') || '<tr><td colspan="4" style="text-align:center;color:var(--text3);padding:14px">Žádné vyřízené</td></tr>';
 }
 
@@ -1656,7 +1656,7 @@ function savePlan() {
   var susen = document.getElementById('pm-susen').checked;
   var note  = document.getElementById('pm-note').value.trim();
   if (!forma && !qty) { toast('err','Chyba','Zadejte formu nebo počet kusů.'); return; }
-  var entry = {forma:forma, mat:mat, qty:qty, barva:barva, cas:cas, susen:susen, note:note, updatedAt:now()};
+  var entry = {forma:forma, mat:mat, qty:qty, barva:barva, cas:cas, susen:susen, note:note, updatedAt:nowFull()};
   fbSet('plan/'+editPlanKey, entry);
   // Notifikace o sušení
   if (susen && mat) {
@@ -1881,6 +1881,8 @@ function renderActivityFeed() {
     if (role==='sklad') {
       if (r.status==='pending') {
         addItem('af-req','📦','Nový požadavek', r.material+' · '+r.qty+' kg · '+r.machine, r.time);
+      } else {
+        addItem('af-req', r.status==='ready'?'✅':'❌', 'Sklad: '+(r.status==='ready'?'Připraveno':'Nedostupné'), r.material+' · '+r.qty+' kg', r.resolvedTime||r.time);
       }
     } else if (role==='serizovac') {
       if (r.status==='pending') {
@@ -1899,7 +1901,7 @@ function renderActivityFeed() {
   D.formaChanges.slice(0,15).forEach(function(f){
     if (role==='vedouci') {
       addItem('af-forma','🔔','Vydáno: změna formy', f.machine+' · '+f.formOff+' → '+f.formOn+(f.changeTime?' v '+f.changeTime:''), f.issuedAt);
-    } else {
+    } else if (role==='mistr'||role==='serizovac'||role==='sklad'||role==='technolog'||role==='udrzba') {
       addItem('af-forma','🔔','Nová změna formy', f.machine+' · '+f.formOff+' → '+f.formOn+(f.changeTime?' v '+f.changeTime:''), f.issuedAt);
     }
   });
@@ -1908,47 +1910,50 @@ function renderActivityFeed() {
   D.objednavky.slice(0,15).forEach(function(o){
     if (role==='sklad') {
       if (o.status==='pending') {
-        addItem('af-obj','🛒','Nová objednávka', o.item+' · '+o.qty+' '+o.unit+(o.podal?' · '+o.podal:''), o.time);
+        addItem('af-obj','🛒','Nová objednávka: '+o.item, o.qty+' '+o.unit+(o.podal?' · '+o.podal:''), o.time);
       } else {
         addItem('af-obj', o.status==='done'?'✅':'❌', 'Objednávka: '+(o.status==='done'?'vyřízeno':'nedostupné'), o.item+' · '+o.qty+' '+o.unit, o.resolvedAt||o.time);
       }
     } else if (role==='mistr') {
       var st = {pending:'⏳ čeká', done:'✅ vyřízeno', unavailable:'❌ nedostupné'}[o.status]||o.status;
-      addItem('af-obj','🛒','Objednávka: '+o.item, o.qty+' '+o.unit+' · '+st, o.time);
+      addItem('af-obj','🛒','Objednávka: '+o.item, o.qty+' '+o.unit+' · '+st, o.resolvedAt||o.time);
     }
   });
 
   // ── DOVOLENÉ ───────────────────────────────────
   D.dovolene.slice(0,20).forEach(function(d){
     if (role==='vedouci') {
-      if (d.status==='pending') {
-        addItem('af-dov','🏖','Nová žádost: '+dovTypLbl(d.typ), d.jmeno+' · '+d.pozice+' · '+fmtD(d.od)+' – '+fmtD(d.doo), d.podalAt);
-      } else {
-        var icon = d.status==='approved'?'✅':'❌';
-        var st = d.status==='approved'?'schváleno':'zamítnuto';
-        addItem('af-dov', icon, d.jmeno+' – '+st, dovTypLbl(d.typ)+' · '+fmtD(d.od)+' – '+fmtD(d.doo), d.resolvedAt||d.podalAt);
-      }
+      var icon = d.status==='pending'?'🏖':d.status==='approved'?'✅':'❌';
+      var st   = d.status==='pending'?'Nová žádost':d.status==='approved'?'Schváleno':'Zamítnuto';
+      addItem('af-dov', icon, d.jmeno+' – '+st, dovTypLbl(d.typ)+' · '+fmtD(d.od)+' – '+fmtD(d.doo), d.resolvedAt||d.podalAt);
     } else if (role==='mistr') {
       var icon2 = d.status==='pending'?'🏖':d.status==='approved'?'✅':'❌';
-      var st2 = d.status==='pending'?'čeká na schválení':d.status==='approved'?'schváleno':'zamítnuto';
+      var st2   = d.status==='pending'?'čeká na schválení':d.status==='approved'?'schváleno':'zamítnuto';
       addItem('af-dov', icon2, d.jmeno+' – '+st2, dovTypLbl(d.typ)+' · '+fmtD(d.od)+' – '+fmtD(d.doo), d.resolvedAt||d.podalAt);
     }
   });
 
   // ── PLÁN VÝROBY ────────────────────────────────
   if (role==='vedouci' || role==='mistr' || role==='serizovac') {
-    var planKeys = Object.keys(D.plan).filter(function(k){ return D.plan[k] && D.plan[k].updatedAt; });
-    planKeys.slice(0,10).forEach(function(k){
+    Object.keys(D.plan).forEach(function(k){
       var p = D.plan[k];
+      if (!p || !p.updatedAt) return;
       var parts = k.split('_');
       var smena = parts[parts.length-1];
-      var mach = parts.slice(0,-2).join(' ').replace(/_/g,' ');
-      addItem('af-plan','📅','Plán aktualizován', (p.forma?p.forma+' · ':'')+p.mat.split('(')[0].trim()+' · '+smena, p.updatedAt);
+      var mat = p.mat ? p.mat.split('(')[0].trim() : '';
+      addItem('af-plan','📅','Plán aktualizován', (p.forma?p.forma+' · ':'')+mat+' · '+smena, p.updatedAt);
     });
   }
 
-  // Sort by time descending
-  items.sort(function(a,b){ return (b.time||'').localeCompare(a.time||''); });
+  // Sort by time descending — use full ISO string if available, else HH:MM
+  items.sort(function(a,b){
+    var ta = a.time||'';
+    var tb = b.time||'';
+    if (!ta && !tb) return 0;
+    if (!ta) return 1;
+    if (!tb) return -1;
+    return tb.localeCompare(ta);
+  });
 
   if (!items.length) {
     el.innerHTML = '<div class="af-empty">Žádná aktivita</div>';
@@ -1959,10 +1964,12 @@ function renderActivityFeed() {
 
   var html = items.slice(0,50).map(function(item){
     return '<div class="af-item '+item.type+'">' +
-      '<div class="af-icon">'+item.icon+'</div>' +
+      '<div style="display:flex;align-items:center;gap:6px;margin-bottom:3px">' +
+        '<span class="af-icon">'+item.icon+'</span>' +
+        (item.time ? '<span class="af-time" style="margin:0">'+fmtActivityTime(item.time)+'</span>' : '') +
+      '</div>' +
       '<div class="af-title">'+item.title+'</div>' +
       (item.sub ? '<div class="af-sub">'+item.sub+'</div>' : '') +
-      (item.time ? '<div class="af-time">'+item.time+'</div>' : '') +
     '</div>';
   }).join('');
 
@@ -2070,6 +2077,19 @@ function dismissForma(key) {
 //  RENDER FUNCTIONS
 // ═══════════════════════════════════════════════
 function now() { return new Date().toTimeString().slice(0,5); }
+function nowFull() {
+  var d = new Date();
+  return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')+'T'+d.toTimeString().slice(0,5);
+}
+function fmtActivityTime(t) {
+  if (!t) return '';
+  if (t.includes('T')) {
+    var parts = t.split('T');
+    var dp = parts[0].split('-');
+    return dp[2]+'.'+dp[1]+'. '+parts[1];
+  }
+  return t;
+}
 function fmtD(s) {
   if (!s) return '–';
   var p=s.split('-'); return p[2]+'.'+p[1]+'.'+p[0];
@@ -2099,11 +2119,11 @@ function renderPrehled() {
   renderPlanToday();
   var tr = document.getElementById('tbl-req-p');
   if (tr) tr.innerHTML = D.requests.slice(0,10).map(function(r){
-    return '<tr><td class="mono">'+r.time+'</td><td class="bold">'+r.material+'</td><td>'+r.qty+' kg</td><td>'+sbadge(r.status)+'</td></tr>';
+    return '<tr><td class="mono">'+fmtActivityTime(r.time)+'</td><td class="bold">'+r.material+'</td><td>'+r.qty+' kg</td><td>'+sbadge(r.status)+'</td></tr>';
   }).join('') || '<tr><td colspan="4" style="text-align:center;color:var(--text3);padding:18px">Žádné požadavky</td></tr>';
   var ts = document.getElementById('tbl-scrap-p');
   if (ts) ts.innerHTML = D.scrap.slice(0,8).map(function(s){
-    return '<tr><td class="mono">'+s.time+'</td><td class="bold">'+s.material+'</td><td style="font-weight:700;color:var(--green-text)">'+s.weight+' kg</td><td><span class="tbadge">'+s.type+'</span></td></tr>';
+    return '<tr><td class="mono">'+fmtActivityTime(s.time)+'</td><td class="bold">'+s.material+'</td><td style="font-weight:700;color:var(--green-text)">'+s.weight+' kg</td><td><span class="tbadge">'+s.type+'</span></td></tr>';
   }).join('') || '<tr><td colspan="4" style="text-align:center;color:var(--text3);padding:18px">Žádný scrap</td></tr>';
 }
 
@@ -2124,7 +2144,7 @@ function renderProd(containerId) {
 function renderPozadavky() {
   var t = document.getElementById('tbl-my-req'); if (!t) return;
   t.innerHTML = D.requests.map(function(r){
-    return '<tr><td class="mono">'+r.time+'</td><td class="bold">'+r.material+'</td><td>'+r.qty+' kg</td><td>'+sbadge(r.status)+'</td></tr>';
+    return '<tr><td class="mono">'+fmtActivityTime(r.time)+'</td><td class="bold">'+r.material+'</td><td>'+r.qty+' kg</td><td>'+sbadge(r.status)+'</td></tr>';
   }).join('') || '<tr><td colspan="4" style="text-align:center;color:var(--text3);padding:18px">Žádné požadavky</td></tr>';
 }
 
@@ -2133,7 +2153,7 @@ function renderScrap() {
   if (sf) sf.style.display = (role==='mistr') ? 'none' : 'block';
   var t = document.getElementById('tbl-scrap'); if (!t) return;
   t.innerHTML = D.scrap.map(function(s){
-    return '<tr><td class="mono">'+s.time+'</td><td class="bold">'+s.material+'</td><td><span class="tbadge">'+s.type+'</span></td><td style="font-weight:700;color:var(--green-text)">'+s.weight+' kg</td><td class="dim">'+s.machine+'</td></tr>';
+    return '<tr><td class="mono">'+fmtActivityTime(s.time)+'</td><td class="bold">'+s.material+'</td><td><span class="tbadge">'+s.type+'</span></td><td style="font-weight:700;color:var(--green-text)">'+s.weight+' kg</td><td class="dim">'+s.machine+'</td></tr>';
   }).join('') || '<tr><td colspan="5" style="text-align:center;color:var(--text3);padding:18px">Žádné záznamy</td></tr>';
 }
 
@@ -2153,7 +2173,7 @@ function renderSklad() {
   }).join('');
   var dt = document.getElementById('tbl-sklad-done');
   if (dt) dt.innerHTML = doneReq.map(function(r){
-    return '<tr><td class="mono">'+r.time+'</td><td class="bold">'+r.material+'</td><td>'+r.qty+' kg</td><td class="dim">'+r.machine+'</td><td class="mono">'+(r.resolvedTime||'–')+'</td><td>'+sbadge(r.status)+'</td></tr>';
+    return '<tr><td class="mono">'+fmtActivityTime(r.time)+'</td><td class="bold">'+r.material+'</td><td>'+r.qty+' kg</td><td class="dim">'+r.machine+'</td><td class="mono">'+fmtActivityTime(r.resolvedTime||'')+'</td><td>'+sbadge(r.status)+'</td></tr>';
   }).join('') || '<tr><td colspan="6" style="text-align:center;color:var(--text3);padding:18px">Žádné vyřízené</td></tr>';
 
   // Objednávky
@@ -2174,7 +2194,7 @@ function renderSklad() {
   }).join('');
   var odt = document.getElementById('tbl-obj-done');
   if (odt) odt.innerHTML = doneObj.map(function(o){
-    return '<tr><td class="mono">'+o.time+'</td><td class="bold">'+o.item+'</td><td>'+o.qty+' '+o.unit+'</td><td class="dim">'+(o.note||'–')+'</td><td>'+sbadge(o.status)+'</td></tr>';
+    return '<tr><td class="mono">'+fmtActivityTime(o.time)+'</td><td class="bold">'+o.item+'</td><td>'+o.qty+' '+o.unit+'</td><td class="dim">'+(o.note||'–')+'</td><td>'+sbadge(o.status)+'</td></tr>';
   }).join('') || '<tr><td colspan="5" style="text-align:center;color:var(--text3);padding:18px">Žádné vyřízené</td></tr>';
 }
 
@@ -2187,7 +2207,7 @@ function renderScrapReport() {
     '<div class="stat"><div class="sl">Typy zmetků</div><div class="sv">'+new Set(D.scrap.map(function(s){return s.type;})).size+' <span class="su">druhy</span></div></div>';
   var t = document.getElementById('tbl-scrap-r');
   if (t) t.innerHTML = D.scrap.map(function(s){
-    return '<tr><td class="mono">'+s.time+'</td><td class="bold">'+s.material+'</td><td><span class="tbadge">'+s.type+'</span></td><td style="font-weight:700;color:var(--green-text)">'+s.weight+' kg</td><td class="dim">'+s.machine+'</td><td class="dim">'+s.reason+'</td></tr>';
+    return '<tr><td class="mono">'+fmtActivityTime(s.time)+'</td><td class="bold">'+s.material+'</td><td><span class="tbadge">'+s.type+'</span></td><td style="font-weight:700;color:var(--green-text)">'+s.weight+' kg</td><td class="dim">'+s.machine+'</td><td class="dim">'+s.reason+'</td></tr>';
   }).join('') || '<tr><td colspan="6" style="text-align:center;color:var(--text3);padding:18px">Žádné záznamy</td></tr>';
   renderRepTables();
 }
@@ -2237,7 +2257,7 @@ function renderFormy() {
 function renderObjednavky() {
   var t=document.getElementById('tbl-obj-mistr'); if(!t) return;
   t.innerHTML=D.objednavky.map(function(o){
-    return '<tr><td class="mono">'+o.time+'</td><td class="bold">'+o.item+'</td><td>'+o.qty+' '+o.unit+'</td><td>'+sbadge(o.status)+'</td></tr>';
+    return '<tr><td class="mono">'+fmtActivityTime(o.time)+'</td><td class="bold">'+o.item+'</td><td>'+o.qty+' '+o.unit+'</td><td>'+sbadge(o.status)+'</td></tr>';
   }).join('') || '<tr><td colspan="4" style="text-align:center;color:var(--text3);padding:18px">Žádné objednávky</td></tr>';
 }
 
@@ -2322,7 +2342,7 @@ function submitReq() {
   var prior=document.getElementById('req-prior').value;
   var note=document.getElementById('req-note').value;
   if(!mat||!qty||!stroj){toast('err','Chyba','Vyplňte materiál, množství a stroj.');return;}
-  fbPush('requests',{time:now(),material:mat,qty:parseInt(qty),machine:stroj,priority:prior,note:note,status:'pending',worker:'Seřizovač',resolvedTime:null});
+  fbPush('requests',{time:nowFull(),material:mat,qty:parseInt(qty),machine:stroj,priority:prior,note:note,status:'pending',worker:'Seřizovač',resolvedTime:null});
   document.getElementById('req-mat').value='';
   document.getElementById('req-qty').value='';
   document.getElementById('req-stroj').value='';
@@ -2337,7 +2357,7 @@ function submitScrap() {
   var typ=document.getElementById('sc-typ').value;
   var reason=document.getElementById('sc-reason').value;
   if(!mat||!wt||!stroj||!typ){toast('err','Chyba','Vyplňte všechna povinná pole.');return;}
-  fbPush('scrap',{time:now(),material:mat,weight:parseFloat(wt),machine:stroj,type:typ,reason:reason||'–',worker:LABELS[role]});
+  fbPush('scrap',{time:nowFull(),material:mat,weight:parseFloat(wt),machine:stroj,type:typ,reason:reason||'–',worker:LABELS[role]});
   document.getElementById('sc-mat').value='';
   document.getElementById('sc-wt').value='';
   document.getElementById('sc-stroj').value='';
@@ -2359,7 +2379,7 @@ function respondReq(action) {
   var r=D.requests.find(function(x){return x.fbKey===curReqKey;});
   if(!r||!r.fbKey){closeModal('mod-sklad');return;}
   var note=document.getElementById('ms-note').value;
-  r.status=action; r.resolvedTime=now(); r.note=note;
+  r.status=action; r.resolvedTime=nowFull(); r.note=note;
   fbSet('requests/'+r.fbKey,r);
   if(action==='unavailable') {
     fbPush('skladAlerts',{material:r.material,qty:r.qty,machine:r.machine,time:now(),note:note,dismissedBy:[]});
@@ -2374,7 +2394,7 @@ function submitObj() {
   var unit=document.getElementById('obj-unit').value;
   var note=document.getElementById('obj-note').value.trim();
   if(!item||!qty){toast('err','Chyba','Vyberte položku a množství.');return;}
-  fbPush('objednavky',{time:now(),item:item,qty:parseInt(qty),unit:unit,note:note,status:'pending',podal:LABELS[role]});
+  fbPush('objednavky',{time:nowFull(),item:item,qty:parseInt(qty),unit:unit,note:note,status:'pending',podal:LABELS[role]});
   document.getElementById('obj-item').value='';
   document.getElementById('obj-qty').value='';
   document.getElementById('obj-note').value='';
@@ -2383,7 +2403,7 @@ function submitObj() {
 function respondObj(key,action) {
   var o=D.objednavky.find(function(x){return x.fbKey===key;});
   if(!o) return;
-  o.status=action; o.resolvedAt=now();
+  o.status=action; o.resolvedAt=nowFull();
   fbSet('objednavky/'+key,o);
   toast(action==='done'?'ok':'err',action==='done'?'Vyřízeno':'Nedostupné',o.item);
 }
@@ -2409,7 +2429,7 @@ function submitDov() {
     var btn = document.querySelector('#page-dovolene .btn.br.bful');
     if (btn) btn.textContent = '🏖 Odeslat žádost vedoucímu';
   } else {
-    fbPush('dovolene',{jmeno:jmeno,pozice:pozice,typ:typ,od:od,doo:doo,note:note,status:'pending',podal:LABELS[role],podalAt:now()});
+    fbPush('dovolene',{jmeno:jmeno,pozice:pozice,typ:typ,od:od,doo:doo,note:note,status:'pending',podal:LABELS[role],podalAt:nowFull()});
     toast('ok','Žádost odeslána',jmeno);
   }
   document.getElementById('dov-jmeno').value='';
@@ -2420,7 +2440,7 @@ function submitDov() {
 function respondDov(key,action) {
   var d=D.dovolene.find(function(x){return x.fbKey===key;});
   if(!d) return;
-  d.status=action; d.resolvedAt=now(); d.resolvedBy=LABELS[role];
+  d.status=action; d.resolvedAt=nowFull(); d.resolvedBy=LABELS[role];
   fbSet('dovolene/'+key,d);
   toast(action==='approved'?'ok':'err',action==='approved'?'Schváleno':'Zamítnuto',d.jmeno);
 }
@@ -2431,7 +2451,7 @@ function submitForma() {
   var off=document.getElementById('f-off').value.trim();
   var on=document.getElementById('f-on').value.trim();
   if(!stroj||!cas||!off||!on){toast('err','Chyba','Vyplňte stroj, čas a formy.');return;}
-  fbPush('formaChanges',{machine:stroj,changeTime:cas,formOff:off,formOn:on,mat:document.getElementById('f-mat').value,dry:document.getElementById('f-dry').checked,note:document.getElementById('f-note').value,issuedAt:now(),dismissedBy:[]});
+  fbPush('formaChanges',{machine:stroj,changeTime:cas,formOff:off,formOn:on,mat:document.getElementById('f-mat').value,dry:document.getElementById('f-dry').checked,note:document.getElementById('f-note').value,issuedAt:nowFull(),dismissedBy:[]});
   document.getElementById('f-stroj').value='';
   document.getElementById('f-off').value='';
   document.getElementById('f-on').value='';
