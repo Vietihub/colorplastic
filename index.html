@@ -1439,7 +1439,7 @@ var VAPID_KEY = 'BCON6lvLxriq7yGBzYBy2woLDTKb7ypazVl2LXX8Fg5dYyvG9ybA6eFJlFFSDB8
 
 function initFCM() {
   if (!('serviceWorker' in navigator) || !('Notification' in window)) return;
-  navigator.serviceWorker.register('/firebase-messaging-sw.js')
+  navigator.serviceWorker.register('./firebase-messaging-sw.js')
     .then(function(reg) {
       var messaging = firebase.messaging();
       messaging.useServiceWorker(reg);
