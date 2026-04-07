@@ -1328,6 +1328,7 @@ var DEFAULT_MATS = [
 ];
 
 var editMatKey = null;
+var editDovKey = null;
 
 function renderMaterialy() {
   var canEdit = role==='technolog';
@@ -1806,6 +1807,7 @@ function startFirebase() {
   fbOn('dovolene', function(val){
     D.dovolene = fromFb(val).reverse();
     afterUpdate();
+    renderActivityFeed();
   });
   fbOn('notifications', function(val){
     D.notifications = val ? fromFb(val).filter(function(n){return !n.read;}).reverse() : [];
@@ -1870,101 +1872,102 @@ function renderActivityFeed() {
   var el = document.getElementById('ap-feed'); if (!el) return;
   var items = [];
 
-  // Helper to add item
   function addItem(type, icon, title, sub, time) {
     items.push({type:type, icon:icon, title:title, sub:sub, time:time||''});
   }
 
-  var isVedouci  = role==='vedouci';
-  var isMistr    = role==='mistr';
-  var isSeriz    = role==='serizovac';
-  var isSklad    = role==='sklad';
-  var isTech     = role==='technolog';
-  var isUdrzba   = role==='udrzba';
-
-  // MATERIÁLOVÉ POŽADAVKY
-  if (isSeriz || isSklad || isVedouci || isMistr) {
-    D.requests.slice(0,20).forEach(function(r){
-      if (isSklad && r.status==='pending') {
-        addItem('af-req','📦','Nový požadavek na materiál', r.material+' · '+r.qty+' kg · '+r.machine, r.time);
-      } else if ((isSeriz||isVedouci||isMistr) && r.status!=='pending') {
-        var statusTxt = r.status==='ready' ? 'Připraveno' : 'Nedostupné';
-        addItem('af-req', r.status==='ready'?'✅':'❌', 'Materiál: '+statusTxt, r.material+' · '+r.qty+' kg', r.resolvedTime||r.time);
-      } else if (isSeriz && r.status==='pending') {
-        addItem('af-req','📤','Požadavek odeslán', r.material+' · '+r.qty+' kg', r.time);
+  // ── MATERIÁLOVÉ POŽADAVKY ──────────────────────
+  D.requests.slice(0,30).forEach(function(r){
+    if (role==='sklad') {
+      if (r.status==='pending') {
+        addItem('af-req','📦','Nový požadavek', r.material+' · '+r.qty+' kg · '+r.machine, r.time);
       }
-    });
-  }
+    } else if (role==='serizovac') {
+      if (r.status==='pending') {
+        addItem('af-req','📤','Odesláno do skladu', r.material+' · '+r.qty+' kg', r.time);
+      } else {
+        addItem('af-req', r.status==='ready'?'✅':'❌', 'Sklad: '+(r.status==='ready'?'Připraveno':'Nedostupné'), r.material+' · '+r.qty+' kg', r.resolvedTime||r.time);
+      }
+    } else if (role==='vedouci' || role==='mistr') {
+      if (r.status!=='pending') {
+        addItem('af-req', r.status==='ready'?'✅':'❌', 'Materiál: '+(r.status==='ready'?'Připraveno':'Nedostupné'), r.material+' · '+r.qty+' kg', r.resolvedTime||r.time);
+      }
+    }
+  });
 
-  // ZMĚNY FOREM
-  if (!isVedouci) {
-    D.formaChanges.slice(0,10).forEach(function(f){
-      addItem('af-forma','🔔','Změna formy: '+f.machine, f.formOff+' → '+f.formOn+(f.changeTime?' v '+f.changeTime:''), f.issuedAt);
-    });
-  } else {
-    D.formaChanges.slice(0,10).forEach(function(f){
-      addItem('af-forma','🔔','Vydáno: změna formy', f.machine+' · '+f.formOff+' → '+f.formOn, f.issuedAt);
-    });
-  }
+  // ── ZMĚNY FOREM ────────────────────────────────
+  D.formaChanges.slice(0,15).forEach(function(f){
+    if (role==='vedouci') {
+      addItem('af-forma','🔔','Vydáno: změna formy', f.machine+' · '+f.formOff+' → '+f.formOn+(f.changeTime?' v '+f.changeTime:''), f.issuedAt);
+    } else {
+      addItem('af-forma','🔔','Nová změna formy', f.machine+' · '+f.formOff+' → '+f.formOn+(f.changeTime?' v '+f.changeTime:''), f.issuedAt);
+    }
+  });
 
-  // OBJEDNÁVKY MATERIÁLU
-  if (isSklad) {
-    D.objednavky.filter(function(o){return o.status==='pending';}).slice(0,10).forEach(function(o){
-      addItem('af-obj','🛒','Nová objednávka', o.item+' · '+o.qty+' '+o.unit, o.time);
-    });
-  } else if (isMistr) {
-    D.objednavky.slice(0,10).forEach(function(o){
-      var st = o.status==='pending'?'čeká':o.status==='done'?'vyřízeno':'nedostupné';
-      addItem('af-obj','🛒','Objednávka: '+st, o.item+' · '+o.qty+' '+o.unit, o.time);
-    });
-  }
+  // ── OBJEDNÁVKY MATERIÁLU ───────────────────────
+  D.objednavky.slice(0,15).forEach(function(o){
+    if (role==='sklad') {
+      if (o.status==='pending') {
+        addItem('af-obj','🛒','Nová objednávka', o.item+' · '+o.qty+' '+o.unit+(o.podal?' · '+o.podal:''), o.time);
+      } else {
+        addItem('af-obj', o.status==='done'?'✅':'❌', 'Objednávka: '+(o.status==='done'?'vyřízeno':'nedostupné'), o.item+' · '+o.qty+' '+o.unit, o.resolvedAt||o.time);
+      }
+    } else if (role==='mistr') {
+      var st = {pending:'⏳ čeká', done:'✅ vyřízeno', unavailable:'❌ nedostupné'}[o.status]||o.status;
+      addItem('af-obj','🛒','Objednávka: '+o.item, o.qty+' '+o.unit+' · '+st, o.time);
+    }
+  });
 
-  // DOVOLENÉ
-  if (isVedouci) {
-    D.dovolene.filter(function(d){return d.status==='pending';}).slice(0,10).forEach(function(d){
-      addItem('af-dov','🏖','Žádost o dovolenou', d.jmeno+' · '+d.pozice, d.podalAt);
-    });
-  } else if (isMistr) {
-    D.dovolene.slice(0,10).forEach(function(d){
-      var st = d.status==='pending'?'čeká na schválení':d.status==='approved'?'schváleno':'zamítnuto';
-      addItem('af-dov','🏖',d.jmeno+' – '+st, d.od+' – '+d.doo, d.podalAt);
-    });
-  }
+  // ── DOVOLENÉ ───────────────────────────────────
+  D.dovolene.slice(0,20).forEach(function(d){
+    if (role==='vedouci') {
+      if (d.status==='pending') {
+        addItem('af-dov','🏖','Nová žádost: '+dovTypLbl(d.typ), d.jmeno+' · '+d.pozice+' · '+fmtD(d.od)+' – '+fmtD(d.doo), d.podalAt);
+      } else {
+        var icon = d.status==='approved'?'✅':'❌';
+        var st = d.status==='approved'?'schváleno':'zamítnuto';
+        addItem('af-dov', icon, d.jmeno+' – '+st, dovTypLbl(d.typ)+' · '+fmtD(d.od)+' – '+fmtD(d.doo), d.resolvedAt||d.podalAt);
+      }
+    } else if (role==='mistr') {
+      var icon2 = d.status==='pending'?'🏖':d.status==='approved'?'✅':'❌';
+      var st2 = d.status==='pending'?'čeká na schválení':d.status==='approved'?'schváleno':'zamítnuto';
+      addItem('af-dov', icon2, d.jmeno+' – '+st2, dovTypLbl(d.typ)+' · '+fmtD(d.od)+' – '+fmtD(d.doo), d.resolvedAt||d.podalAt);
+    }
+  });
 
-  // PLÁN VÝROBY
-  if (isVedouci || isMistr || isSeriz) {
-    var planEntries = Object.keys(D.plan).filter(function(k){ return D.plan[k] && D.plan[k].updatedAt; });
-    planEntries.slice(0,8).forEach(function(k){
+  // ── PLÁN VÝROBY ────────────────────────────────
+  if (role==='vedouci' || role==='mistr' || role==='serizovac') {
+    var planKeys = Object.keys(D.plan).filter(function(k){ return D.plan[k] && D.plan[k].updatedAt; });
+    planKeys.slice(0,10).forEach(function(k){
       var p = D.plan[k];
       var parts = k.split('_');
       var smena = parts[parts.length-1];
-      addItem('af-plan','📅','Plán aktualizován', (p.forma||'')+(p.mat?' · '+p.mat.split('(')[0].trim():'')+(smena?' · '+smena:''), p.updatedAt||'');
+      var mach = parts.slice(0,-2).join(' ').replace(/_/g,' ');
+      addItem('af-plan','📅','Plán aktualizován', (p.forma?p.forma+' · ':'')+p.mat.split('(')[0].trim()+' · '+smena, p.updatedAt);
     });
   }
 
-  // Sort by time desc (simple string compare works for HH:MM format)
+  // Sort by time descending
   items.sort(function(a,b){ return (b.time||'').localeCompare(a.time||''); });
 
   if (!items.length) {
     el.innerHTML = '<div class="af-empty">Žádná aktivita</div>';
-    var mobEl = document.getElementById('mob-ap-feed');
     var mobSec = document.getElementById('mob-activity-section');
     if (mobSec) mobSec.style.display = 'none';
     return;
   }
 
-  var html = items.slice(0,40).map(function(item){
+  var html = items.slice(0,50).map(function(item){
     return '<div class="af-item '+item.type+'">' +
       '<div class="af-icon">'+item.icon+'</div>' +
       '<div class="af-title">'+item.title+'</div>' +
-      '<div class="af-sub">'+item.sub+'</div>' +
-      '<div class="af-time">'+item.time+'</div>' +
+      (item.sub ? '<div class="af-sub">'+item.sub+'</div>' : '') +
+      (item.time ? '<div class="af-time">'+item.time+'</div>' : '') +
     '</div>';
   }).join('');
 
   el.innerHTML = html;
 
-  // Mobile version
   var mobEl = document.getElementById('mob-ap-feed');
   var mobSec = document.getElementById('mob-activity-section');
   if (mobEl) mobEl.innerHTML = html;
@@ -2241,8 +2244,42 @@ function renderObjednavky() {
 function renderDovMistr() {
   var t=document.getElementById('tbl-dov-mistr'); if(!t) return;
   t.innerHTML=D.dovolene.map(function(d){
-    return '<tr><td class="bold">'+d.jmeno+'</td><td><span class="'+dovTypClass(d.typ)+'">'+dovTypLbl(d.typ)+'</span></td><td class="mono">'+fmtD(d.od)+'</td><td class="mono">'+fmtD(d.doo)+'</td><td>'+sbadge(d.status)+'</td></tr>';
+    var canEdit = d.status==='pending';
+    var actions = canEdit
+      ? '<div style="display:flex;gap:5px">' +
+          '<button class="btn bg bsm" data-k="'+d.fbKey+'" onclick="openDovEdit(this.dataset.k)">✏ Upravit</button>' +
+          '<button class="btn bwarn bsm" data-k="'+d.fbKey+'" onclick="deleteDov(this.dataset.k)">✕</button>' +
+        '</div>'
+      : sbadge(d.status);
+    return '<tr>' +
+      '<td class="bold">'+d.jmeno+'</td>' +
+      '<td><span class="'+dovTypClass(d.typ)+'">'+dovTypLbl(d.typ)+'</span></td>' +
+      '<td class="mono">'+fmtD(d.od)+'</td>' +
+      '<td class="mono">'+fmtD(d.doo)+'</td>' +
+      '<td>'+actions+'</td>' +
+    '</tr>';
   }).join('') || '<tr><td colspan="5" style="text-align:center;color:var(--text3);padding:18px">Žádné žádosti</td></tr>';
+}
+
+function openDovEdit(key) {
+  var d = D.dovolene.find(function(x){ return x.fbKey===key; });
+  if (!d) return;
+  document.getElementById('dov-jmeno').value = d.jmeno||'';
+  document.getElementById('dov-pozice').value = d.pozice||'Operátor';
+  document.getElementById('dov-typ').value = d.typ||'d';
+  document.getElementById('dov-od').value = d.od||'';
+  document.getElementById('dov-do').value = d.doo||'';
+  document.getElementById('dov-note').value = d.note||'';
+  editDovKey = key;
+  var btn = document.querySelector('#page-dovolene .btn.br.bful');
+  if (btn) btn.textContent = '💾 Uložit změny';
+  window.scrollTo({top: 0, behavior: 'smooth'});
+  toast('ok','Upravit žádost','Proveďte změny a uložte');
+}
+
+function deleteDov(key) {
+  db.ref('dovolene/'+key).remove();
+  toast('ok','Smazáno','Žádost odstraněna');
 }
 
 function renderDovVedouci() {
@@ -2360,12 +2397,25 @@ function submitDov() {
   var note=document.getElementById('dov-note').value.trim();
   if(!jmeno||!od||!doo){toast('err','Chyba','Vyplňte jméno a datum.');return;}
   if(od>doo){toast('err','Chyba','Datum "Do" musí být po "Od".');return;}
-  fbPush('dovolene',{jmeno:jmeno,pozice:pozice,typ:typ,od:od,doo:doo,note:note,status:'pending',podal:LABELS[role],podalAt:now()});
+  if (editDovKey) {
+    var existing = D.dovolene.find(function(x){ return x.fbKey===editDovKey; });
+    if (existing) {
+      existing.jmeno=jmeno; existing.pozice=pozice; existing.typ=typ;
+      existing.od=od; existing.doo=doo; existing.note=note;
+      fbSet('dovolene/'+editDovKey, existing);
+      toast('ok','Změny uloženy',jmeno);
+    }
+    editDovKey = null;
+    var btn = document.querySelector('#page-dovolene .btn.br.bful');
+    if (btn) btn.textContent = '🏖 Odeslat žádost vedoucímu';
+  } else {
+    fbPush('dovolene',{jmeno:jmeno,pozice:pozice,typ:typ,od:od,doo:doo,note:note,status:'pending',podal:LABELS[role],podalAt:now()});
+    toast('ok','Žádost odeslána',jmeno);
+  }
   document.getElementById('dov-jmeno').value='';
   document.getElementById('dov-od').value='';
   document.getElementById('dov-do').value='';
   document.getElementById('dov-note').value='';
-  toast('ok','Žádost odeslána',jmeno);
 }
 function respondDov(key,action) {
   var d=D.dovolene.find(function(x){return x.fbKey===key;});
