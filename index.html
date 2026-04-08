@@ -1368,13 +1368,15 @@ function buildMatOptions(defaultLabel) {
     var f = D.formy[cislo];
     if (!f.material || !f.druh) return;
     var val = f.material + ' (' + f.druh + ')';
-    if (seen[val]) return;
-    seen[val] = true;
-    list.push(val);
+    var key = val + '|' + (f.matId || '');
+    if (seen[key]) return;
+    seen[key] = true;
+    list.push({val: val, matId: f.matId || ''});
   });
   var opts = '<option value="">' + (defaultLabel || '— Nevyplněno —') + '</option>';
-  list.forEach(function(val) {
-    opts += '<option value="' + val + '">' + val + '</option>';
+  list.forEach(function(item) {
+    var label = item.matId ? item.val + ' · ' + item.matId : item.val;
+    opts += '<option value="' + item.val + '">' + label + '</option>';
   });
   return opts;
 }
