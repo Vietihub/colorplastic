@@ -583,12 +583,7 @@ input[type="time"]::-webkit-date-and-time-value { text-align: left; }
           <div class="fgrid">
             <div class="frow">
               <div class="fg"><label class="fl">Materiál</label>
-                <select class="fs" id="req-mat"><option value="">Vyberte...</option>
-                  <option>Lukablend 7400 (PC/ABS)</option>
-                  <option>Enflex 120 (PP)</option>
-                  <option>Bayblend TX65 (PC/ABS)</option>
-                  <option>Lukablend 8500 (PC/ABS)</option>
-                </select>
+                <select class="fs" id="req-mat"><option value="">Vyberte...</option></select>
               </div>
               <div class="fg"><label class="fl">Množství (kg)</label>
                 <div class="ww"><input type="number" class="fi" id="req-qty" placeholder="0" min="1"><span class="ws">kg</span></div>
@@ -629,12 +624,7 @@ input[type="time"]::-webkit-date-and-time-value { text-align: left; }
           <div class="fgrid">
             <div class="frow">
               <div class="fg"><label class="fl">Materiál</label>
-                <select class="fs" id="sc-mat"><option value="">Vyberte...</option>
-                  <option>Lukablend 7400 (PC/ABS)</option>
-                  <option>Enflex 120 (PP)</option>
-                  <option>Bayblend TX65 (PC/ABS)</option>
-                  <option>Lukablend 8500 (PC/ABS)</option>
-                </select>
+                <select class="fs" id="sc-mat"><option value="">Vyberte...</option></select>
               </div>
               <div class="fg"><label class="fl">Hmotnost</label>
                 <div class="ww"><input type="number" class="fi" id="sc-wt" placeholder="0.0" min="0" step="0.1"><span class="ws">kg</span></div>
@@ -768,16 +758,11 @@ input[type="time"]::-webkit-date-and-time-value { text-align: left; }
               <div class="fg"><label class="fl">Čas změny</label><input type="time" class="fi" id="f-cas" value="15:00"></div>
             </div>
             <div class="frow">
-              <div class="fg"><label class="fl">Sundat formu č.</label><input type="text" class="fi" id="f-off" placeholder="napr. 128"></div>
-              <div class="fg"><label class="fl">Nasadit formu č.</label><input type="text" class="fi" id="f-on" placeholder="napr. 141"></div>
+              <div class="fg"><label class="fl">Sundat formu č.</label><select class="fs" id="f-off"><option value="">Vyberte...</option></select></div>
+              <div class="fg"><label class="fl">Nasadit formu č.</label><select class="fs" id="f-on" onchange="onFOnChange()"><option value="">Vyberte...</option></select></div>
             </div>
             <div class="fg"><label class="fl">Materiál pro novou formu</label>
-              <select class="fs" id="f-mat"><option value="">Není třeba</option>
-                <option>Lukablend 7400 (PC/ABS)</option>
-                <option>Enflex 120 (PP)</option>
-                <option>Bayblend TX65 (PC/ABS)</option>
-                <option>Lukablend 8500 (PC/ABS)</option>
-              </select>
+              <select class="fs" id="f-mat"><option value="">Není třeba</option></select>
             </div>
             <label style="display:flex;align-items:center;gap:9px;font-size:13px">
               <input type="checkbox" id="f-dry" style="width:15px;height:15px;accent-color:var(--red)"> Nutno nasušit materiál
@@ -938,7 +923,7 @@ input[type="time"]::-webkit-date-and-time-value { text-align: left; }
     </div>
     <div class="fgrid">
       <div class="frow">
-        <div class="fg"><label class="fl">Forma č.</label><input type="text" class="fi" id="pm-forma" placeholder="napr. č. 128"></div>
+        <div class="fg"><label class="fl">Forma č.</label><select class="fs" id="pm-forma" onchange="onPmFormaChange()"><option value="">— Vyberte formu —</option></select></div>
         <div class="fg"><label class="fl">Čas výměny</label><input type="time" class="fi" id="pm-cas"></div>
       </div>
       <div class="frow">
@@ -946,13 +931,7 @@ input[type="time"]::-webkit-date-and-time-value { text-align: left; }
         <div class="fg"><label class="fl">Barva</label><input type="text" class="fi" id="pm-barva" placeholder="napr. RAL 9005 černá"></div>
       </div>
       <div class="fg"><label class="fl">Materiál</label>
-          <select class="fs" id="pm-mat">
-            <option value="">— Nevyplněno —</option>
-            <option>Lukablend 7400 (PC/ABS)</option>
-            <option>Enflex 120 (PP)</option>
-            <option>Bayblend TX65 (PC/ABS)</option>
-            <option>Lukablend 8500 (PC/ABS)</option>
-          </select>
+          <select class="fs" id="pm-mat"><option value="">— Nevyplněno —</option></select>
       </div>
       <label style="display:flex;align-items:center;gap:9px;font-size:13px;cursor:pointer">
         <input type="checkbox" id="pm-susen" style="width:15px;height:15px;accent-color:var(--red)">
@@ -1036,14 +1015,9 @@ input[type="time"]::-webkit-date-and-time-value { text-align: left; }
     <div class="mtitle" id="mp-title">Aktualizovat lis</div>
     <div class="msub">Forma a materiál</div>
     <div class="fgrid">
-      <div class="fg"><label class="fl">Nasazená forma č.</label><input type="text" class="fi" id="mp-forma" placeholder="napr. 128 (prázdné = lis stojí)"></div>
+      <div class="fg"><label class="fl">Nasazená forma č.</label><select class="fs" id="mp-forma" onchange="onMpFormaChange()"><option value="">— Lis stojí —</option></select></div>
       <div class="fg"><label class="fl">Materiál</label>
-        <select class="fs" id="mp-mat"><option value="">— Nevyplněno —</option>
-          <option>Lukablend 7400 (PC/ABS)</option>
-          <option>Enflex 120 (PP)</option>
-          <option>Bayblend TX65 (PC/ABS)</option>
-          <option>Lukablend 8500 (PC/ABS)</option>
-        </select>
+        <select class="fs" id="mp-mat"><option value="">— Nevyplněno —</option></select>
       </div>
     </div>
     <div class="mact">
@@ -1097,7 +1071,7 @@ var curReqKey = null;
 var curProdMachine = null;
 var D = {
   requests:[], scrap:[], skladAlerts:[], formaChanges:[],
-  objednavky:[], dovolene:[], materialy:[], plan:{}, notifications:[],
+  objednavky:[], dovolene:[], materialy:[], plan:{}, notifications:[], formy:{},
   production:[
     {machine:'Engel duo 300T',forma:null,mat:null,running:false,updated:null},
     {machine:'Engel duo 550T',forma:null,mat:null,running:false,updated:null},
@@ -1359,22 +1333,89 @@ function renderTechPrehled() {
   var f=document.getElementById('forma-tech'); if(f) f.innerHTML=buildFormaBanner();
 }
 
-var DEFAULT_MATS = [
-  {forma:'Č. 126',typ:'PC/ABS',nazev:'Lukablend 7400',cislo:'1.131',teplota:'110',cas:'2'},
-  {forma:'Č. 127',typ:'PC/ABS',nazev:'Lukablend 7400',cislo:'1.131',teplota:'110',cas:'2'},
-  {forma:'Č. 128',typ:'PC/ABS',nazev:'Lukablend 7400',cislo:'1.131',teplota:'110',cas:'2'},
-  {forma:'Č. 129',typ:'PC/ABS',nazev:'Lukablend 7400',cislo:'1.131',teplota:'110',cas:'2'},
-  {forma:'Č. 130',typ:'PC/ABS',nazev:'Lukablend 7400',cislo:'1.131',teplota:'110',cas:'2'},
-  {forma:'Č. 131',typ:'PC/ABS',nazev:'Lukablend 7400',cislo:'1.131',teplota:'110',cas:'2'},
-  {forma:'Č. 141',typ:'PP',    nazev:'Enflex 120',    cislo:'1.089',teplota:'80', cas:'2'},
-  {forma:'Č. 149',typ:'PP',    nazev:'Enflex 120',    cislo:'1.089',teplota:'80', cas:'2'},
-  {forma:'Č. 150',typ:'PC/ABS',nazev:'Bayblend TX65', cislo:'1.001',teplota:'110',cas:'2'},
-  {forma:'Č. 151',typ:'PC/ABS',nazev:'Bayblend TX65', cislo:'1.001',teplota:'110',cas:'2'},
-  {forma:'Č. 175',typ:'PC/ABS',nazev:'Lukablend 8500',cislo:'1.155',teplota:'110',cas:'4'}
-];
+// Helpers: build form and material select options from Firebase /formy data
+function buildFormaOptions(defaultLabel) {
+  var opts = '<option value="">' + (defaultLabel || '— Vyberte formu —') + '</option>';
+  var cisla = Object.keys(D.formy).sort(function(a, b) {
+    var na = parseFloat(a), nb = parseFloat(b);
+    if (!isNaN(na) && !isNaN(nb)) return na - nb;
+    return String(a).localeCompare(String(b));
+  });
+  cisla.forEach(function(cislo) {
+    var f = D.formy[cislo];
+    opts += '<option value="' + cislo + '">' + cislo + (f.nazev ? ' – ' + f.nazev : '') + '</option>';
+  });
+  return opts;
+}
+
+function buildMatOptions(defaultLabel) {
+  var seen = {};
+  var list = [];
+  var cisla = Object.keys(D.formy).sort(function(a,b){
+    var na=parseFloat(a), nb=parseFloat(b);
+    if(!isNaN(na)&&!isNaN(nb)) return na-nb;
+    return String(a).localeCompare(String(b));
+  });
+  cisla.forEach(function(cislo) {
+    var f = D.formy[cislo];
+    if (!f.material || !f.druh) return;
+    var val = f.material + ' (' + f.druh + ')';
+    if (seen[val]) return;
+    seen[val] = true;
+    list.push(val);
+  });
+  var opts = '<option value="">' + (defaultLabel || '— Nevyplněno —') + '</option>';
+  list.forEach(function(val) {
+    opts += '<option value="' + val + '">' + val + '</option>';
+  });
+  return opts;
+}
+
+function populateFormaSelects() {
+  if (!D.formy || !Object.keys(D.formy).length) return;
+  var fDefs = {'pm-forma':'— Vyberte formu —','f-off':'Vyberte...','f-on':'Vyberte...','mp-forma':'— Lis stojí —'};
+  Object.keys(fDefs).forEach(function(id) {
+    var el = document.getElementById(id); if (!el) return;
+    var cur = el.value;
+    el.innerHTML = buildFormaOptions(fDefs[id]);
+    if (cur) el.value = cur;
+  });
+  var mDefs = {'req-mat':'Vyberte...','sc-mat':'Vyberte...','f-mat':'Není třeba','pm-mat':'— Nevyplněno —','mp-mat':'— Nevyplněno —'};
+  Object.keys(mDefs).forEach(function(id) {
+    var el = document.getElementById(id); if (!el) return;
+    var cur = el.value;
+    el.innerHTML = buildMatOptions(mDefs[id]);
+    if (cur) el.value = cur;
+  });
+}
+
+function setMatFromForma(cislo, matSelId, dryId) {
+  var f = cislo && D.formy[cislo];
+  if (!f || !f.material || !f.druh) return;
+  var val = f.material + ' (' + f.druh + ')';
+  var matSel = document.getElementById(matSelId); if (!matSel) return;
+  for (var i = 0; i < matSel.options.length; i++) {
+    if (matSel.options[i].value === val) { matSel.value = val; break; }
+  }
+  if (dryId) {
+    var dryEl = document.getElementById(dryId);
+    if (dryEl) dryEl.checked = (f.suseni && f.suseni !== '-');
+  }
+}
+function onPmFormaChange() { setMatFromForma(document.getElementById('pm-forma').value, 'pm-mat', 'pm-susen'); }
+function onFOnChange()     { setMatFromForma(document.getElementById('f-on').value, 'f-mat', 'f-dry'); }
+function onMpFormaChange() { setMatFromForma(document.getElementById('mp-forma').value, 'mp-mat', null); }
 
 var editMatKey = null;
 var editDovKey = null;
+
+function parseSuseni(s) {
+  // "110°C / min 2h" → {teplota:'110', cas:'2'}
+  if (!s || s === '-') return {teplota:'–', cas:'–'};
+  var t = (s.match(/(\d+)\s*°/) || [])[1] || '–';
+  var c = (s.match(/(\d+)\s*h/) || [])[1] || '–';
+  return {teplota: t, cas: c};
+}
 
 function renderMaterialy() {
   var canEdit = role==='technolog';
@@ -1385,25 +1426,48 @@ function renderMaterialy() {
   var addBtn=document.getElementById('mat-add-btn');
   if(addBtn) addBtn.style.display = canEdit ? 'inline-flex' : 'none';
 
-  var mats = D.materialy.length ? D.materialy : DEFAULT_MATS;
   var tbody=document.getElementById('tbl-materialy'); if(!tbody) return;
-  tbody.innerHTML = mats.map(function(m) {
-    var k = m.fbKey||'';
-    return '<tr>' +
-      '<td class="bold">' + m.forma + '</td>' +
-      '<td><span class="tbadge">' + m.typ + '</span></td>' +
-      '<td class="bold">' + m.nazev + '</td>' +
-      '<td class="mono">' + m.cislo + '</td>' +
-      '<td style="color:var(--orange);font-weight:600">' + m.teplota + ' °C</td>' +
-      '<td style="color:var(--text2)">' + m.cas + ' hod</td>' +
-      (canEdit ?
-        '<td style="display:flex;gap:5px;padding:8px 14px">' +
-          '<button class="btn bg bsm" data-k="'+k+'" data-m="'+encodeURIComponent(JSON.stringify(m))+'" onclick="openMatModal(this)">✏</button>' +
-          '<button class="btn bwarn bsm" data-k="'+k+'" onclick="deleteMat(this.dataset.k)">✕</button>' +
-        '</td>'
-        : '<td></td>') +
-    '</tr>';
-  }).join('');
+
+  // Use custom /materialy entries; fall back to /formy data for read-only view
+  if (D.materialy.length) {
+    tbody.innerHTML = D.materialy.map(function(m) {
+      var k = m.fbKey||'';
+      return '<tr>' +
+        '<td class="bold">' + m.forma + '</td>' +
+        '<td><span class="tbadge">' + m.typ + '</span></td>' +
+        '<td class="bold">' + m.nazev + '</td>' +
+        '<td class="mono">' + m.cislo + '</td>' +
+        '<td style="color:var(--orange);font-weight:600">' + m.teplota + ' °C</td>' +
+        '<td style="color:var(--text2)">' + m.cas + ' hod</td>' +
+        (canEdit ?
+          '<td style="display:flex;gap:5px;padding:8px 14px">' +
+            '<button class="btn bg bsm" data-k="'+k+'" data-m="'+encodeURIComponent(JSON.stringify(m))+'" onclick="openMatModal(this)">✏</button>' +
+            '<button class="btn bwarn bsm" data-k="'+k+'" onclick="deleteMat(this.dataset.k)">✕</button>' +
+          '</td>'
+          : '<td></td>') +
+      '</tr>';
+    }).join('');
+  } else {
+    // Show data from /formy as reference (read-only)
+    var cisla = Object.keys(D.formy).sort(function(a,b){
+      var na=parseFloat(a), nb=parseFloat(b);
+      if(!isNaN(na)&&!isNaN(nb)) return na-nb;
+      return String(a).localeCompare(String(b));
+    });
+    tbody.innerHTML = cisla.filter(function(c){ return D.formy[c].material; }).map(function(cislo) {
+      var f = D.formy[cislo];
+      var sus = parseSuseni(f.suseni);
+      return '<tr>' +
+        '<td class="bold">Č. ' + cislo + '</td>' +
+        '<td><span class="tbadge">' + (f.druh||'–') + '</span></td>' +
+        '<td class="bold" style="font-size:12px">' + (f.material||'–') + '</td>' +
+        '<td class="mono">' + (f.matId||'–') + '</td>' +
+        '<td style="color:var(--orange);font-weight:600">' + sus.teplota + (sus.teplota!=='–'?' °C':'') + '</td>' +
+        '<td style="color:var(--text2)">' + sus.cas + (sus.cas!=='–'?' hod':'') + '</td>' +
+        '<td></td>' +
+      '</tr>';
+    }).join('') || '<tr><td colspan="7" style="text-align:center;color:var(--text3);padding:20px">Načítání...</td></tr>';
+  }
 }
 
 function openMatModal(btn) {
@@ -1441,10 +1505,6 @@ function saveMat() {
     fbSet('materialy/'+editMatKey, obj);
     toast('ok','Uloženo',forma+' – '+nazev);
   } else {
-    // Init from defaults first if empty
-    if(!D.materialy.length) {
-      DEFAULT_MATS.forEach(function(m){ fbPush('materialy', m); });
-    }
     fbPush('materialy', obj);
     toast('ok','Přidáno',forma+' – '+nazev);
   }
@@ -1936,13 +1996,13 @@ function startFirebase() {
     renderActivityFeed();
   });
   fbOn('materialy', function(val){
-    if (val) {
-      D.materialy = fromFb(val);
-    } else {
-      DEFAULT_MATS.forEach(function(m){ fbPush('materialy', m); });
-    }
+    D.materialy = val ? fromFb(val) : [];
     var ab=document.querySelector('.sbn.on');
     if(ab && ab.dataset.page==='materialy') renderMaterialy();
+  });
+  fbOn('formy', function(val){
+    D.formy = val || {};
+    populateFormaSelects();
   });
   fbOn('production', function(val){
     if (val) {

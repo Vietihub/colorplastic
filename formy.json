@@ -1,0 +1,691 @@
+{
+  "11": {
+    "cislo": "11",
+    "nazev": "Deckel Unterteil TVKF vorne Li/Re",
+    "material": "Magnum 3616 Natur + Styron MB Styrenic 2% Black 39058",
+    "druh": "ABS",
+    "suseni": "80°C / min 2h (ML80-90°C)",
+    "teplota": "260-240",
+    "vlhkostList": "0,1%",
+    "vlhkostInterni": "0,1%",
+    "matId": "1.016 +2.002",
+    "barvy": []
+  },
+  "12": {
+    "cislo": "12",
+    "nazev": "Deckel Unterteil TVKF hinten Li/Re",
+    "material": "Magnum 3616 Natur + Styron MB Styrenic 2% Black 39058",
+    "druh": "ABS",
+    "suseni": "80°C / min 2h (ML80-90°C)",
+    "teplota": "260-240",
+    "vlhkostList": "0,1%",
+    "vlhkostInterni": "0,1%",
+    "matId": "1.016+2.002",
+    "barvy": []
+  },
+  "116": {
+    "cislo": "116",
+    "nazev": "Assy cover inner display",
+    "material": "Lukablend 7400",
+    "druh": "PC/ABS",
+    "suseni": "110°C / min 2h",
+    "teplota": "270-240",
+    "vlhkostList": "0,02%",
+    "vlhkostInterni": "0,04%",
+    "matId": "1.131",
+    "barvy": []
+  },
+  "117": {
+    "cislo": "117",
+    "nazev": "Kneepad basis DS+PS",
+    "material": "Bayblend T88 GF20 Black,Bayblend T88 GF20 Nat.+ MB 2%",
+    "druh": "PC+SAN-I-GF20",
+    "suseni": "110°C / min 2h (ML95-110)",
+    "teplota": "280-260",
+    "vlhkostList": "0,02%",
+    "vlhkostInterni": "0,04%",
+    "matId": "1.071/1.067",
+    "barvy": [
+      {
+        "nazev": "BLACK",
+        "matId": "1.071"
+      },
+      {
+        "nazev": "LIME BEIGE",
+        "matId": "1.067+2.031"
+      },
+      {
+        "nazev": "BORDEAUX RED",
+        "matId": "1.067+2.030"
+      },
+      {
+        "nazev": "CHALK",
+        "matId": "1.067+2.034"
+      },
+      {
+        "nazev": "BLACKBERRY",
+        "matId": "1.067+2.035"
+      },
+      {
+        "nazev": "NIGHT GREEN",
+        "matId": "1.067+2.032"
+      }
+    ]
+  },
+  "118": {
+    "cislo": "118",
+    "nazev": "Assy storagebox lower Cupholder",
+    "material": "Lukablend 7400",
+    "druh": "PC/ABS",
+    "suseni": "110°C / min 2h",
+    "teplota": "270-240",
+    "vlhkostList": "0,02%",
+    "vlhkostInterni": "0.04%",
+    "matId": "1.131",
+    "barvy": []
+  },
+  "122": {
+    "cislo": "122",
+    "nazev": "Assy Sidecover DS+PS",
+    "material": "Lukablend 7400",
+    "druh": "PC/ABS",
+    "suseni": "110°C / min 2h",
+    "teplota": "270-240",
+    "vlhkostList": "0,02%",
+    "vlhkostInterni": "0,04%",
+    "matId": "1.131",
+    "barvy": []
+  },
+  "126": {
+    "cislo": "126",
+    "nazev": "Glove box Lid shell basis LHD",
+    "material": "Lukablend 7400, Bayblend T65 XF Natur + MB 2%",
+    "druh": "PC/ABS",
+    "suseni": "110°C / min 2h",
+    "teplota": "270-240",
+    "vlhkostList": "0,02%",
+    "vlhkostInterni": "0,04%",
+    "matId": "1.131/1.002",
+    "barvy": [
+      {
+        "nazev": "BLACK",
+        "matId": "1.131"
+      },
+      {
+        "nazev": "LIME BEIGE",
+        "matId": "1.002+2.031"
+      },
+      {
+        "nazev": "BORDEAUX RED",
+        "matId": "1.002+2.030"
+      },
+      {
+        "nazev": "CHALK",
+        "matId": "1.002+2.034"
+      },
+      {
+        "nazev": "BLACKBERRY",
+        "matId": "1.002+2.035"
+      },
+      {
+        "nazev": "NIGHT GREEN",
+        "matId": "1.002+2.032"
+      }
+    ]
+  },
+  "127": {
+    "cislo": "127",
+    "nazev": "Glove box Lid shell basis RHD",
+    "material": "Lukablend 7400, Bayblend T65 XF Natur + MB 2%",
+    "druh": "PC/ABS",
+    "suseni": "110°C / min 2h",
+    "teplota": "270-240",
+    "vlhkostList": "0,02%",
+    "vlhkostInterni": "0,04%",
+    "matId": "1.131/1.002",
+    "barvy": [
+      {
+        "nazev": "BLACK",
+        "matId": "1.131"
+      },
+      {
+        "nazev": "LIME BEIGE",
+        "matId": "1.002+2.031"
+      },
+      {
+        "nazev": "BORDEAUX RED",
+        "matId": "1.002+2.030"
+      },
+      {
+        "nazev": "CHALK",
+        "matId": "1.002+2.034"
+      },
+      {
+        "nazev": "BLACKBERRY",
+        "matId": "1.002+2.035"
+      },
+      {
+        "nazev": "NIGHT GREEN",
+        "matId": "1.002+2.032"
+      }
+    ]
+  },
+  "128": {
+    "cislo": "128",
+    "nazev": "Cover DS LWR cover basis LHD",
+    "material": "Lukablend 7400, Bayblend T65 XF Natur + MB 2%",
+    "druh": "PC/ABS",
+    "suseni": "110°C / min 2h",
+    "teplota": "270-240",
+    "vlhkostList": "0,02%",
+    "vlhkostInterni": "0,04%",
+    "matId": "1.131/1.002",
+    "barvy": [
+      {
+        "nazev": "BLACK",
+        "matId": "1.131"
+      },
+      {
+        "nazev": "LIME BEIGE",
+        "matId": "1.002+2.031"
+      },
+      {
+        "nazev": "BORDEAUX RED",
+        "matId": "1.002+2.030"
+      },
+      {
+        "nazev": "CHALK",
+        "matId": "1.002+2.034"
+      },
+      {
+        "nazev": "BLACKBERRY",
+        "matId": "1.002+2.035"
+      },
+      {
+        "nazev": "NIGHT GREEN",
+        "matId": "1.002+2.032"
+      }
+    ]
+  },
+  "129": {
+    "cislo": "129",
+    "nazev": "Cover DS LWR cover basis RHD",
+    "material": "Lukablend 7400, Bayblend T65 XF Natur + MB 2%",
+    "druh": "PC/ABS",
+    "suseni": "110°C / min 2h",
+    "teplota": "270-240",
+    "vlhkostList": "0,02%",
+    "vlhkostInterni": "0,04%",
+    "matId": "1.131/1.002",
+    "barvy": [
+      {
+        "nazev": "BLACK",
+        "matId": "1.131"
+      },
+      {
+        "nazev": "LIME BEIGE",
+        "matId": "1.002+2.031"
+      },
+      {
+        "nazev": "BORDEAUX RED",
+        "matId": "1.002+2.030"
+      },
+      {
+        "nazev": "CHALK",
+        "matId": "1.002+2.034"
+      },
+      {
+        "nazev": "BLACKBERRY",
+        "matId": "1.002+2.035"
+      },
+      {
+        "nazev": "NIGHT GREEN",
+        "matId": "1.002+2.032"
+      }
+    ]
+  },
+  "130": {
+    "cislo": "130",
+    "nazev": "Cover DS LWR Carrier LHD",
+    "material": "Lukablend 7400",
+    "druh": "PC/ABS",
+    "suseni": "110°C / min 2h",
+    "teplota": "270-240",
+    "vlhkostList": "0,02%",
+    "vlhkostInterni": "0,04%",
+    "matId": "1.131",
+    "barvy": []
+  },
+  "131": {
+    "cislo": "131",
+    "nazev": "Cover DS LWR Carrier RHD",
+    "material": "Lukablend 7400",
+    "druh": "PC/ABS",
+    "suseni": "110°C / min 2h",
+    "teplota": "270-240",
+    "vlhkostList": "0,02%",
+    "vlhkostInterni": "0,04%",
+    "matId": "1.131",
+    "barvy": []
+  },
+  "141": {
+    "cislo": "141",
+    "nazev": "Tank flap cup",
+    "material": "Enflex VL 120 70A T2 900 Black",
+    "druh": "TPE",
+    "suseni": "80°C / min 2h",
+    "teplota": "220-170",
+    "vlhkostList": "0,08%",
+    "vlhkostInterni": "0,08%",
+    "matId": "1.082",
+    "barvy": []
+  },
+  "146": {
+    "cislo": "146",
+    "nazev": "Ablage Koppelbox LL",
+    "material": "Bayblend T65XF 910510 Black",
+    "druh": "PC/ABS",
+    "suseni": "110°C / min 2h",
+    "teplota": "270-240",
+    "vlhkostList": "0,02%",
+    "vlhkostInterni": "0,04%",
+    "matId": "1.001",
+    "barvy": []
+  },
+  "147": {
+    "cislo": "147",
+    "nazev": "Ablage Koppelbox RL",
+    "material": "Bayblend T65XF 910510 Black",
+    "druh": "PC/ABS",
+    "suseni": "110°C / min 2h",
+    "teplota": "270-240",
+    "vlhkostList": "0,02%",
+    "vlhkostInterni": "0,04%",
+    "matId": "1.001",
+    "barvy": []
+  },
+  "149": {
+    "cislo": "149",
+    "nazev": "Blende Cupholder LL",
+    "material": "Bayblend T65XF 910510 Black",
+    "druh": "PC/ABS",
+    "suseni": "110°C / min 2h",
+    "teplota": "270-240",
+    "vlhkostList": "0,02%",
+    "vlhkostInterni": "0,04%",
+    "matId": "1.001",
+    "barvy": []
+  },
+  "150": {
+    "cislo": "150",
+    "nazev": "Blende Cupholder RL",
+    "material": "Bayblend T65XF 910510 Black",
+    "druh": "PC/ABS",
+    "suseni": "110°C / min 2h",
+    "teplota": "270-240",
+    "vlhkostList": "0,02%",
+    "vlhkostInterni": "0,04%",
+    "matId": "1.001",
+    "barvy": []
+  },
+  "151": {
+    "cislo": "151",
+    "nazev": "Fuel filler cup",
+    "material": "Enflex VL 120 70A T2 900 Black",
+    "druh": "TPE",
+    "suseni": "80°C / min 2h",
+    "teplota": "220-170",
+    "vlhkostList": "0,08%",
+    "vlhkostInterni": "0,08%",
+    "matId": "1.082",
+    "barvy": []
+  },
+  "175": {
+    "cislo": "175",
+    "nazev": "Gitter mitte",
+    "material": "Bayblend T85XF Black",
+    "druh": "PC/ABS",
+    "suseni": "110°C/ min 4h",
+    "teplota": "280-260",
+    "vlhkostList": "0,02%",
+    "vlhkostInterni": "0,04%",
+    "matId": "1.090",
+    "barvy": []
+  },
+  "180": {
+    "cislo": "180",
+    "nazev": "MAT Pocket LH_RH",
+    "material": "Santoprene 8221-65 M300",
+    "druh": "TPE",
+    "suseni": "-",
+    "teplota": "230-175",
+    "vlhkostList": "-",
+    "vlhkostInterni": "-",
+    "matId": "1.037",
+    "barvy": []
+  },
+  "198A": {
+    "cislo": "198A",
+    "nazev": "Speaker cover LL (kryt-ka repr. LL)",
+    "material": "Bayblend T85 XF black",
+    "druh": "PC-ABS",
+    "suseni": "100°C/ min 4h",
+    "teplota": "280-260",
+    "vlhkostList": "0,02%",
+    "vlhkostInterni": "0,04%",
+    "matId": "1.090",
+    "barvy": []
+  },
+  "198B": {
+    "cislo": "198B",
+    "nazev": "Speaker cover RL (kryt-ka repr. RL)",
+    "material": "Bayblend T85 XF black",
+    "druh": "PC-ABS",
+    "suseni": "100°C/ min 4h",
+    "teplota": "280-260",
+    "vlhkostList": "0,02%",
+    "vlhkostInterni": "0,04%",
+    "matId": "1.090",
+    "barvy": []
+  },
+  "201": {
+    "cislo": "201",
+    "nazev": "ZSB Assy bottom cover PS LL",
+    "material": "PP Lukapylen 1319 Black",
+    "druh": "PP",
+    "suseni": "(80°C/min2h)",
+    "teplota": "210-240",
+    "vlhkostList": "0,02-0,05",
+    "vlhkostInterni": "0,02-0,05",
+    "matId": "1.105",
+    "barvy": []
+  },
+  "213": {
+    "cislo": "213",
+    "nazev": "Lamelle Gitter Seite Li/Re",
+    "material": "Pulse A35-110",
+    "druh": "PC/ABS",
+    "suseni": "100°C/min 4h",
+    "teplota": "280-255",
+    "vlhkostList": "0,02%",
+    "vlhkostInterni": "0,02%",
+    "matId": "1.118",
+    "barvy": []
+  },
+  "214": {
+    "cislo": "214",
+    "nazev": "Abdeckung Seitlich Basis Li/Re",
+    "material": "Pulse A35-110",
+    "druh": "PC/ABS",
+    "suseni": "100°C/min 4h",
+    "teplota": "280-255",
+    "vlhkostList": "0,02%",
+    "vlhkostInterni": "0,02%",
+    "matId": "1.118",
+    "barvy": []
+  },
+  "231": {
+    "cislo": "231",
+    "nazev": "Lamelle Seite Li_Re",
+    "material": "lamelebil",
+    "druh": "PC/ABS",
+    "suseni": "100°C/ min 4h.",
+    "teplota": "280-255",
+    "vlhkostList": "0,02%",
+    "vlhkostInterni": "Měřit zbytk. vlhkost",
+    "matId": "1.118",
+    "barvy": []
+  },
+  "237": {
+    "cislo": "237",
+    "nazev": "DIF AMB DOOR BELTLINE RR LH/RH",
+    "material": "PC- ALCOM LD2 PC 1000 UV 16059 CC1059-16",
+    "druh": "PC",
+    "suseni": "120°C/ min 2h",
+    "teplota": "310-270",
+    "vlhkostList": "0,02%",
+    "vlhkostInterni": "Měřit zbytk. vlhkost",
+    "matId": "1.015",
+    "barvy": []
+  },
+  "239": {
+    "cislo": "239",
+    "nazev": "Mřížka reproduktoru LR",
+    "material": "Polyblend 85H LB NATUR + PCABS CC 3% TP 7800228 SOUL",
+    "druh": "PC/ABS",
+    "suseni": "100-110/ min 2-8",
+    "teplota": "290-260",
+    "vlhkostList": "0,05%",
+    "vlhkostInterni": "Měřit zbytk. vlhkost",
+    "matId": "1.138 + 2.055",
+    "barvy": []
+  },
+  "261": {
+    "cislo": "261",
+    "nazev": "Rám Buddy X1",
+    "material": "Akroloy PA CF 40 black (8504)",
+    "druh": "PA+40% carbon",
+    "suseni": "80°C / min 4h",
+    "teplota": "310-280",
+    "vlhkostList": "0,02-1",
+    "vlhkostInterni": "Měřit zbytk. vlhkost",
+    "matId": "1.102",
+    "barvy": []
+  },
+  "271": {
+    "cislo": "271",
+    "nazev": "DIF AMB DOOR ARMREST LH/RH",
+    "material": "PC- ALCOM LD2 PC 1000 UV 16059 CC1059-16",
+    "druh": "PC",
+    "suseni": "120°C/ min 2h",
+    "teplota": "310-270",
+    "vlhkostList": "0,02%",
+    "vlhkostInterni": "Měřit zbytk. vlhkost",
+    "matId": "1.130",
+    "barvy": []
+  },
+  "279": {
+    "cislo": "279",
+    "nazev": "Adapter MRR Basis",
+    "material": "Infino WP1069 K23194",
+    "druh": "PC/ABS",
+    "suseni": "90°C/ 2-4h",
+    "teplota": "",
+    "vlhkostList": "",
+    "vlhkostInterni": "",
+    "matId": "1.040",
+    "barvy": []
+  },
+  "282": {
+    "cislo": "282",
+    "nazev": "Blende air curtain Basis LH/RH",
+    "material": "Taboren-PR 72T 10R-black",
+    "druh": "PP",
+    "suseni": "80°C/ min 3h",
+    "teplota": "230-180",
+    "vlhkostList": "unte",
+    "vlhkostInterni": "",
+    "matId": "1.142",
+    "barvy": []
+  },
+  "283": {
+    "cislo": "283",
+    "nazev": "Frame",
+    "material": "Taboren-PR 72T 10R-black",
+    "druh": "PP",
+    "suseni": "80°C/ min 3h",
+    "teplota": "230-180",
+    "vlhkostList": "",
+    "vlhkostInterni": "",
+    "matId": "1.142",
+    "barvy": []
+  },
+  "284": {
+    "cislo": "284",
+    "nazev": "Radiator grille",
+    "material": "Infino WP1069 K23194",
+    "druh": "PC/ABS",
+    "suseni": "90°C/ 2-4h",
+    "teplota": "",
+    "vlhkostList": "",
+    "vlhkostInterni": "",
+    "matId": "1.040",
+    "barvy": []
+  },
+  "286": {
+    "cislo": "286",
+    "nazev": "Ventilation grille RS",
+    "material": "Taboren-PR 72T 10R-black",
+    "druh": "PP",
+    "suseni": "80°C/ min 3h",
+    "teplota": "230-180",
+    "vlhkostList": "",
+    "vlhkostInterni": "",
+    "matId": "1.142",
+    "barvy": []
+  },
+  "287": {
+    "cislo": "287",
+    "nazev": "Cover RS rear LH/RH",
+    "material": "Taboren-PR 72T 10R-black",
+    "druh": "PP",
+    "suseni": "80°C/ min 3h",
+    "teplota": "230-180",
+    "vlhkostList": "",
+    "vlhkostInterni": "",
+    "matId": "1.142",
+    "barvy": []
+  },
+  "288": {
+    "cislo": "288",
+    "nazev": "Moulding RS rear LH/RH",
+    "material": "Taboren-PR 72T 10R-black",
+    "druh": "PP",
+    "suseni": "80°C/ min 3h",
+    "teplota": "230-180",
+    "vlhkostList": "",
+    "vlhkostInterni": "",
+    "matId": "1.142",
+    "barvy": []
+  },
+  "302": {
+    "cislo": "302",
+    "nazev": "Oben",
+    "material": "Daplen EE 189HP-9557 Titanschwarz",
+    "druh": "PP",
+    "suseni": "80°C/ min 2h",
+    "teplota": "250-210",
+    "vlhkostList": "",
+    "vlhkostInterni": "",
+    "matId": "1.149",
+    "barvy": []
+  },
+  "303": {
+    "cislo": "303",
+    "nazev": "Aufnahme Sonnenrollo Li_Re",
+    "material": "",
+    "druh": "",
+    "suseni": "",
+    "teplota": "",
+    "vlhkostList": "",
+    "vlhkostInterni": "",
+    "matId": "",
+    "barvy": []
+  },
+  "304": {
+    "cislo": "304",
+    "nazev": "Assy Fuel Filler Module – benzin/diesel",
+    "material": "",
+    "druh": "",
+    "suseni": "",
+    "teplota": "",
+    "vlhkostList": "",
+    "vlhkostInterni": "",
+    "matId": "",
+    "barvy": []
+  },
+  "305": {
+    "cislo": "305",
+    "nazev": "Flap",
+    "material": "",
+    "druh": "",
+    "suseni": "",
+    "teplota": "",
+    "vlhkostList": "",
+    "vlhkostInterni": "",
+    "matId": "",
+    "barvy": []
+  },
+  "306": {
+    "cislo": "306",
+    "nazev": "D-sloupek",
+    "material": "",
+    "druh": "",
+    "suseni": "",
+    "teplota": "",
+    "vlhkostList": "",
+    "vlhkostInterni": "",
+    "matId": "",
+    "barvy": []
+  },
+  "354": {
+    "cislo": "354",
+    "nazev": "Trim panel CNT Arvnt ASY LHD",
+    "material": "",
+    "druh": "",
+    "suseni": "",
+    "teplota": "",
+    "vlhkostList": "",
+    "vlhkostInterni": "",
+    "matId": "",
+    "barvy": []
+  },
+  "355": {
+    "cislo": "355",
+    "nazev": "Trim panel CNT Arvnt ASY RHD",
+    "material": "",
+    "druh": "",
+    "suseni": "",
+    "teplota": "",
+    "vlhkostList": "",
+    "vlhkostInterni": "",
+    "matId": "",
+    "barvy": []
+  },
+  "360": {
+    "cislo": "360",
+    "nazev": "Unten",
+    "material": "Daplen EE 189HP-9557 Titanschwarz",
+    "druh": "PP",
+    "suseni": "80°C/ min 2h",
+    "teplota": "250-210",
+    "vlhkostList": "0,1%",
+    "vlhkostInterni": "",
+    "matId": "1.169",
+    "barvy": []
+  },
+  "364": {
+    "cislo": "364",
+    "nazev": "Oben Beta",
+    "material": "Daplen EE 250AI-9557 Titanschwarz",
+    "druh": "PP",
+    "suseni": "80°C/ min 2h",
+    "teplota": "250-210",
+    "vlhkostList": "0,1%",
+    "vlhkostInterni": "",
+    "matId": "1.169",
+    "barvy": []
+  },
+  "367": {
+    "cislo": "367",
+    "nazev": "DIF CONT COCKPIT WSS V530",
+    "material": "PC ALCOMLD2PC1000UV16059CC1059",
+    "druh": "PC",
+    "suseni": "120°C/ min 2h",
+    "teplota": "310-270",
+    "vlhkostList": "0,02%",
+    "vlhkostInterni": "Měřit zbytk. vlhkost",
+    "matId": "1.130",
+    "barvy": []
+  }
+}
