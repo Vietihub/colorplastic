@@ -1699,6 +1699,20 @@ function isToday(d) {
   return d.getTime() === t.getTime();
 }
 
+function currentShift() {
+  var h = new Date().getHours();
+  if (h >= 6 && h < 14) return 'ranní';
+  if (h >= 14 && h < 22) return 'odpolední';
+  return 'noční';
+}
+
+function getPlanForMachineNow(machine) {
+  var today = dateKey(new Date());
+  var shift = currentShift();
+  var k = machine.replace(/ /g,'_') + '_' + today + '_' + shift;
+  return D.plan[k] || null;
+}
+
 function planPrevWeek() { planWeekOffset--; renderPlan(); }
 function planNextWeek() { planWeekOffset++; renderPlan(); }
 function planThisWeek() { planWeekOffset=0; renderPlan(); }
@@ -2467,11 +2481,28 @@ function renderPrehled() {
 function renderProd(containerId) {
   var el = document.getElementById(containerId); if (!el) return;
   var canEdit = (role==='vedouci'||role==='serizovac'||role==='technolog'||role==='mistr');
+  var shiftLabels = {'ranní':'R','odpolední':'O','noční':'N'};
+  var curShift = currentShift();
   el.innerHTML = D.production.map(function(p){
+    var planned = getPlanForMachineNow(p.machine);
+    var planBadge = '';
+    if (planned && planned.forma) {
+      var match = p.forma && p.forma.toString() === planned.forma.toString();
+      planBadge = '<div style="margin-top:7px;padding:5px 9px;border-radius:5px;font-size:11px;font-weight:700;letter-spacing:.4px;display:flex;align-items:center;gap:6px;' +
+        (match
+          ? 'background:rgba(57,211,83,.1);border:1px solid rgba(57,211,83,.25);color:var(--green-text)'
+          : 'background:rgba(74,158,255,.08);border:1px solid rgba(74,158,255,.2);color:#4a9eff') + '">' +
+        '<span style="opacity:.7;font-size:10px">PLÁN ' + shiftLabels[curShift] + ':</span>' +
+        '<span>č. ' + planned.forma + '</span>' +
+        (planned.qty ? '<span style="opacity:.6;font-weight:400">· ' + parseInt(planned.qty).toLocaleString() + ' ks</span>' : '') +
+        (match ? '<span style="font-size:13px">✓</span>' : '') +
+      '</div>';
+    }
     return '<div class="pc'+(p.running?' run':'')+'">' +
       '<div class="pc-mach"><span>'+p.machine+'</span><div class="dot'+(p.running?' on':'')+'"></div></div>' +
       (p.forma ? '<div class="pc-forma">'+p.forma+'</div><div class="pc-flbl">Nasazená forma</div>' : '<div class="pc-idle">Lis stojí</div>') +
       (p.mat ? '<div class="pc-mat">🎨 '+p.mat+'</div>' : '') +
+      planBadge +
       (p.updated ? '<div class="pc-upd">Aktualizováno v '+p.updated+'</div>' : '') +
       (canEdit ? '<button class="pc-edit" data-m="'+p.machine+'" onclick="openProdModal(this.dataset.m)">✏ Upravit</button>' : '') +
     '</div>';
@@ -2863,8 +2894,14 @@ function openProdModal(machine) {
   curProdMachine=machine;
   var p=D.production.find(function(x){return x.machine===machine;});
   document.getElementById('mp-title').textContent=machine;
-  document.getElementById('mp-forma').value=p&&p.forma?p.forma:'';
-  document.getElementById('mp-mat').value=p&&p.mat?p.mat:'';
+  // Pre-fill forma from today's plan if production has none set
+  var currentForma = p&&p.forma ? p.forma : '';
+  if (!currentForma) {
+    var planned = getPlanForMachineNow(machine);
+    if (planned && planned.forma) currentForma = planned.forma;
+  }
+  document.getElementById('mp-forma').value=currentForma;
+  onMpFormaChange();
   document.getElementById('mod-prod').classList.add('on');
 }
 function saveProd() {
