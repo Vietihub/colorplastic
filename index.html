@@ -896,7 +896,7 @@ input[type="time"]::-webkit-date-and-time-value { text-align: left; }
       </div>
       <div class="card">
         <div class="tw"><table>
-          <thead><tr><th>Forma</th><th>Typ</th><th>Název</th><th>Interní č.</th><th>Teplota sušení</th><th>Čas sušení</th><th></th></tr></thead>
+          <thead id="thead-materialy"><tr><th>Forma</th><th>Typ</th><th>Název</th><th>Interní č.</th><th>Teplota sušení</th><th>Čas sušení</th><th></th></tr></thead>
           <tbody id="tbl-materialy"></tbody>
         </table></div>
       </div>
@@ -1002,7 +1002,7 @@ input[type="time"]::-webkit-date-and-time-value { text-align: left; }
       <div class="card">
         <div class="tw"><table>
           <thead><tr><th>Forma</th><th>Typ</th><th>Název</th><th>Interní č.</th><th>Teplota sušení</th><th>Čas sušení</th><th></th></tr></thead>
-          <tbody id="tbl-materialy"></tbody>
+          <tbody></tbody>
         </table></div>
       </div>
     </div>
@@ -1418,55 +1418,55 @@ function parseSuseni(s) {
 }
 
 function renderMaterialy() {
-  var canEdit = role==='technolog';
-  var sub=document.getElementById('mat-psub');
-  if(sub) sub.textContent = canEdit ? 'Správa materiálů – přidat, upravit, odebrat' : 'Parametry zpracování – pouze čtení';
+  var canEdit = role === 'technolog';
+  var sub = document.getElementById('mat-psub');
+  var addBtn = document.getElementById('mat-add-btn');
+  var tbody = document.getElementById('tbl-materialy'); if (!tbody) return;
+  var thead = document.getElementById('thead-materialy');
 
-  // Show/hide add button
-  var addBtn=document.getElementById('mat-add-btn');
-  if(addBtn) addBtn.style.display = canEdit ? 'inline-flex' : 'none';
-
-  var tbody=document.getElementById('tbl-materialy'); if(!tbody) return;
-
-  // Use custom /materialy entries; fall back to /formy data for read-only view
-  if (D.materialy.length) {
+  if (canEdit) {
+    // Technolog: editable custom /materialy records
+    if(sub) sub.textContent = 'Správa materiálů – přidat, upravit, odebrat';
+    if(addBtn) addBtn.style.display = 'inline-flex';
+    if(thead) thead.innerHTML = '<tr><th>Forma</th><th>Typ</th><th>Název</th><th>Interní č.</th><th>Teplota sušení</th><th>Čas sušení</th><th></th></tr>';
     tbody.innerHTML = D.materialy.map(function(m) {
       var k = m.fbKey||'';
       return '<tr>' +
-        '<td class="bold">' + m.forma + '</td>' +
-        '<td><span class="tbadge">' + m.typ + '</span></td>' +
-        '<td class="bold">' + m.nazev + '</td>' +
-        '<td class="mono">' + m.cislo + '</td>' +
-        '<td style="color:var(--orange);font-weight:600">' + m.teplota + ' °C</td>' +
-        '<td style="color:var(--text2)">' + m.cas + ' hod</td>' +
-        (canEdit ?
-          '<td style="display:flex;gap:5px;padding:8px 14px">' +
-            '<button class="btn bg bsm" data-k="'+k+'" data-m="'+encodeURIComponent(JSON.stringify(m))+'" onclick="openMatModal(this)">✏</button>' +
-            '<button class="btn bwarn bsm" data-k="'+k+'" onclick="deleteMat(this.dataset.k)">✕</button>' +
-          '</td>'
-          : '<td></td>') +
+        '<td class="bold">' + (m.forma||'–') + '</td>' +
+        '<td><span class="tbadge">' + (m.typ||'–') + '</span></td>' +
+        '<td class="bold">' + (m.nazev||'–') + '</td>' +
+        '<td class="mono">' + (m.cislo||'–') + '</td>' +
+        '<td style="color:var(--orange);font-weight:600">' + (m.teplota||'–') + (m.teplota&&m.teplota!=='–'?' °C':'') + '</td>' +
+        '<td style="color:var(--text2)">' + (m.cas||'–') + (m.cas&&m.cas!=='–'?' hod':'') + '</td>' +
+        '<td style="display:flex;gap:5px;padding:8px 14px">' +
+          '<button class="btn bg bsm" data-k="'+k+'" data-m="'+encodeURIComponent(JSON.stringify(m))+'" onclick="openMatModal(this)">✏</button>' +
+          '<button class="btn bwarn bsm" data-k="'+k+'" onclick="deleteMat(this.dataset.k)">✕</button>' +
+        '</td>' +
       '</tr>';
-    }).join('');
+    }).join('') || '<tr><td colspan="7" style="text-align:center;color:var(--text3);padding:20px">Žádné záznamy. Přidejte první materiál.</td></tr>';
   } else {
-    // Show data from /formy as reference (read-only)
+    // Seřizovač + ostatní: kompletní seznam z /formy (read-only)
+    if(sub) sub.textContent = 'Parametry zpracování – seznam forem a materiálů';
+    if(addBtn) addBtn.style.display = 'none';
+    if(thead) thead.innerHTML = '<tr><th>Č. formy</th><th>Název zakázky</th><th>Materiál</th><th>Druh</th><th>Sušení</th><th>Teplota zprac.</th><th>Interní č.</th></tr>';
     var cisla = Object.keys(D.formy).sort(function(a,b){
       var na=parseFloat(a), nb=parseFloat(b);
       if(!isNaN(na)&&!isNaN(nb)) return na-nb;
       return String(a).localeCompare(String(b));
     });
-    tbody.innerHTML = cisla.filter(function(c){ return D.formy[c].material; }).map(function(cislo) {
+    var rows = cisla.filter(function(c){ return D.formy[c].material; }).map(function(cislo) {
       var f = D.formy[cislo];
-      var sus = parseSuseni(f.suseni);
       return '<tr>' +
-        '<td class="bold">Č. ' + cislo + '</td>' +
+        '<td class="bold" style="font-family:\'Barlow Condensed\',sans-serif;font-size:20px;font-weight:900;white-space:nowrap">' + cislo + '</td>' +
+        '<td style="font-size:12px;color:var(--text2);max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">' + (f.nazev||'–') + '</td>' +
+        '<td class="bold" style="font-size:12px;max-width:220px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="'+(f.material||'')+'">' + (f.material||'–') + '</td>' +
         '<td><span class="tbadge">' + (f.druh||'–') + '</span></td>' +
-        '<td class="bold" style="font-size:12px">' + (f.material||'–') + '</td>' +
-        '<td class="mono">' + (f.matId||'–') + '</td>' +
-        '<td style="color:var(--orange);font-weight:600">' + sus.teplota + (sus.teplota!=='–'?' °C':'') + '</td>' +
-        '<td style="color:var(--text2)">' + sus.cas + (sus.cas!=='–'?' hod':'') + '</td>' +
-        '<td></td>' +
+        '<td style="font-size:12px;color:var(--text2);white-space:nowrap">' + (f.suseni||'–') + '</td>' +
+        '<td style="color:var(--orange);font-weight:600;white-space:nowrap">' + (f.teplota||'–') + (f.teplota&&f.teplota!=='–'?' °C':'') + '</td>' +
+        '<td class="mono" style="font-size:12px">' + (f.matId||'–') + '</td>' +
       '</tr>';
-    }).join('') || '<tr><td colspan="7" style="text-align:center;color:var(--text3);padding:20px">Načítání...</td></tr>';
+    }).join('');
+    tbody.innerHTML = rows || '<tr><td colspan="7" style="text-align:center;color:var(--text3);padding:20px">Načítání forem...</td></tr>';
   }
 }
 
