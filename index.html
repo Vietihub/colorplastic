@@ -1356,6 +1356,17 @@ function buildFormaOptions(defaultLabel) {
   return opts;
 }
 
+function getMatIdByName(materialStr) {
+  // materialStr format: "Lukablend 7400 (PC/ABS)" → look up matId in D.formy
+  var keys = Object.keys(D.formy || {});
+  for (var i = 0; i < keys.length; i++) {
+    var f = D.formy[keys[i]];
+    var name = f.material + ' (' + f.druh + ')';
+    if (name === materialStr && f.matId) return f.matId;
+  }
+  return null;
+}
+
 function buildMatOptions(defaultLabel) {
   var seen = {};
   var list = [];
@@ -2537,8 +2548,9 @@ function renderSklad() {
     : '<div style="background:rgba(57,211,83,.07);border:1px solid rgba(57,211,83,.2);border-radius:8px;padding:14px 18px;margin-bottom:14px;display:flex;align-items:center;gap:10px"><span style="font-size:20px">✅</span><span style="font-weight:700;color:var(--green-text)">Vše odbaveno</span></div>';
   var ce = document.getElementById('sklad-cards');
   if (ce) ce.innerHTML = pendReq.map(function(r){
+    var matId = getMatIdByName(r.material);
     return '<div class="rc"><div><div class="rc-time">'+fmtActivityTime(r.time)+'</div><div class="rc-lbl">čeká</div></div>'+
-      '<div><div class="rc-mat">'+r.material+'</div><div class="rc-meta"><span>⚖️ '+r.qty+' kg</span><span>🏭 '+r.machine+'</span>'+(r.note?'<span>📝 '+r.note+'</span>':'')+(r.priority==='urgent'?'<span style="color:var(--red);font-weight:700">⚡ Urgentní</span>':'')+'</div></div>'+
+      '<div><div class="rc-mat">'+r.material+(matId?'<span style="font-size:12px;font-weight:400;color:var(--text3);margin-left:8px">· '+matId+'</span>':'')+'</div><div class="rc-meta"><span>⚖️ '+r.qty+' kg</span><span>🏭 '+r.machine+'</span>'+(r.note?'<span>📝 '+r.note+'</span>':'')+(r.priority==='urgent'?'<span style="color:var(--red);font-weight:700">⚡ Urgentní</span>':'')+'</div></div>'+
       '<div><button class="btn br bsm" data-k="'+r.fbKey+'" onclick="openSkladModal(this.dataset.k)">Reagovat</button></div></div>';
   }).join('');
   var dt = document.getElementById('tbl-sklad-done');
