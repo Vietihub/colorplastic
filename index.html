@@ -931,7 +931,8 @@ input[type="time"]::-webkit-date-and-time-value { text-align: left; }
         <div class="fg"><label class="fl">Barva</label><input type="text" class="fi" id="pm-barva" placeholder="napr. RAL 9005 černá"></div>
       </div>
       <div class="fg"><label class="fl">Materiál</label>
-          <select class="fs" id="pm-mat"><option value="">— Nevyplněno —</option></select>
+          <select class="fs" id="pm-mat" disabled style="opacity:.7;cursor:not-allowed"><option value="">— Nevyplněno —</option></select>
+          <div id="pm-mat-id" style="display:none;margin-top:5px;font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--text2);padding:4px 8px;background:var(--bg4);border-radius:5px;border:1px solid var(--border)">Interní č.: —</div>
       </div>
       <label style="display:flex;align-items:center;gap:9px;font-size:13px;cursor:pointer">
         <input type="checkbox" id="pm-susen" style="width:15px;height:15px;accent-color:var(--red)">
@@ -1402,7 +1403,20 @@ function setMatFromForma(cislo, matSelId, dryId) {
     if (dryEl) dryEl.checked = (f.suseni && f.suseni !== '-');
   }
 }
-function onPmFormaChange() { setMatFromForma(document.getElementById('pm-forma').value, 'pm-mat', 'pm-susen'); }
+function onPmFormaChange() {
+  var cislo = document.getElementById('pm-forma').value;
+  var f = cislo && D.formy[cislo];
+  var matSel = document.getElementById('pm-mat');
+  var matIdEl = document.getElementById('pm-mat-id');
+  if (f && f.material) {
+    setMatFromForma(cislo, 'pm-mat', 'pm-susen');
+    if (matSel) matSel.disabled = true;
+    if (matIdEl) { matIdEl.style.display = 'block'; matIdEl.textContent = 'Interní č.: ' + (f.matId || '—'); }
+  } else {
+    if (matSel) { matSel.disabled = false; matSel.value = ''; }
+    if (matIdEl) matIdEl.style.display = 'none';
+  }
+}
 function onFOnChange()     { setMatFromForma(document.getElementById('f-on').value, 'f-mat', 'f-dry'); }
 function onMpFormaChange() { setMatFromForma(document.getElementById('mp-forma').value, 'mp-mat', null); }
 
@@ -1456,8 +1470,11 @@ function renderMaterialy() {
     });
     var rows = cisla.filter(function(c){ return D.formy[c].material; }).map(function(cislo) {
       var f = D.formy[cislo];
-      return '<tr>' +
-        '<td class="bold" style="font-family:\'Barlow Condensed\',sans-serif;font-size:20px;font-weight:900;white-space:nowrap">' + cislo + '</td>' +
+      var hasBarvy = f.barvy && f.barvy.length > 0;
+      var mainRow = '<tr style="cursor:'+(hasBarvy?'pointer':'default')+'"' + (hasBarvy?' onclick="toggleBarvy(\''+cislo+'\')"':'') + '>' +
+        '<td class="bold" style="font-family:\'Barlow Condensed\',sans-serif;font-size:20px;font-weight:900;white-space:nowrap">' +
+          (hasBarvy ? '<span id="barvy-arrow-'+cislo+'" style="font-size:12px;margin-right:5px;display:inline-block;transition:transform .2s">▶</span>' : '') +
+          cislo + '</td>' +
         '<td style="font-size:12px;color:var(--text2);max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">' + (f.nazev||'–') + '</td>' +
         '<td class="bold" style="font-size:12px;max-width:220px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="'+(f.material||'')+'">' + (f.material||'–') + '</td>' +
         '<td><span class="tbadge">' + (f.druh||'–') + '</span></td>' +
@@ -1465,9 +1482,31 @@ function renderMaterialy() {
         '<td style="color:var(--orange);font-weight:600;white-space:nowrap">' + (f.teplota||'–') + (f.teplota&&f.teplota!=='–'?' °C':'') + '</td>' +
         '<td class="mono" style="font-size:12px">' + (f.matId||'–') + '</td>' +
       '</tr>';
+      var barvyRow = '';
+      if (hasBarvy) {
+        var barvyHtml = f.barvy.map(function(b) {
+          return '<tr style="background:rgba(255,255,255,.02)">' +
+            '<td style="padding:6px 12px 6px 32px;color:var(--text3);font-size:11px;border-left:3px solid var(--border2)">↳</td>' +
+            '<td colspan="4" style="padding:6px 10px;font-size:12px;font-weight:600;letter-spacing:.3px">' + b.nazev + '</td>' +
+            '<td></td>' +
+            '<td class="mono" style="padding:6px 10px;font-size:12px;color:var(--text2)">' + (b.matId||'–') + '</td>' +
+          '</tr>';
+        }).join('');
+        barvyRow = '<tr id="barvy-row-'+cislo+'" style="display:none"><td colspan="7" style="padding:0"><table style="width:100%;border-collapse:collapse">' + barvyHtml + '</table></td></tr>';
+      }
+      return mainRow + barvyRow;
     }).join('');
     tbody.innerHTML = rows || '<tr><td colspan="7" style="text-align:center;color:var(--text3);padding:20px">Načítání forem...</td></tr>';
   }
+}
+
+function toggleBarvy(cislo) {
+  var row = document.getElementById('barvy-row-' + cislo);
+  var arrow = document.getElementById('barvy-arrow-' + cislo);
+  if (!row) return;
+  var open = row.style.display !== 'none';
+  row.style.display = open ? 'none' : 'table-row';
+  if (arrow) arrow.style.transform = open ? '' : 'rotate(90deg)';
 }
 
 function openMatModal(btn) {
@@ -1810,7 +1849,19 @@ function openPlanModal(planKey, mach, dk, smena) {
   document.getElementById('pm-title').textContent = mach;
   document.getElementById('pm-date').textContent = dk.split('-').reverse().join('.') + ' · ' + (smenaLabels[smena] || smena);
   document.getElementById('pm-forma').value = p.forma || '';
-  document.getElementById('pm-mat').value = p.mat || '';
+  // Restore mat state: if forma is in D.formy, lock material and show matId
+  var pmMatSel = document.getElementById('pm-mat');
+  var pmMatId  = document.getElementById('pm-mat-id');
+  var fData = p.forma && D.formy[p.forma];
+  if (fData && fData.material) {
+    pmMatSel.value = (fData.material + ' (' + (fData.druh||'') + ')');
+    pmMatSel.disabled = true;
+    if (pmMatId) { pmMatId.style.display='block'; pmMatId.textContent='Interní č.: '+(fData.matId||'—'); }
+  } else {
+    pmMatSel.value = p.mat || '';
+    pmMatSel.disabled = false;
+    if (pmMatId) pmMatId.style.display='none';
+  }
   document.getElementById('pm-qty').value = p.qty || '';
   var casEl = document.getElementById('pm-cas');
   if (casEl) casEl.value = p.cas || '';
