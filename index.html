@@ -396,6 +396,9 @@ input[type="time"]::-webkit-date-and-time-value { text-align: left; }
 .banner-group-hdr{display:flex;align-items:center;justify-content:space-between;padding:10px 14px;border-radius:8px;cursor:pointer;user-select:none;transition:all .15s;}
 .banner-group-hdr.red{background:linear-gradient(135deg,#1a0a0a,#22100f);border:1px solid rgba(255,69,69,.4);}
 .banner-group-hdr.orange{background:linear-gradient(135deg,#1a1400,#221e00);border:1px solid rgba(255,156,0,.35);}
+.banner-group-hdr.blue{background:linear-gradient(135deg,#080f1a,#0d1828);border:1px solid rgba(74,158,255,.3);}
+.banner-group-count.blue{background:var(--blue);}
+.banner-group-body.collapsed .banner{margin-top:0;}
 .banner-group-title{display:flex;align-items:center;gap:8px;font-size:13px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;}
 .banner-group-meta{display:flex;align-items:center;gap:8px;}
 .banner-group-count{background:var(--red);color:#fff;font-size:10px;font-weight:700;border-radius:10px;padding:1px 6px;}
@@ -2330,7 +2333,7 @@ function buildUnavailBanner() {
           '<span class="banner-group-arrow" id="arr-'+groupId+'">▼</span>' +
         '</div>' +
       '</div>' +
-      '<div class="banner-group-body expanded" id="'+groupId+'">' +
+      '<div class="banner-group-body collapsed" id="'+groupId+'">' +
         bodyItems +
       '</div>' +
     '</div>';
@@ -2353,42 +2356,61 @@ function toggleBannerGroup(id) {
 
 function buildFormaBanner() {
   if (!D.formaChanges.length || role==='vedouci') return '';
-  return D.formaChanges.map(function(f){
-    var dismissed = f.dismissedBy||[];
-    if (dismissed.indexOf(role)>=0) return '';
+  var active = D.formaChanges.filter(function(f){
+    return (f.dismissedBy||[]).indexOf(role) < 0;
+  });
+  if (!active.length) return '';
+  var bodyItems = active.map(function(f){
     var k = f.fbKey||'';
-    return '<div class="banner ban-o">' +
-      '<div><div style="display:flex;align-items:center;gap:8px">' +
-        '<span style="font-size:17px">🔔</span>' +
-        '<span class="ban-title" style="color:var(--orange)">Plánovaná změna formy</span>' +
+    return '<div class="banner ban-o" style="margin:6px 0 0;border-radius:6px">' +
+      '<div>' +
+        '<div class="ban-body"><strong>'+f.machine+'</strong> · v <strong>'+f.changeTime+'</strong> · '+f.formOff+' → '+f.formOn+'</div>' +
+        (f.dry?'<div style="margin-top:4px;display:inline-flex;align-items:center;gap:4px;background:var(--orange-dim);border:1px solid rgba(255,156,0,.3);border-radius:4px;padding:2px 7px;font-size:11px;font-weight:700;color:var(--orange)">🔥 Nutno nasušit</div>':'')+
+        '<div class="ban-meta">Vydal vedoucí · '+f.issuedAt+'</div>' +
       '</div>' +
-      '<div class="ban-body"><strong>'+f.machine+'</strong> · v <strong>'+f.changeTime+'</strong> · '+f.formOff+' → '+f.formOn+'</div>' +
-      (f.dry?'<div style="margin-top:5px;display:inline-flex;align-items:center;gap:4px;background:var(--orange-dim);border:1px solid rgba(255,156,0,.3);border-radius:4px;padding:2px 7px;font-size:11px;font-weight:700;color:var(--orange)">🔥 Nutno nasušit</div>':'')+
-      '<div class="ban-meta">Vydal vedoucí · '+f.issuedAt+'</div></div>' +
       '<button class="ban-x" data-key="'+k+'" onclick="dismissForma(this.dataset.key)">✕</button>' +
     '</div>';
   }).join('');
+  return '<div class="banner-group">' +
+    '<div class="banner-group-hdr orange" data-bgid="bg-formy" onclick="toggleBannerGroup(\'bg-formy\')">' +
+      '<div class="banner-group-title" style="color:var(--orange)"><span>🔔</span><span>Změny forem</span></div>' +
+      '<div class="banner-group-meta">' +
+        '<span class="banner-group-count orange">'+active.length+'</span>' +
+        '<span class="banner-group-arrow" id="arr-bg-formy">▼</span>' +
+      '</div>' +
+    '</div>' +
+    '<div class="banner-group-body collapsed" id="bg-formy">' + bodyItems + '</div>' +
+  '</div>';
 }
 
 function buildDovBanner() {
   if (role!=='vedouci') return '';
   var pending = D.dovolene.filter(function(d){ return d.status==='pending'; });
   if (!pending.length) return '';
-  return pending.map(function(d){
+  var bodyItems = pending.map(function(d){
     var k = d.fbKey||'';
-    return '<div class="banner ban-b">' +
-      '<div><div style="display:flex;align-items:center;gap:8px">' +
-        '<span style="font-size:17px">🏖</span>' +
-        '<span class="ban-title" style="color:var(--blue)">'+dovTypLbl(d.typ)+'</span>' +
+    return '<div class="banner ban-b" style="margin:6px 0 0;border-radius:6px">' +
+      '<div>' +
+        '<div style="font-size:12px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;color:var(--blue);margin-bottom:3px">'+dovTypLbl(d.typ)+'</div>' +
+        '<div class="ban-body"><strong>'+d.jmeno+'</strong> · '+d.pozice+' · '+fmtD(d.od)+' – '+fmtD(d.doo)+'</div>' +
+        '<div class="ban-meta">Podal '+d.podal+' v '+fmtActivityTime(d.podalAt)+'</div>' +
       '</div>' +
-      '<div class="ban-body"><strong>'+d.jmeno+'</strong> · '+d.pozice+' · '+fmtD(d.od)+' – '+fmtD(d.doo)+'</div>' +
-      '<div class="ban-meta">Podal '+d.podal+' v '+fmtActivityTime(d.podalAt)+'</div></div>' +
       '<div style="display:flex;gap:7px;flex-shrink:0">' +
         '<button class="btn bwarn bsm" data-key="'+k+'" data-act="rejected" onclick="respondDov(this.dataset.key,this.dataset.act)">❌ Zamítnout</button>' +
         '<button class="btn br bsm" data-key="'+k+'" data-act="approved" onclick="respondDov(this.dataset.key,this.dataset.act)">✅ Schválit</button>' +
       '</div>' +
     '</div>';
   }).join('');
+  return '<div class="banner-group">' +
+    '<div class="banner-group-hdr blue" data-bgid="bg-dov" onclick="toggleBannerGroup(\'bg-dov\')">' +
+      '<div class="banner-group-title" style="color:var(--blue)"><span>🏖</span><span>Žádosti o dovolené</span></div>' +
+      '<div class="banner-group-meta">' +
+        '<span class="banner-group-count blue">'+pending.length+'</span>' +
+        '<span class="banner-group-arrow" id="arr-bg-dov">▼</span>' +
+      '</div>' +
+    '</div>' +
+    '<div class="banner-group-body collapsed" id="bg-dov">' + bodyItems + '</div>' +
+  '</div>';
 }
 
 function dismissUnavail(key) {
