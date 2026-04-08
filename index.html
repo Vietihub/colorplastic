@@ -1883,8 +1883,8 @@ function renderPlanTodayIn(containerId) {
   el.innerHTML =
     '<div class="stitle">Dnešní plán výroby</div>' +
     '<div class="card" style="overflow-x:auto;padding:0;margin-bottom:18px">' +
-      '<table style="width:100%;border-collapse:collapse">' +
-        '<colgroup><col style="width:100px"><col><col><col></colgroup>' +
+      '<table style="width:100%;border-collapse:collapse;table-layout:fixed">' +
+        '<colgroup><col style="width:90px"><col style="width:calc((100% - 90px)/3)"><col style="width:calc((100% - 90px)/3)"><col style="width:calc((100% - 90px)/3)"></colgroup>' +
         '<thead><tr style="border-bottom:2px solid var(--bg2)">' +
           '<th style="padding:10px 16px;text-align:center;font-size:10px;font-weight:700;letter-spacing:1px;color:var(--text3);background:rgba(255,255,255,.02)">LIS</th>' +
           '<th style="padding:10px 14px;text-align:center;font-size:11px;font-weight:700;color:#4a9eff;background:rgba(74,158,255,.07);border-left:3px solid rgba(74,158,255,.3)">RANNÍ<div style="font-size:9px;font-weight:400;opacity:.6;margin-top:1px">06:00 – 14:00</div></th>' +
