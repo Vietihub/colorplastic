@@ -1,0 +1,422 @@
+{
+  "Engel_duo_300T_2026-04-08_noční": {
+    "forma": "149",
+    "mat": "",
+    "qty": "5000",
+    "barva": "",
+    "cas": "",
+    "susen": false,
+    "note": "Blende Cupholder LL",
+    "updatedAt": "2026-04-08 00:00"
+  },
+  "Engel_duo_300T_2026-04-08_ranní": {
+    "forma": "149",
+    "mat": "",
+    "qty": "4000",
+    "barva": "",
+    "cas": "",
+    "susen": false,
+    "note": "Blende Cupholder LL",
+    "updatedAt": "2026-04-08 00:00"
+  },
+  "Engel_duo_300T_2026-04-08_odpolední": {
+    "forma": "149",
+    "mat": "",
+    "qty": "3000",
+    "barva": "",
+    "cas": "",
+    "susen": false,
+    "note": "Blende Cupholder LL",
+    "updatedAt": "2026-04-08 00:00"
+  },
+  "Engel_duo_300T_2026-04-09_noční": {
+    "forma": "149",
+    "mat": "",
+    "qty": "2000",
+    "barva": "",
+    "cas": "",
+    "susen": false,
+    "note": "Blende Cupholder LL",
+    "updatedAt": "2026-04-08 00:00"
+  },
+  "Engel_duo_300T_2026-04-09_ranní": {
+    "forma": "151",
+    "mat": "",
+    "qty": "6000",
+    "barva": "",
+    "cas": "",
+    "susen": false,
+    "note": "Výměna 11:00 – BENZIN | Fuel filler cup benzin/diesel",
+    "updatedAt": "2026-04-08 00:00"
+  },
+  "Engel_duo_300T_2026-04-09_odpolední": {
+    "forma": "151",
+    "mat": "",
+    "qty": "6000",
+    "barva": "",
+    "cas": "",
+    "susen": false,
+    "note": "BENZIN | Fuel filler cup benzin/diesel",
+    "updatedAt": "2026-04-08 00:00"
+  },
+  "Engel_duo_300T_2026-04-10_noční": {
+    "forma": "151",
+    "mat": "",
+    "qty": "4800",
+    "barva": "",
+    "cas": "",
+    "susen": false,
+    "note": "BENZIN | Fuel filler cup benzin/diesel",
+    "updatedAt": "2026-04-08 00:00"
+  },
+  "Engel_duo_300T_2026-04-10_ranní": {
+    "forma": "151",
+    "mat": "",
+    "qty": "3600",
+    "barva": "",
+    "cas": "",
+    "susen": false,
+    "note": "BENZIN | Fuel filler cup benzin/diesel",
+    "updatedAt": "2026-04-08 00:00"
+  },
+  "Engel_duo_300T_2026-04-10_odpolední": {
+    "forma": "151",
+    "mat": "",
+    "qty": "2400",
+    "barva": "",
+    "cas": "",
+    "susen": false,
+    "note": "BENZIN | Fuel filler cup benzin/diesel",
+    "updatedAt": "2026-04-08 00:00"
+  },
+  "Engel_duo_700T_2026-04-08_ranní": {
+    "forma": "279",
+    "mat": "",
+    "qty": "",
+    "barva": "",
+    "cas": "",
+    "susen": false,
+    "note": "TEST ZK 279 | TEST ZK 279",
+    "updatedAt": "2026-04-08 00:00"
+  },
+  "Engel_duo_700T_2026-04-08_odpolední": {
+    "forma": "231",
+    "mat": "",
+    "qty": "1800",
+    "barva": "",
+    "cas": "",
+    "susen": false,
+    "note": "Po testech přechod na ZK 231 | Lamelle Seite LI/RE",
+    "updatedAt": "2026-04-08 00:00"
+  },
+  "Engel_duo_700T_2026-04-09_ranní": {
+    "forma": "231",
+    "mat": "",
+    "qty": "1800",
+    "barva": "",
+    "cas": "",
+    "susen": false,
+    "note": "Lamelle Seite LI/RE",
+    "updatedAt": "2026-04-08 00:00"
+  },
+  "Engel_duo_700T_2026-04-09_odpolední": {
+    "forma": "231",
+    "mat": "",
+    "qty": "1200",
+    "barva": "",
+    "cas": "",
+    "susen": false,
+    "note": "Lamelle Seite LI/RE",
+    "updatedAt": "2026-04-08 00:00"
+  },
+  "Engel_duo_700T_2026-04-10_noční": {
+    "forma": "231",
+    "mat": "",
+    "qty": "600",
+    "barva": "",
+    "cas": "",
+    "susen": false,
+    "note": "Lamelle Seite LI/RE",
+    "updatedAt": "2026-04-08 00:00"
+  },
+  "Engel_duo_700T_2026-04-10_ranní": {
+    "forma": "271",
+    "mat": "",
+    "qty": "1000",
+    "barva": "",
+    "cas": "",
+    "susen": false,
+    "note": "Výměna 06:00",
+    "updatedAt": "2026-04-08 00:00"
+  },
+  "Engel_duo_700T_2026-04-10_odpolední": {
+    "forma": "271",
+    "mat": "",
+    "qty": "1800",
+    "barva": "",
+    "cas": "",
+    "susen": false,
+    "note": "",
+    "updatedAt": "2026-04-08 00:00"
+  },
+  "Engel_duo_550T_2026-04-09_odpolední": {
+    "forma": "36",
+    "mat": "",
+    "qty": "",
+    "barva": "",
+    "cas": "",
+    "susen": false,
+    "note": "Zierleiste Mitte Q3",
+    "updatedAt": "2026-04-08 00:00"
+  },
+  "Engel_duo_550T_2026-04-10_noční": {
+    "forma": "36",
+    "mat": "",
+    "qty": "",
+    "barva": "",
+    "cas": "",
+    "susen": false,
+    "note": "Zierleiste Mitte Q3",
+    "updatedAt": "2026-04-08 00:00"
+  },
+  "Engel_duo_900T_2026-04-09_noční": {
+    "forma": "118",
+    "mat": "",
+    "qty": "2000",
+    "barva": "",
+    "cas": "",
+    "susen": false,
+    "note": "Výměna BEZ VÝROBY na ZK 118 | Assy Storagebox lower Cupholder",
+    "updatedAt": "2026-04-08 00:00"
+  },
+  "Engel_duo_900T_2026-04-09_ranní": {
+    "forma": "118",
+    "mat": "",
+    "qty": "2000",
+    "barva": "",
+    "cas": "",
+    "susen": false,
+    "note": "Assy Storagebox lower Cupholder",
+    "updatedAt": "2026-04-08 00:00"
+  },
+  "Engel_duo_900T_2026-04-09_odpolední": {
+    "forma": "118",
+    "mat": "",
+    "qty": "1500",
+    "barva": "",
+    "cas": "",
+    "susen": false,
+    "note": "Assy Storagebox lower Cupholder",
+    "updatedAt": "2026-04-08 00:00"
+  },
+  "Engel_duo_900T_2026-04-10_noční": {
+    "forma": "118",
+    "mat": "",
+    "qty": "1000",
+    "barva": "",
+    "cas": "",
+    "susen": false,
+    "note": "Assy Storagebox lower Cupholder",
+    "updatedAt": "2026-04-08 00:00"
+  },
+  "Engel_duo_900T_2026-04-10_ranní": {
+    "forma": "118",
+    "mat": "",
+    "qty": "500",
+    "barva": "",
+    "cas": "",
+    "susen": false,
+    "note": "Assy Storagebox lower Cupholder",
+    "updatedAt": "2026-04-08 00:00"
+  },
+  "Engel_duo_900T_2026-04-10_odpolední": {
+    "forma": "270",
+    "mat": "",
+    "qty": "800",
+    "barva": "",
+    "cas": "",
+    "susen": false,
+    "note": "Výměna 14:00 | HSK Lade Innenteil",
+    "updatedAt": "2026-04-08 00:00"
+  },
+  "Engel_duo_1700T_2026-04-08_noční": {
+    "forma": "364",
+    "mat": "",
+    "qty": "1500",
+    "barva": "",
+    "cas": "",
+    "susen": false,
+    "note": "PRIORITA 2 – OBEN BETA",
+    "updatedAt": "2026-04-08 00:00"
+  },
+  "Engel_duo_1700T_2026-04-08_ranní": {
+    "forma": "364",
+    "mat": "",
+    "qty": "1080",
+    "barva": "",
+    "cas": "",
+    "susen": false,
+    "note": "OBEN BETA",
+    "updatedAt": "2026-04-08 00:00"
+  },
+  "Engel_duo_1700T_2026-04-08_odpolední": {
+    "forma": "364",
+    "mat": "",
+    "qty": "660",
+    "barva": "",
+    "cas": "",
+    "susen": false,
+    "note": "OBEN BETA",
+    "updatedAt": "2026-04-08 00:00"
+  },
+  "Engel_duo_1700T_2026-04-09_noční": {
+    "forma": "364",
+    "mat": "",
+    "qty": "1800",
+    "barva": "",
+    "cas": "",
+    "susen": false,
+    "note": "Výměna 03:00",
+    "updatedAt": "2026-04-08 00:00"
+  },
+  "Engel_duo_1700T_2026-04-09_ranní": {
+    "forma": "122",
+    "mat": "",
+    "qty": "1800",
+    "barva": "",
+    "cas": "",
+    "susen": false,
+    "note": "Start technolog | Assy sidecover DS+PS",
+    "updatedAt": "2026-04-08 00:00"
+  },
+  "Engel_duo_1700T_2026-04-09_odpolední": {
+    "forma": "122",
+    "mat": "",
+    "qty": "1500",
+    "barva": "",
+    "cas": "",
+    "susen": false,
+    "note": "Assy sidecover DS+PS",
+    "updatedAt": "2026-04-08 00:00"
+  },
+  "Engel_duo_1700T_2026-04-10_noční": {
+    "forma": "122",
+    "mat": "",
+    "qty": "900",
+    "barva": "",
+    "cas": "",
+    "susen": false,
+    "note": "Assy sidecover DS+PS",
+    "updatedAt": "2026-04-08 00:00"
+  },
+  "Engel_duo_1700T_2026-04-10_ranní": {
+    "forma": "302",
+    "mat": "",
+    "qty": "",
+    "barva": "",
+    "cas": "",
+    "susen": false,
+    "note": "Výměna 11:00 – BEZ HÁČKŮ 320ks",
+    "updatedAt": "2026-04-08 00:00"
+  },
+  "Engel_duo_1700T_2026-04-10_odpolední": {
+    "forma": "302",
+    "mat": "",
+    "qty": "",
+    "barva": "",
+    "cas": "",
+    "susen": false,
+    "note": "BEZ HÁČKŮ 320ks",
+    "updatedAt": "2026-04-08 00:00"
+  },
+  "Engel_duo_2000T_2026-04-08_noční": {
+    "forma": "360",
+    "mat": "",
+    "qty": "1332",
+    "barva": "",
+    "cas": "",
+    "susen": false,
+    "note": "PRIORITA 1 – Výměna 20:00 – 1332ks s dírou (148 boxů)",
+    "updatedAt": "2026-04-08 00:00"
+  },
+  "Engel_duo_2000T_2026-04-08_ranní": {
+    "forma": "360",
+    "mat": "",
+    "qty": "999",
+    "barva": "",
+    "cas": "",
+    "susen": false,
+    "note": "1332ks s dírou (148 boxů)",
+    "updatedAt": "2026-04-08 00:00"
+  },
+  "Engel_duo_2000T_2026-04-08_odpolední": {
+    "forma": "360",
+    "mat": "",
+    "qty": "666",
+    "barva": "",
+    "cas": "",
+    "susen": false,
+    "note": "1332ks s dírou (148 boxů)",
+    "updatedAt": "2026-04-08 00:00"
+  },
+  "Engel_duo_2000T_2026-04-09_noční": {
+    "forma": "360",
+    "mat": "",
+    "qty": "333",
+    "barva": "",
+    "cas": "",
+    "susen": false,
+    "note": "1332ks s dírou (148 boxů)",
+    "updatedAt": "2026-04-08 00:00"
+  },
+  "Engel_duo_2000T_2026-04-09_ranní": {
+    "forma": "360",
+    "mat": "",
+    "qty": "396",
+    "barva": "",
+    "cas": "",
+    "susen": false,
+    "note": "396ks bez díry (44 boxů)",
+    "updatedAt": "2026-04-08 00:00"
+  },
+  "Engel_duo_2000T_2026-04-09_odpolední": {
+    "forma": "175",
+    "mat": "",
+    "qty": "2700",
+    "barva": "",
+    "cas": "",
+    "susen": false,
+    "note": "Výměna 14:00 | Gitter Mitte",
+    "updatedAt": "2026-04-08 00:00"
+  },
+  "Engel_duo_2000T_2026-04-10_noční": {
+    "forma": "175",
+    "mat": "",
+    "qty": "2400",
+    "barva": "",
+    "cas": "",
+    "susen": false,
+    "note": "Gitter Mitte",
+    "updatedAt": "2026-04-08 00:00"
+  },
+  "Engel_duo_2000T_2026-04-10_ranní": {
+    "forma": "175",
+    "mat": "",
+    "qty": "1760",
+    "barva": "",
+    "cas": "",
+    "susen": false,
+    "note": "Gitter Mitte",
+    "updatedAt": "2026-04-08 00:00"
+  },
+  "Engel_duo_2000T_2026-04-10_odpolední": {
+    "forma": "175",
+    "mat": "",
+    "qty": "1120",
+    "barva": "",
+    "cas": "",
+    "susen": false,
+    "note": "Gitter Mitte",
+    "updatedAt": "2026-04-08 00:00"
+  }
+}
