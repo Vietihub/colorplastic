@@ -174,8 +174,9 @@ tbody td{padding:11px 14px;font-size:13px;}
 .frow{display:grid;grid-template-columns:1fr 1fr;gap:13px;}
 .fg{display:flex;flex-direction:column;gap:5px;}
 .fl{font-size:11px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--text2);}
-.fi,.fs,.fta{background:var(--bg4);border:1px solid var(--border2);border-radius:6px;padding:9px 12px;font-family:'Barlow',sans-serif;font-size:14px;color:var(--text);outline:none;width:100%;transition:border-color .15s;}
+.fi,.fs,.fta{background:var(--bg4);border:1px solid var(--border2);border-radius:6px;padding:9px 12px;font-family:'Barlow',sans-serif;font-size:14px;color:var(--text);outline:none;width:100%;transition:border-color .15s;box-sizing:border-box;}
 .fi:focus,.fs:focus,.fta:focus{border-color:var(--red);}
+.fs{-webkit-appearance:none;appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23888' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center;padding-right:32px;}
 .fs option{background:var(--bg4);}
 .fta{resize:vertical;min-height:75px;}
 .ww{position:relative;}
@@ -928,7 +929,11 @@ input[type="time"]::-webkit-date-and-time-value { text-align: left; }
       </div>
       <div class="frow">
         <div class="fg"><label class="fl">Počet kusů</label><input type="number" class="fi" id="pm-qty" placeholder="0" min="0"></div>
-        <div class="fg"><label class="fl">Barva</label><input type="text" class="fi" id="pm-barva" placeholder="napr. RAL 9005 černá"></div>
+        <div class="fg">
+          <label class="fl">Barva</label>
+          <select class="fs" id="pm-barva-sel" style="display:none" onchange="onPmBarvaSel()"><option value="">— Vyberte barvu —</option></select>
+          <input type="text" class="fi" id="pm-barva" placeholder="napr. RAL 9005 černá">
+        </div>
       </div>
       <div class="fg"><label class="fl">Materiál</label>
           <select class="fs" id="pm-mat" disabled style="opacity:.7;cursor:not-allowed"><option value="">— Nevyplněno —</option></select>
@@ -1406,15 +1411,49 @@ function setMatFromForma(cislo, matSelId, dryId) {
 function onPmFormaChange() {
   var cislo = document.getElementById('pm-forma').value;
   var f = cislo && D.formy[cislo];
-  var matSel = document.getElementById('pm-mat');
-  var matIdEl = document.getElementById('pm-mat-id');
+  var matSel   = document.getElementById('pm-mat');
+  var matIdEl  = document.getElementById('pm-mat-id');
+  var barvaSel = document.getElementById('pm-barva-sel');
+  var barvaInp = document.getElementById('pm-barva');
+
   if (f && f.material) {
     setMatFromForma(cislo, 'pm-mat', 'pm-susen');
     if (matSel) matSel.disabled = true;
     if (matIdEl) { matIdEl.style.display = 'block'; matIdEl.textContent = 'Interní č.: ' + (f.matId || '—'); }
+
+    // Color variants
+    var hasBarvy = f.barvy && f.barvy.length > 0;
+    if (barvaSel && barvaInp) {
+      if (hasBarvy) {
+        barvaSel.innerHTML = '<option value="">— Vyberte barvu —</option>' +
+          f.barvy.map(function(b){ return '<option value="'+b.nazev+'" data-matid="'+b.matId+'">'+b.nazev+' ('+b.matId+')</option>'; }).join('');
+        barvaSel.style.display = 'block';
+        barvaInp.style.display = 'none';
+        barvaInp.value = '';
+      } else {
+        barvaSel.style.display = 'none';
+        barvaInp.style.display = 'block';
+      }
+    }
   } else {
-    if (matSel) { matSel.disabled = false; matSel.value = ''; }
+    if (matSel)  { matSel.disabled = false; matSel.value = ''; }
     if (matIdEl) matIdEl.style.display = 'none';
+    if (barvaSel){ barvaSel.style.display = 'none'; }
+    if (barvaInp){ barvaInp.style.display = 'block'; }
+  }
+}
+
+function onPmBarvaSel() {
+  var sel = document.getElementById('pm-barva-sel');
+  var opt = sel && sel.options[sel.selectedIndex];
+  var matIdEl = document.getElementById('pm-mat-id');
+  var cislo = document.getElementById('pm-forma').value;
+  var f = cislo && D.formy[cislo];
+  if (matIdEl && opt && opt.value) {
+    var matId = opt.getAttribute('data-matid');
+    matIdEl.textContent = 'Interní č.: ' + (matId || (f && f.matId) || '—');
+  } else if (matIdEl && f) {
+    matIdEl.textContent = 'Interní č.: ' + (f.matId || '—');
   }
 }
 function onFOnChange()     { setMatFromForma(document.getElementById('f-on').value, 'f-mat', 'f-dry'); }
@@ -1853,20 +1892,42 @@ function openPlanModal(planKey, mach, dk, smena) {
   var pmMatSel = document.getElementById('pm-mat');
   var pmMatId  = document.getElementById('pm-mat-id');
   var fData = p.forma && D.formy[p.forma];
+  var barvaSel = document.getElementById('pm-barva-sel');
+  var barvaInp = document.getElementById('pm-barva');
   if (fData && fData.material) {
     pmMatSel.value = (fData.material + ' (' + (fData.druh||'') + ')');
     pmMatSel.disabled = true;
-    if (pmMatId) { pmMatId.style.display='block'; pmMatId.textContent='Interní č.: '+(fData.matId||'—'); }
+    // Determine which matId to show (color-specific or base)
+    var shownMatId = fData.matId || '—';
+    var hasBarvy = fData.barvy && fData.barvy.length > 0;
+    if (hasBarvy) {
+      barvaSel.innerHTML = '<option value="">— Vyberte barvu —</option>' +
+        fData.barvy.map(function(b){ return '<option value="'+b.nazev+'" data-matid="'+b.matId+'">'+b.nazev+' ('+b.matId+')</option>'; }).join('');
+      barvaSel.style.display = 'block';
+      barvaInp.style.display = 'none';
+      // Restore saved color selection
+      if (p.barva) {
+        barvaSel.value = p.barva;
+        var selOpt = barvaSel.options[barvaSel.selectedIndex];
+        if (selOpt && selOpt.getAttribute('data-matid')) shownMatId = selOpt.getAttribute('data-matid');
+      }
+    } else {
+      barvaSel.style.display = 'none';
+      barvaInp.style.display = 'block';
+      barvaInp.value = p.barva || '';
+    }
+    if (pmMatId) { pmMatId.style.display='block'; pmMatId.textContent='Interní č.: '+shownMatId; }
   } else {
     pmMatSel.value = p.mat || '';
     pmMatSel.disabled = false;
     if (pmMatId) pmMatId.style.display='none';
+    barvaSel.style.display = 'none';
+    barvaInp.style.display = 'block';
+    barvaInp.value = p.barva || '';
   }
   document.getElementById('pm-qty').value = p.qty || '';
   var casEl = document.getElementById('pm-cas');
   if (casEl) casEl.value = p.cas || '';
-  var barvaEl = document.getElementById('pm-barva');
-  if (barvaEl) barvaEl.value = p.barva || '';
   var susenEl = document.getElementById('pm-susen');
   if (susenEl) susenEl.checked = !!p.susen;
   document.getElementById('pm-note').value = p.note || '';
@@ -1878,7 +1939,9 @@ function savePlan() {
   var mat   = document.getElementById('pm-mat').value.trim();
   var qty   = document.getElementById('pm-qty').value.trim();
   var cas   = document.getElementById('pm-cas') ? document.getElementById('pm-cas').value : '';
-  var barva = document.getElementById('pm-barva') ? document.getElementById('pm-barva').value.trim() : '';
+  var barvaSel = document.getElementById('pm-barva-sel');
+  var barvaInp = document.getElementById('pm-barva');
+  var barva = (barvaSel && barvaSel.style.display !== 'none') ? barvaSel.value : (barvaInp ? barvaInp.value.trim() : '');
   var susen = document.getElementById('pm-susen').checked;
   var note  = document.getElementById('pm-note').value.trim();
   if (!forma && !qty) { toast('err','Chyba','Zadejte formu nebo počet kusů.'); return; }
