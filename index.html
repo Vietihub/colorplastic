@@ -1910,6 +1910,32 @@ function smenaLabel(s) {
   return s==='ranní'?'R':s==='odpolední'?'O':'N';
 }
 
+// Returns the plan entry that "spans" into this cell via its platido field
+// (entry started in an earlier shift and its platido is after this cell's start time)
+function getSpanningPlanForCell(mach, cellDate, cellShift) {
+  if (!D.plan) return null;
+  var shiftStartH = {ranní:6, odpolední:14, noční:22};
+  var keyPrefix = mach.replace(/ /g,'_') + '_';
+  var h0 = shiftStartH[cellShift]; if (h0 === undefined) return null;
+  var cellStartMs = new Date(cellDate + 'T' + String(h0).padStart(2,'0') + ':00:00').getTime();
+  var best = null; var bestStartMs = 0;
+  Object.keys(D.plan).forEach(function(key) {
+    if (key.indexOf(keyPrefix) !== 0) return;
+    var entry = D.plan[key];
+    if (!entry || !entry.platido || !entry.forma) return;
+    var platidoMs = new Date(entry.platido.replace(' ','T')).getTime();
+    if (platidoMs <= cellStartMs) return; // ends before or exactly at this cell start
+    var suffix = key.slice(keyPrefix.length);
+    var datePart = suffix.slice(0,10); var shiftPart = suffix.slice(11);
+    var h = shiftStartH[shiftPart]; if (h === undefined) return;
+    var entryStartMs = new Date(datePart + 'T' + String(h).padStart(2,'0') + ':00:00').getTime();
+    if (entryStartMs < cellStartMs && entryStartMs > bestStartMs) {
+      bestStartMs = entryStartMs; best = entry;
+    }
+  });
+  return best;
+}
+
 function renderPlan() {
   var dates = getWeekDates(planWeekOffset);
   var lbl = document.getElementById('plan-week-label');
@@ -1967,10 +1993,22 @@ function renderPlan() {
           if (p.note)  html += '<div style="font-size:9px;color:var(--text3);margin-top:2px;font-style:italic">'+p.note+'</div>';
           html += '</div></div></td>';
         } else {
-          html += '<td style="padding:0;background:'+smenyBg[si]+';border-left:2px solid '+smenyBorder[si]+todayBg+'">';
-          html += '<div id="'+cellId+'" class="plan-cell-empty" style="min-height:80px;font-size:18px;color:var(--text3);opacity:.25">';
-          html += role==='vedouci' ? '+' : '–';
-          html += '</div></td>';
+          var spanEntry = getSpanningPlanForCell(mach, dk, smena);
+          if (spanEntry) {
+            var pdDisp = spanEntry.platido ? spanEntry.platido.slice(8,10)+'.'+spanEntry.platido.slice(5,7)+'. '+spanEntry.platido.slice(11,16) : '';
+            html += '<td style="padding:0;background:'+smenyBg[si]+';border-left:2px solid '+smenyBorder[si]+todayBg+'">';
+            html += '<div id="'+cellId+'" class="plan-cell has-plan" style="padding:8px 6px;text-align:center;border-left:none;opacity:.55">';
+            html += '<div style="font-size:9px;color:var(--text3);margin-bottom:3px;letter-spacing:.4px">▶ pokračuje</div>';
+            html += '<div style="font-size:15px;font-weight:900;color:var(--text);line-height:1.1;margin-bottom:3px">'+spanEntry.forma+'</div>';
+            if (spanEntry.mat) html += '<div style="font-size:9px;color:var(--text2);margin-bottom:2px">'+spanEntry.mat.split('(')[0].trim()+'</div>';
+            if (pdDisp) html += '<div style="font-size:9px;color:var(--orange);font-weight:700;margin-top:2px">do '+pdDisp+'</div>';
+            html += '</div></td>';
+          } else {
+            html += '<td style="padding:0;background:'+smenyBg[si]+';border-left:2px solid '+smenyBorder[si]+todayBg+'">';
+            html += '<div id="'+cellId+'" class="plan-cell-empty" style="min-height:80px;font-size:18px;color:var(--text3);opacity:.25">';
+            html += role==='vedouci' ? '+' : '–';
+            html += '</div></td>';
+          }
         }
       });
     });
