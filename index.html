@@ -2134,6 +2134,7 @@ function startFirebase() {
   fbOn('formy', function(val){
     D.formy = val || {};
     populateFormaSelects();
+    afterUpdate();
   });
   fbOn('production', function(val){
     if (val) {
