@@ -927,7 +927,11 @@ input[type="time"]::-webkit-date-and-time-value { text-align: left; }
     <div class="fgrid">
       <div class="frow">
         <div class="fg"><label class="fl">Forma č.</label><select class="fs" id="pm-forma" onchange="onPmFormaChange()"><option value="">— Vyberte formu —</option></select></div>
-        <div class="fg"><label class="fl">Čas výměny</label><input type="time" class="fi" id="pm-cas"></div>
+        <div class="fg"><label class="fl">Čas výměny (start)</label><input type="time" class="fi" id="pm-cas"></div>
+      </div>
+      <div class="frow">
+        <div class="fg"><label class="fl">Platí do – datum</label><input type="date" class="fi" id="pm-platido-dat"></div>
+        <div class="fg"><label class="fl">Platí do – čas</label><input type="time" class="fi" id="pm-platido-cas"></div>
       </div>
       <div class="frow">
         <div class="fg"><label class="fl">Počet kusů</label><input type="number" class="fi" id="pm-qty" placeholder="0" min="0"></div>
@@ -1725,10 +1729,45 @@ function currentShift() {
 }
 
 function getPlanForMachineNow(machine) {
-  var today = dateKey(new Date());
+  return getActivePlanForMachine(machine);
+}
+
+function getActivePlanForMachine(machine) {
+  var now = new Date();
+  var nowMs = now.getTime();
+  var today = dateKey(now);
   var shift = currentShift();
-  var k = machine.replace(/ /g,'_') + '_' + today + '_' + shift;
-  return D.plan[k] || null;
+  var keyPrefix = machine.replace(/ /g,'_') + '_';
+
+  // 1. Aktuální směna (klasický případ)
+  var curKey = keyPrefix + today + '_' + shift;
+  var curEntry = D.plan[curKey];
+  if (curEntry && (curEntry.forma || curEntry.qty)) return curEntry;
+
+  // 2. Probíhající výroba: hledáme záznam s platido v budoucnosti,
+  //    jehož směna začala před current time (cross-shift / přes půlnoc)
+  var shiftStartH = {ranní:6, odpolední:14, noční:22};
+  var active = null;
+  var latestStartMs = 0;
+  Object.keys(D.plan).forEach(function(key) {
+    if (key.indexOf(keyPrefix) !== 0) return;
+    var entry = D.plan[key];
+    if (!entry || !entry.platido || !entry.forma) return;
+    var platidoMs = new Date(entry.platido.replace(' ','T')).getTime();
+    if (platidoMs <= nowMs) return; // vypršelo
+    // Zjistíme start směny z klíče
+    var suffix = key.slice(keyPrefix.length); // "2026-04-08_noční"
+    var datePart = suffix.slice(0,10);
+    var shiftPart = suffix.slice(11);
+    var h = shiftStartH[shiftPart];
+    if (h === undefined) return;
+    var startMs = new Date(datePart + 'T' + String(h).padStart(2,'0') + ':00:00').getTime();
+    if (startMs <= nowMs && startMs > latestStartMs) {
+      latestStartMs = startMs;
+      active = entry;
+    }
+  });
+  return active;
 }
 
 function planPrevWeek() { planWeekOffset--; renderPlan(); }
@@ -1962,6 +2001,12 @@ function openPlanModal(planKey, mach, dk, smena) {
   document.getElementById('pm-qty').value = p.qty || '';
   var casEl = document.getElementById('pm-cas');
   if (casEl) casEl.value = p.cas || '';
+  // Platí do
+  var platido = p.platido || '';
+  var pdDat = document.getElementById('pm-platido-dat');
+  var pdCas = document.getElementById('pm-platido-cas');
+  if (pdDat) pdDat.value = platido ? platido.slice(0,10) : '';
+  if (pdCas) pdCas.value = platido ? platido.slice(11,16) : '';
   var susenEl = document.getElementById('pm-susen');
   if (susenEl) susenEl.checked = !!p.susen;
   document.getElementById('pm-note').value = p.note || '';
@@ -1973,13 +2018,16 @@ function savePlan() {
   var mat   = document.getElementById('pm-mat').value.trim();
   var qty   = document.getElementById('pm-qty').value.trim();
   var cas   = document.getElementById('pm-cas') ? document.getElementById('pm-cas').value : '';
+  var pdDat = document.getElementById('pm-platido-dat');
+  var pdCas = document.getElementById('pm-platido-cas');
+  var platido = (pdDat && pdDat.value && pdCas && pdCas.value) ? pdDat.value + ' ' + pdCas.value : '';
   var barvaSel = document.getElementById('pm-barva-sel');
   var barvaInp = document.getElementById('pm-barva');
   var barva = (barvaSel && barvaSel.style.display !== 'none') ? barvaSel.value : (barvaInp ? barvaInp.value.trim() : '');
   var susen = document.getElementById('pm-susen').checked;
   var note  = document.getElementById('pm-note').value.trim();
   if (!forma && !qty) { toast('err','Chyba','Zadejte formu nebo počet kusů.'); return; }
-  var entry = {forma:forma, mat:mat, qty:qty, barva:barva, cas:cas, susen:susen, note:note, updatedAt:nowFull()};
+  var entry = {forma:forma, mat:mat, qty:qty, barva:barva, cas:cas, platido:platido, susen:susen, note:note, updatedAt:nowFull()};
   fbSet('plan/'+editPlanKey, entry);
   // Notifikace o sušení
   if (susen && mat) {
@@ -2507,13 +2555,19 @@ function renderProd(containerId) {
     var planBadge = '';
     if (planned && planned.forma) {
       var match = p.forma && p.forma.toString() === planned.forma.toString();
+      var platidoLabel = '';
+      if (planned.platido) {
+        var pd = new Date(planned.platido.replace(' ','T'));
+        platidoLabel = ' · do ' + String(pd.getDate()).padStart(2,'0') + '.' + String(pd.getMonth()+1).padStart(2,'0') + '. ' + planned.platido.slice(11,16);
+      }
       planBadge = '<div style="margin-top:7px;padding:5px 9px;border-radius:5px;font-size:11px;font-weight:700;letter-spacing:.4px;display:flex;align-items:center;gap:6px;' +
         (match
           ? 'background:rgba(57,211,83,.1);border:1px solid rgba(57,211,83,.25);color:var(--green-text)'
           : 'background:rgba(74,158,255,.08);border:1px solid rgba(74,158,255,.2);color:#4a9eff') + '">' +
-        '<span style="opacity:.7;font-size:10px">PLÁN ' + shiftLabels[curShift] + ':</span>' +
+        '<span style="opacity:.7;font-size:10px">PLÁN:</span>' +
         '<span>č. ' + planned.forma + '</span>' +
         (planned.qty ? '<span style="opacity:.6;font-weight:400">· ' + parseInt(planned.qty).toLocaleString() + ' ks</span>' : '') +
+        (platidoLabel ? '<span style="opacity:.7;font-weight:400;font-size:10px">' + platidoLabel + '</span>' : '') +
         (match ? '<span style="font-size:13px">✓</span>' : '') +
       '</div>';
     }

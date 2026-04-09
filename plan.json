@@ -7,7 +7,8 @@
     "cas": "",
     "susen": false,
     "note": "Blende Cupholder LL",
-    "updatedAt": "2026-04-08 00:00"
+    "updatedAt": "2026-04-08 00:00",
+    "platido": "2026-04-09 11:00"
   },
   "Engel_duo_300T_2026-04-08_ranní": {
     "forma": "149",
@@ -44,7 +45,7 @@
     "mat": "",
     "qty": "6000",
     "barva": "",
-    "cas": "",
+    "cas": "11:00",
     "susen": false,
     "note": "Výměna 11:00 – BENZIN | Fuel filler cup benzin/diesel",
     "updatedAt": "2026-04-08 00:00"
@@ -107,7 +108,8 @@
     "cas": "",
     "susen": false,
     "note": "Po testech přechod na ZK 231 | Lamelle Seite LI/RE",
-    "updatedAt": "2026-04-08 00:00"
+    "updatedAt": "2026-04-08 00:00",
+    "platido": "2026-04-10 06:00"
   },
   "Engel_duo_700T_2026-04-09_ranní": {
     "forma": "231",
@@ -144,7 +146,7 @@
     "mat": "",
     "qty": "1000",
     "barva": "",
-    "cas": "",
+    "cas": "06:00",
     "susen": false,
     "note": "Výměna 06:00",
     "updatedAt": "2026-04-08 00:00"
@@ -187,7 +189,8 @@
     "cas": "",
     "susen": false,
     "note": "Výměna BEZ VÝROBY na ZK 118 | Assy Storagebox lower Cupholder",
-    "updatedAt": "2026-04-08 00:00"
+    "updatedAt": "2026-04-08 00:00",
+    "platido": "2026-04-10 14:00"
   },
   "Engel_duo_900T_2026-04-09_ranní": {
     "forma": "118",
@@ -234,7 +237,7 @@
     "mat": "",
     "qty": "800",
     "barva": "",
-    "cas": "",
+    "cas": "14:00",
     "susen": false,
     "note": "Výměna 14:00 | HSK Lade Innenteil",
     "updatedAt": "2026-04-08 00:00"
@@ -247,7 +250,8 @@
     "cas": "",
     "susen": false,
     "note": "PRIORITA 2 – OBEN BETA",
-    "updatedAt": "2026-04-08 00:00"
+    "updatedAt": "2026-04-08 00:00",
+    "platido": "2026-04-10 03:00"
   },
   "Engel_duo_1700T_2026-04-08_ranní": {
     "forma": "364",
@@ -274,7 +278,7 @@
     "mat": "",
     "qty": "1800",
     "barva": "",
-    "cas": "",
+    "cas": "03:00",
     "susen": false,
     "note": "Výměna 03:00",
     "updatedAt": "2026-04-08 00:00"
@@ -287,7 +291,8 @@
     "cas": "",
     "susen": false,
     "note": "Start technolog | Assy sidecover DS+PS",
-    "updatedAt": "2026-04-08 00:00"
+    "updatedAt": "2026-04-08 00:00",
+    "platido": "2026-04-10 11:00"
   },
   "Engel_duo_1700T_2026-04-09_odpolední": {
     "forma": "122",
@@ -314,7 +319,7 @@
     "mat": "",
     "qty": "",
     "barva": "",
-    "cas": "",
+    "cas": "11:00",
     "susen": false,
     "note": "Výměna 11:00 – BEZ HÁČKŮ 320ks",
     "updatedAt": "2026-04-08 00:00"
@@ -337,7 +342,8 @@
     "cas": "",
     "susen": false,
     "note": "PRIORITA 1 – Výměna 20:00 – 1332ks s dírou (148 boxů)",
-    "updatedAt": "2026-04-08 00:00"
+    "updatedAt": "2026-04-08 00:00",
+    "platido": "2026-04-09 14:00"
   },
   "Engel_duo_2000T_2026-04-08_ranní": {
     "forma": "360",
@@ -384,7 +390,7 @@
     "mat": "",
     "qty": "2700",
     "barva": "",
-    "cas": "",
+    "cas": "14:00",
     "susen": false,
     "note": "Výměna 14:00 | Gitter Mitte",
     "updatedAt": "2026-04-08 00:00"
