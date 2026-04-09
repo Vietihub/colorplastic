@@ -2511,9 +2511,11 @@ function renderProd(containerId) {
         (match ? '<span style="font-size:13px">✓</span>' : '') +
       '</div>';
     }
+    var formaData = p.forma && D.formy && D.formy[p.forma];
+    var formaNazev = formaData ? formaData.nazev : null;
     return '<div class="pc'+(p.running?' run':'')+'">' +
       '<div class="pc-mach"><span>'+p.machine+'</span><div class="dot'+(p.running?' on':'')+'"></div></div>' +
-      (p.forma ? '<div class="pc-forma">'+p.forma+'</div><div class="pc-flbl">Nasazená forma</div>' : '<div class="pc-idle">Lis stojí</div>') +
+      (p.forma ? '<div class="pc-forma">'+p.forma+'</div>'+(formaNazev?'<div class="pc-flbl" style="font-size:11px;color:var(--text2);margin-top:2px;white-space:normal;line-height:1.3">'+formaNazev+'</div>':'<div class="pc-flbl">Nasazená forma</div>') : '<div class="pc-idle">Lis stojí</div>') +
       (p.mat ? '<div class="pc-mat">🎨 '+p.mat+'</div>' : '') +
       planBadge +
       (p.updated ? '<div class="pc-upd">Aktualizováno v '+p.updated+'</div>' : '') +
