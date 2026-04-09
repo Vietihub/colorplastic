@@ -1038,6 +1038,7 @@ input[type="time"]::-webkit-date-and-time-value { text-align: left; }
 <div class="toasts" id="toasts"></div>
 
 <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
 <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
 <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-messaging.js"></script>
 <script>
@@ -1056,6 +1057,10 @@ if (!firebase.apps.length) {
   });
 }
 var db = firebase.database();
+
+// Anonymní přihlášení – chrání DB před neautorizovaným přístupem z internetu
+firebase.auth().signInAnonymously().catch(function(e){ console.warn('Auth error:', e); });
+
 function fbPush(path, data, cb) {
   db.ref(path).push(data).then(function(r){ if(cb) cb(r.key); }).catch(function(e){ console.error('fbPush',path,e); });
 }
