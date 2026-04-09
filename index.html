@@ -926,7 +926,17 @@ input[type="time"]::-webkit-date-and-time-value { text-align: left; }
     </div>
     <div class="fgrid">
       <div class="frow">
-        <div class="fg"><label class="fl">Forma č.</label><select class="fs" id="pm-forma" onchange="onPmFormaChange()"><option value="">— Vyberte formu —</option></select></div>
+        <div class="fg">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">
+            <label class="fl" style="margin-bottom:0">Forma č.</label>
+            <label style="display:flex;align-items:center;gap:5px;font-size:11px;color:var(--text3);cursor:pointer">
+              <input type="checkbox" id="pm-forma-custom-chk" onchange="togglePmFormaCustom()" style="width:12px;height:12px;accent-color:var(--orange)">
+              Vlastní číslo
+            </label>
+          </div>
+          <select class="fs" id="pm-forma" onchange="onPmFormaChange()"><option value="">— Vyberte formu —</option></select>
+          <input type="text" class="fi" id="pm-forma-custom" placeholder="Zadejte č. formy ručně" style="display:none;margin-top:6px">
+        </div>
         <div class="fg"><label class="fl">Čas výměny (start)</label><input type="time" class="fi" id="pm-cas"></div>
       </div>
       <div class="frow">
@@ -980,6 +990,35 @@ input[type="time"]::-webkit-date-and-time-value { text-align: left; }
     <div class="mact">
       <button class="btn bg" onclick="closeModal('mod-mat')">Zrušit</button>
       <button class="btn br" onclick="saveMat()">✔ Uložit</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: Editace formy (Technolog) -->
+<div class="moverlay" id="mod-formy-edit">
+  <div class="modal">
+    <div style="display:flex;justify-content:space-between;align-items:flex-start">
+      <div><div class="mtitle" id="formy-modal-title">Přidat formu</div><div class="msub">Parametry formy a materiálu</div></div>
+      <button class="btn bwarn bsm" id="formy-modal-del-btn" onclick="deleteFormyEntry()" style="display:none;margin-top:2px">✕ Smazat</button>
+    </div>
+    <div class="fgrid">
+      <div class="frow">
+        <div class="fg"><label class="fl">Č. formy</label><input type="text" class="fi" id="fe-cislo" placeholder="36"></div>
+        <div class="fg"><label class="fl">Název zakázky</label><input type="text" class="fi" id="fe-nazev" placeholder="Zierleiste Mitte Q3"></div>
+      </div>
+      <div class="frow">
+        <div class="fg"><label class="fl">Materiál</label><input type="text" class="fi" id="fe-material" placeholder="Bayblend T65XF 910510 Black"></div>
+        <div class="fg"><label class="fl">Druh (PC/ABS, PP…)</label><input type="text" class="fi" id="fe-druh" placeholder="PC/ABS"></div>
+      </div>
+      <div class="frow">
+        <div class="fg"><label class="fl">Interní č.</label><input type="text" class="fi" id="fe-matid" placeholder="1.001"></div>
+        <div class="fg"><label class="fl">Sušení</label><input type="text" class="fi" id="fe-suseni" placeholder="110°C / min 2h"></div>
+      </div>
+      <div class="fg"><label class="fl">Teplota zpracování (°C)</label><input type="text" class="fi" id="fe-teplota" placeholder="260"></div>
+    </div>
+    <div class="mact">
+      <button class="btn bg" onclick="closeModal('mod-formy-edit')">Zrušit</button>
+      <button class="btn br" onclick="saveForma()">✔ Uložit</button>
     </div>
   </div>
 </div>
@@ -1432,6 +1471,30 @@ function setMatFromForma(cislo, matSelId, dryId) {
     if (dryEl) dryEl.checked = (f.suseni && f.suseni !== '-');
   }
 }
+function togglePmFormaCustom() {
+  var chk = document.getElementById('pm-forma-custom-chk');
+  var sel = document.getElementById('pm-forma');
+  var inp = document.getElementById('pm-forma-custom');
+  if (chk.checked) {
+    sel.style.display = 'none';
+    inp.style.display = 'block';
+    inp.value = sel.value || '';
+    // Odemkneme materiál a skryjeme matId
+    var pmMat = document.getElementById('pm-mat');
+    var pmMatId = document.getElementById('pm-mat-id');
+    var barvaSel = document.getElementById('pm-barva-sel');
+    var barvaInp = document.getElementById('pm-barva');
+    if (pmMat) { pmMat.disabled = false; pmMat.style.opacity = '1'; pmMat.style.cursor = ''; }
+    if (pmMatId) pmMatId.style.display = 'none';
+    if (barvaSel) barvaSel.style.display = 'none';
+    if (barvaInp) barvaInp.style.display = 'block';
+  } else {
+    sel.style.display = 'block';
+    inp.style.display = 'none';
+    onPmFormaChange();
+  }
+}
+
 function onPmFormaChange() {
   var cislo = document.getElementById('pm-forma').value;
   var f = cislo && D.formy[cislo];
@@ -1502,25 +1565,31 @@ function renderMaterialy() {
   var thead = document.getElementById('thead-materialy');
 
   if (canEdit) {
-    // Technolog: editable custom /materialy records
-    if(sub) sub.textContent = 'Správa materiálů – přidat, upravit, odebrat';
-    if(addBtn) addBtn.style.display = 'inline-flex';
-    if(thead) thead.innerHTML = '<tr><th>Forma</th><th>Typ</th><th>Název</th><th>Interní č.</th><th>Teplota sušení</th><th>Čas sušení</th><th></th></tr>';
-    tbody.innerHTML = D.materialy.map(function(m) {
-      var k = m.fbKey||'';
+    // Technolog: editace /formy (stejný pohled jako seřizovač + tlačítka)
+    if(sub) sub.textContent = 'Správa forem a materiálů – přidat, upravit, odebrat';
+    if(addBtn) { addBtn.style.display = 'inline-flex'; addBtn.onclick = openFormyModalNew; }
+    if(thead) thead.innerHTML = '<tr><th>Č. formy</th><th>Název zakázky</th><th>Materiál</th><th>Druh</th><th>Sušení</th><th>Teplota zprac.</th><th>Interní č.</th><th></th></tr>';
+    var cisla = Object.keys(D.formy).sort(function(a,b){
+      var na=parseFloat(a), nb=parseFloat(b);
+      if(!isNaN(na)&&!isNaN(nb)) return na-nb;
+      return String(a).localeCompare(String(b));
+    });
+    tbody.innerHTML = cisla.filter(function(c){ return D.formy[c].material; }).map(function(cislo) {
+      var f = D.formy[cislo];
       return '<tr>' +
-        '<td class="bold">' + (m.forma||'–') + '</td>' +
-        '<td><span class="tbadge">' + (m.typ||'–') + '</span></td>' +
-        '<td class="bold">' + (m.nazev||'–') + '</td>' +
-        '<td class="mono">' + (m.cislo||'–') + '</td>' +
-        '<td style="color:var(--orange);font-weight:600">' + (m.teplota||'–') + (m.teplota&&m.teplota!=='–'?' °C':'') + '</td>' +
-        '<td style="color:var(--text2)">' + (m.cas||'–') + (m.cas&&m.cas!=='–'?' hod':'') + '</td>' +
-        '<td style="display:flex;gap:5px;padding:8px 14px">' +
-          '<button class="btn bg bsm" data-k="'+k+'" data-m="'+encodeURIComponent(JSON.stringify(m))+'" onclick="openMatModal(this)">✏</button>' +
-          '<button class="btn bwarn bsm" data-k="'+k+'" onclick="deleteMat(this.dataset.k)">✕</button>' +
+        '<td class="bold" style="font-family:\'Barlow Condensed\',sans-serif;font-size:20px;font-weight:900">' + cislo + '</td>' +
+        '<td style="font-size:12px;color:var(--text2);max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">' + (f.nazev||'–') + '</td>' +
+        '<td class="bold" style="font-size:12px;max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="'+(f.material||'')+'">' + (f.material||'–') + '</td>' +
+        '<td><span class="tbadge">' + (f.druh||'–') + '</span></td>' +
+        '<td style="font-size:12px;color:var(--text2);white-space:nowrap">' + (f.suseni||'–') + '</td>' +
+        '<td style="color:var(--orange);font-weight:600;white-space:nowrap">' + (f.teplota||'–') + (f.teplota&&f.teplota!=='–'?' °C':'') + '</td>' +
+        '<td class="mono" style="font-size:12px">' + (f.matId||'–') + '</td>' +
+        '<td style="display:flex;gap:5px;padding:8px 10px">' +
+          '<button class="btn bg bsm" data-c="'+cislo+'" onclick="openFormyModal(this.dataset.c)">✏</button>' +
+          '<button class="btn bwarn bsm" data-c="'+cislo+'" onclick="deleteFormyEntry(this.dataset.c)">✕</button>' +
         '</td>' +
       '</tr>';
-    }).join('') || '<tr><td colspan="7" style="text-align:center;color:var(--text3);padding:20px">Žádné záznamy. Přidejte první materiál.</td></tr>';
+    }).join('') || '<tr><td colspan="8" style="text-align:center;color:var(--text3);padding:20px">Žádné formy.</td></tr>';
   } else {
     // Seřizovač + ostatní: kompletní seznam z /formy (read-only)
     if(sub) sub.textContent = 'Parametry zpracování – seznam forem a materiálů';
@@ -1617,6 +1686,66 @@ function deleteMat(key) {
   if(!key){toast('err','Chyba','Nelze smazat – záznam nemá klíč.');return;}
   db.ref('materialy/'+key).remove();
   toast('ok','Smazáno','Záznam odstraněn');
+}
+
+// ── TECHNOLOG: editace /formy ──────────────────────────────────────
+var editFormyCislo = null;
+
+function openFormyModal(cislo) {
+  editFormyCislo = cislo;
+  var f = D.formy[cislo] || {};
+  document.getElementById('formy-modal-title').textContent = 'Upravit formu č. ' + cislo;
+  document.getElementById('formy-modal-del-btn').style.display = 'inline-flex';
+  document.getElementById('fe-cislo').value   = cislo || '';
+  document.getElementById('fe-cislo').disabled = true; // nelze změnit klíč
+  document.getElementById('fe-nazev').value   = f.nazev    || '';
+  document.getElementById('fe-material').value= f.material || '';
+  document.getElementById('fe-druh').value    = f.druh     || '';
+  document.getElementById('fe-matid').value   = f.matId    || '';
+  document.getElementById('fe-suseni').value  = f.suseni   || '';
+  document.getElementById('fe-teplota').value = f.teplota  || '';
+  document.getElementById('mod-formy-edit').classList.add('on');
+}
+
+function openFormyModalNew() {
+  editFormyCislo = null;
+  document.getElementById('formy-modal-title').textContent = 'Přidat formu';
+  document.getElementById('formy-modal-del-btn').style.display = 'none';
+  document.getElementById('fe-cislo').disabled = false;
+  ['fe-cislo','fe-nazev','fe-material','fe-druh','fe-matid','fe-suseni','fe-teplota'].forEach(function(id){
+    document.getElementById(id).value = '';
+  });
+  document.getElementById('mod-formy-edit').classList.add('on');
+}
+
+function saveForma() {
+  var cislo    = editFormyCislo || document.getElementById('fe-cislo').value.trim();
+  var nazev    = document.getElementById('fe-nazev').value.trim();
+  var material = document.getElementById('fe-material').value.trim();
+  var druh     = document.getElementById('fe-druh').value.trim();
+  var matId    = document.getElementById('fe-matid').value.trim();
+  var suseni   = document.getElementById('fe-suseni').value.trim();
+  var teplota  = document.getElementById('fe-teplota').value.trim();
+  if (!cislo || !material) { toast('err','Chyba','Vyplňte č. formy a materiál.'); return; }
+  var obj = {
+    cislo: parseInt(cislo) || cislo,
+    nazev: nazev, material: material, druh: druh,
+    matId: matId, suseni: suseni, teplota: teplota,
+    vlhkostList: D.formy[cislo] ? (D.formy[cislo].vlhkostList||'') : '',
+    vlhkostInterni: D.formy[cislo] ? (D.formy[cislo].vlhkostInterni||'') : '',
+    barvy: D.formy[cislo] ? (D.formy[cislo].barvy||[]) : []
+  };
+  fbSet('formy/' + cislo, obj);
+  toast('ok', editFormyCislo ? 'Uloženo' : 'Přidáno', 'Forma č. ' + cislo);
+  closeModal('mod-formy-edit');
+}
+
+function deleteFormyEntry(cislo) {
+  var c = cislo || editFormyCislo;
+  if (!c) return;
+  db.ref('formy/' + c).remove();
+  toast('ok', 'Smazáno', 'Forma č. ' + c + ' odstraněna');
+  closeModal('mod-formy-edit');
 }
 
 // ── FCM PUSH NOTIFICATIONS ────────────────────────────────────────
@@ -1960,7 +2089,21 @@ function openPlanModal(planKey, mach, dk, smena) {
   var smenaLabels = {'ranní':'Ranní','odpolední':'Odpolední','noční':'Noční'};
   document.getElementById('pm-title').textContent = mach;
   document.getElementById('pm-date').textContent = dk.split('-').reverse().join('.') + ' · ' + (smenaLabels[smena] || smena);
-  document.getElementById('pm-forma').value = p.forma || '';
+  // Vlastní číslo formy – obnovit stav
+  var isCustom = !!(p.forma && !D.formy[p.forma]);
+  var customChk = document.getElementById('pm-forma-custom-chk');
+  var pmFormaSel = document.getElementById('pm-forma');
+  var pmFormaInp = document.getElementById('pm-forma-custom');
+  if (customChk) customChk.checked = isCustom;
+  if (isCustom) {
+    pmFormaSel.style.display = 'none';
+    pmFormaInp.style.display = 'block';
+    pmFormaInp.value = p.forma || '';
+  } else {
+    pmFormaSel.style.display = 'block';
+    if (pmFormaInp) pmFormaInp.style.display = 'none';
+    pmFormaSel.value = p.forma || '';
+  }
   // Restore mat state: if forma is in D.formy, lock material and show matId
   var pmMatSel = document.getElementById('pm-mat');
   var pmMatId  = document.getElementById('pm-mat-id');
@@ -2014,7 +2157,10 @@ function openPlanModal(planKey, mach, dk, smena) {
 }
 
 function savePlan() {
-  var forma = document.getElementById('pm-forma').value.trim();
+  var customChk = document.getElementById('pm-forma-custom-chk');
+  var forma = (customChk && customChk.checked)
+    ? document.getElementById('pm-forma-custom').value.trim()
+    : document.getElementById('pm-forma').value.trim();
   var mat   = document.getElementById('pm-mat').value.trim();
   var qty   = document.getElementById('pm-qty').value.trim();
   var cas   = document.getElementById('pm-cas') ? document.getElementById('pm-cas').value : '';

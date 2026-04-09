@@ -687,5 +687,17 @@
     "vlhkostInterni": "Měřit zbytk. vlhkost",
     "matId": "1.130",
     "barvy": []
+  },
+  "36": {
+    "cislo": 36,
+    "nazev": "Zierleiste Mitte Q3",
+    "material": "Bayblend T65XF 910510 Black",
+    "druh": "PC/ABS",
+    "suseni": "",
+    "teplota": "",
+    "vlhkostList": "",
+    "vlhkostInterni": "",
+    "matId": "1.001",
+    "barvy": []
   }
 }
