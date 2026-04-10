@@ -1184,7 +1184,8 @@ selR = 'serizovac';
 function doLogin() {
   var pin = document.getElementById('pin').value.trim();
   var err = document.getElementById('lerr');
-  if (!selR || PINS[selR] !== pin) {
+  if (!selR) selR = 'serizovac';
+  if (PINS[selR] !== pin) {
     err.style.display='block';
     document.getElementById('pin').value='';
     return;
@@ -1204,7 +1205,7 @@ function doLogout() {
     localStorage.removeItem('cp_fcm_key');
   }
   sessionStorage.removeItem('cp_role');
-  role=null; selR=null;
+  role=null; selR='serizovac';
   document.getElementById('pin').value='';
   document.querySelectorAll('.rb').forEach(function(b){ b.classList.remove('on'); });
   document.getElementById('login').style.display='flex';
