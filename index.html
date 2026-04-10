@@ -418,13 +418,13 @@ input[type="time"]::-webkit-date-and-time-value { text-align: left; }
     <div class="logo-big"><span class="logo-c">C</span><span>OLOR</span></div>
     <div class="logo-pl">PLASTIC</div>
     <div class="logo-au">AUTOMOTIVE</div>
-    <div style="font-size:11px;font-weight:600;letter-spacing:2px;color:var(--text3);text-align:center;margin-top:2px;margin-bottom:18px;text-transform:uppercase">Podpůrný systém pro Seřizovače</div>
+    <div style="font-size:11px;font-weight:600;letter-spacing:2px;color:var(--text3);text-align:center;margin-top:2px;margin-bottom:32px;text-transform:uppercase">Podpůrný systém pro Seřizovače</div>
     <div class="lcard">
-      <div class="ll">Zadejte PIN pro přihlášení</div>
-      <div class="roles" style="justify-content:center">
-        <div class="rb on" onclick="selRole('serizovac')" id="rb-serizovac" style="min-width:140px"><div class="ri">⚙️</div><span class="rn">Seřizovač</span></div>
+      <div style="text-align:center;margin-bottom:24px">
+        <div style="font-size:11px;letter-spacing:3px;text-transform:uppercase;color:var(--text3);margin-bottom:8px">Přihlášení</div>
+        <div style="font-size:22px;font-weight:900;letter-spacing:2px;color:var(--text)">⚙ Seřizovač</div>
       </div>
-      <input type="password" class="pin" id="pin" maxlength="6" placeholder="PIN" onfocus="this.placeholder=''" onblur="if(!this.value)this.placeholder='PIN'" autocomplete="off" onkeydown="if(event.key==='Enter')doLogin()">
+      <input type="password" class="pin" id="pin" maxlength="6" placeholder="· · · ·" onfocus="this.placeholder=''" onblur="if(!this.value)this.placeholder='· · · ·'" autocomplete="off" onkeydown="if(event.key==='Enter')doLogin()" style="text-align:center;letter-spacing:6px;font-size:22px">
       <button class="lbtn" onclick="doLogin()">Přihlásit se →</button>
       <div class="lerr" id="lerr">Nesprávný PIN</div>
     </div>
@@ -1156,7 +1156,7 @@ var D = {
 // ═══════════════════════════════════════════════
 //  CONFIG
 // ═══════════════════════════════════════════════
-var PINS = {serizovac:'3333'};
+var PINS = {serizovac:'2026'};
 var LABELS = {serizovac:'Seřizovač'};
 var SHORT = {serizovac:'Seřizovač'};
 var NAV = {
