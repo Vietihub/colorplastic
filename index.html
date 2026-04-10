@@ -2654,34 +2654,7 @@ function buildFormaBanner() {
 }
 
 function buildDovBanner() {
-  // Dovolené banner removed – role not needed
-  if (false) {
-  var pending = D.dovolene.filter(function(d){ return d.status==='pending'; });
-  if (!pending.length) return '';
-  var bodyItems = pending.map(function(d){
-    var k = d.fbKey||'';
-    return '<div class="banner ban-b" style="margin:6px 0 0;border-radius:6px">' +
-      '<div>' +
-        '<div style="font-size:12px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;color:var(--blue);margin-bottom:3px">'+dovTypLbl(d.typ)+'</div>' +
-        '<div class="ban-body"><strong>'+d.jmeno+'</strong> · '+d.pozice+' · '+fmtD(d.od)+' – '+fmtD(d.doo)+'</div>' +
-        '<div class="ban-meta">Podal '+d.podal+' v '+fmtActivityTime(d.podalAt)+'</div>' +
-      '</div>' +
-      '<div style="display:flex;gap:7px;flex-shrink:0">' +
-        '<button class="btn bwarn bsm" data-key="'+k+'" data-act="rejected" onclick="respondDov(this.dataset.key,this.dataset.act)">❌ Zamítnout</button>' +
-        '<button class="btn br bsm" data-key="'+k+'" data-act="approved" onclick="respondDov(this.dataset.key,this.dataset.act)">✅ Schválit</button>' +
-      '</div>' +
-    '</div>';
-  }).join('');
-  return '<div class="banner-group">' +
-    '<div class="banner-group-hdr blue" data-bgid="bg-dov" onclick="toggleBannerGroup(\'bg-dov\')">' +
-      '<div class="banner-group-title" style="color:var(--blue)"><span>🏖</span><span>Žádosti o dovolené</span></div>' +
-      '<div class="banner-group-meta">' +
-        '<span class="banner-group-count blue">'+pending.length+'</span>' +
-        '<span class="banner-group-arrow" id="arr-bg-dov">▼</span>' +
-      '</div>' +
-    '</div>' +
-    '<div class="banner-group-body collapsed" id="bg-dov">' + bodyItems + '</div>' +
-  '</div>';
+  return '';
 }
 
 function dismissUnavail(key) {
