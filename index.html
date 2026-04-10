@@ -1872,23 +1872,39 @@ function smenaLabel(s) {
 
 // Returns the plan entry that "spans" into this cell via its platido field
 // (entry started in an earlier shift and its platido is after this cell's start time)
+// NOTE: Noční shift for date D physically starts at 22:00 of (D-1).
+//       e.g. "čtvrtek noční" = středa 22:00 → čtvrtek 06:00
 function getSpanningPlanForCell(mach, cellDate, cellShift) {
   if (!D.plan) return null;
   var shiftStartH = {ranní:6, odpolední:14, noční:22};
   var keyPrefix = mach.replace(/ /g,'_') + '_';
-  var h0 = shiftStartH[cellShift]; if (h0 === undefined) return null;
-  var cellStartMs = new Date(cellDate + 'T' + String(h0).padStart(2,'0') + ':00:00').getTime();
+  if (shiftStartH[cellShift] === undefined) return null;
+
+  // Actual wall-clock start of a shift given its plan key date + shift name
+  function actualStartMs(dateStr, shiftName) {
+    if (shiftName === 'noční') {
+      // Noční for date D starts at 22:00 of the previous calendar day
+      var d = new Date(dateStr + 'T12:00:00');
+      d.setDate(d.getDate() - 1);
+      return new Date(d.toISOString().slice(0,10) + 'T22:00:00').getTime();
+    }
+    var h = shiftStartH[shiftName];
+    return new Date(dateStr + 'T' + String(h).padStart(2,'0') + ':00:00').getTime();
+  }
+
+  var cellStartMs = actualStartMs(cellDate, cellShift);
   var best = null; var bestStartMs = 0;
   Object.keys(D.plan).forEach(function(key) {
     if (key.indexOf(keyPrefix) !== 0) return;
     var entry = D.plan[key];
-    if (!entry || !entry.platido || !entry.forma) return;
+    if (!entry || !entry.platido) return;
+    if (!entry.forma && !entry.isStoji) return; // skip empty entries
     var platidoMs = new Date(entry.platido.replace(' ','T')).getTime();
     if (platidoMs <= cellStartMs) return; // ends before or exactly at this cell start
     var suffix = key.slice(keyPrefix.length);
     var datePart = suffix.slice(0,10); var shiftPart = suffix.slice(11);
-    var h = shiftStartH[shiftPart]; if (h === undefined) return;
-    var entryStartMs = new Date(datePart + 'T' + String(h).padStart(2,'0') + ':00:00').getTime();
+    if (shiftStartH[shiftPart] === undefined) return;
+    var entryStartMs = actualStartMs(datePart, shiftPart);
     if (entryStartMs < cellStartMs && entryStartMs > bestStartMs) {
       bestStartMs = entryStartMs; best = entry;
     }
