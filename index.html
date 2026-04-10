@@ -1896,11 +1896,11 @@ function renderPlan() {
     lbl.textContent = d0.getDate()+'.'+(d0.getMonth()+1)+'. – '+d6.getDate()+'.'+(d6.getMonth()+1)+'.'+d6.getFullYear();
   }
   var grid = document.getElementById('plan-grid'); if (!grid) return;
-  var smeny = ['ranní','odpolední','noční'];
-  var smenyShort = ['R','O','N'];
-  var smenyColors = ['#4a9eff','var(--orange)','#a070ff'];
-  var smenyBg = ['rgba(74,158,255,.07)','rgba(255,156,0,.07)','rgba(160,112,255,.05)'];
-  var smenyBorder = ['rgba(74,158,255,.3)','rgba(255,156,0,.3)','rgba(160,112,255,.25)'];
+  var smeny = ['noční','ranní','odpolední'];
+  var smenyShort = ['N','R','O'];
+  var smenyColors = ['#a070ff','#4a9eff','var(--orange)'];
+  var smenyBg = ['rgba(160,112,255,.05)','rgba(74,158,255,.07)','rgba(255,156,0,.07)'];
+  var smenyBorder = ['rgba(160,112,255,.25)','rgba(74,158,255,.3)','rgba(255,156,0,.3)'];
 
   var html = '<thead><tr><th class="mach-col" rowspan="2" style="text-align:center">Lis</th>';
   dates.forEach(function(d, i) {
@@ -1913,7 +1913,7 @@ function renderPlan() {
   dates.forEach(function(d) {
     var today = isToday(d);
     smeny.forEach(function(s, si) {
-      html += '<th style="font-size:9px;padding:4px 3px;color:'+smenyColors[si]+';border-top:none;min-width:90px;text-align:center;background:'+smenyBg[si]+';border-left:2px solid '+smenyBorder[si]+'">'+smenyShort[si]+'<span style="opacity:.5;font-weight:400"> '+(['06–14','14–22','22–06'][si])+'</span></th>';
+      html += '<th style="font-size:9px;padding:4px 3px;color:'+smenyColors[si]+';border-top:none;min-width:90px;text-align:center;background:'+smenyBg[si]+';border-left:2px solid '+smenyBorder[si]+'">'+smenyShort[si]+'<span style="opacity:.5;font-weight:400"> '+(['22–06','06–14','14–22'][si])+'</span></th>';
     });
   });
   html += '</tr></thead><tbody>';
@@ -2023,7 +2023,7 @@ function renderPlanToday() {
 function renderPlanTodayIn(containerId) {
   var el = document.getElementById(containerId); if (!el) return;
   var today = dateKey(new Date());
-  var smeny = ['ranní','odpolední','noční'];
+  var smeny = ['noční','ranní','odpolední'];
   var hasAny = false;
   var rows = '';
 
@@ -2033,9 +2033,9 @@ function renderPlanTodayIn(containerId) {
     smeny.forEach(function(smena, si) {
       var k = mach.replace(/ /g,'_') + '_' + today + '_' + smena;
       var p = D.plan[k];
-      var bgColors = ['rgba(74,158,255,.07)','rgba(255,156,0,.07)','rgba(160,112,255,.05)'];
-      var accentColors = ['#4a9eff','var(--orange)','#a070ff'];
-      var borderColors = ['rgba(74,158,255,.3)','rgba(255,156,0,.3)','rgba(160,112,255,.25)'];
+      var bgColors = ['rgba(160,112,255,.05)','rgba(74,158,255,.07)','rgba(255,156,0,.07)'];
+      var accentColors = ['#a070ff','#4a9eff','var(--orange)'];
+      var borderColors = ['rgba(160,112,255,.25)','rgba(74,158,255,.3)','rgba(255,156,0,.3)'];
       if (p && (p.forma || p.qty)) {
         machHasAny = true; hasAny = true;
         var isBezT = !!p.bezVyroby; var isTestT = !!p.isTest;
@@ -2086,9 +2086,9 @@ function renderPlanTodayIn(containerId) {
         '<colgroup><col style="width:90px"><col style="width:calc((100% - 90px)/3)"><col style="width:calc((100% - 90px)/3)"><col style="width:calc((100% - 90px)/3)"></colgroup>' +
         '<thead><tr style="border-bottom:2px solid var(--bg2)">' +
           '<th style="padding:10px 16px;text-align:center;font-size:10px;font-weight:700;letter-spacing:1px;color:var(--text3);background:rgba(255,255,255,.02)">LIS</th>' +
+          '<th style="padding:10px 14px;text-align:center;font-size:11px;font-weight:700;color:#a070ff;background:rgba(160,112,255,.05);border-left:3px solid rgba(160,112,255,.25)">NOČNÍ<div style="font-size:9px;font-weight:400;opacity:.6;margin-top:1px">22:00 – 06:00</div></th>' +
           '<th style="padding:10px 14px;text-align:center;font-size:11px;font-weight:700;color:#4a9eff;background:rgba(74,158,255,.07);border-left:3px solid rgba(74,158,255,.3)">RANNÍ<div style="font-size:9px;font-weight:400;opacity:.6;margin-top:1px">06:00 – 14:00</div></th>' +
           '<th style="padding:10px 14px;text-align:center;font-size:11px;font-weight:700;color:var(--orange);background:rgba(255,156,0,.07);border-left:3px solid rgba(255,156,0,.3)">ODPOLEDNÍ<div style="font-size:9px;font-weight:400;opacity:.6;margin-top:1px">14:00 – 22:00</div></th>' +
-          '<th style="padding:10px 14px;text-align:center;font-size:11px;font-weight:700;color:#a070ff;background:rgba(160,112,255,.05);border-left:3px solid rgba(160,112,255,.25)">NOČNÍ<div style="font-size:9px;font-weight:400;opacity:.6;margin-top:1px">22:00 – 06:00</div></th>' +
         '</tr></thead>' +
         '<tbody>' + rows + '</tbody>' +
       '</table>' +
