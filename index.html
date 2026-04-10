@@ -939,14 +939,23 @@ input[type="time"]::-webkit-date-and-time-value { text-align: left; }
         </div>
         <div class="fg"><label class="fl">Čas výměny (start)</label><input type="time" class="fi" id="pm-cas"></div>
       </div>
-      <!-- BEZ VÝROBY toggle -->
-      <label id="pm-bez-vyroby-row" style="display:flex;align-items:center;gap:10px;cursor:pointer;padding:10px 12px;border-radius:8px;border:2px solid var(--border);background:var(--bg4);transition:all .2s">
-        <input type="checkbox" id="pm-bez-vyroby" onchange="togglePmBezVyroby()" style="width:16px;height:16px;accent-color:#ff4444;cursor:pointer">
-        <div>
-          <div style="font-size:13px;font-weight:700;color:var(--text)">Bez výroby</div>
-          <div style="font-size:11px;color:var(--text3);margin-top:1px">Pouze výměna formy – žádná produkce v této směně</div>
-        </div>
-      </label>
+      <!-- MODE toggles: Bez výroby / Test -->
+      <div style="display:flex;gap:8px">
+        <label id="pm-bez-vyroby-row" style="flex:1;display:flex;align-items:center;gap:10px;cursor:pointer;padding:10px 12px;border-radius:8px;border:2px solid var(--border);background:var(--bg4);transition:all .2s">
+          <input type="checkbox" id="pm-bez-vyroby" onchange="togglePmMode('bez')" style="width:16px;height:16px;accent-color:#ff4444;cursor:pointer">
+          <div>
+            <div style="font-size:13px;font-weight:700;color:var(--text)">Bez výroby</div>
+            <div style="font-size:11px;color:var(--text3);margin-top:1px">Pouze výměna formy</div>
+          </div>
+        </label>
+        <label id="pm-test-row" style="flex:1;display:flex;align-items:center;gap:10px;cursor:pointer;padding:10px 12px;border-radius:8px;border:2px solid var(--border);background:var(--bg4);transition:all .2s">
+          <input type="checkbox" id="pm-test" onchange="togglePmMode('test')" style="width:16px;height:16px;accent-color:#f0c040;cursor:pointer">
+          <div>
+            <div style="font-size:13px;font-weight:700;color:var(--text)">🧪 Test</div>
+            <div style="font-size:11px;color:var(--text3);margin-top:1px">Forma není v systému</div>
+          </div>
+        </label>
+      </div>
       <div id="pm-production-fields">
       <div class="frow">
         <div class="fg"><label class="fl">Platí do – datum</label><input type="date" class="fi" id="pm-platido-dat"></div>
@@ -1505,17 +1514,49 @@ function togglePmFormaCustom() {
   }
 }
 
-function togglePmBezVyroby() {
-  var chk = document.getElementById('pm-bez-vyroby');
+function togglePmMode(changed) {
+  var bezChk  = document.getElementById('pm-bez-vyroby');
+  var testChk = document.getElementById('pm-test');
+  // Mutual exclusivity
+  if (changed === 'bez' && bezChk && bezChk.checked) { if (testChk) testChk.checked = false; }
+  if (changed === 'test' && testChk && testChk.checked) { if (bezChk) bezChk.checked = false; }
+  var isBez  = bezChk  && bezChk.checked;
+  var isTest = testChk && testChk.checked;
+
+  // Bez výroby row style
+  var bezRow = document.getElementById('pm-bez-vyroby-row');
+  if (bezRow) { bezRow.style.borderColor = isBez ? '#ff4444' : 'var(--border)'; bezRow.style.background = isBez ? 'rgba(255,68,68,.12)' : 'var(--bg4)'; }
+  // Test row style
+  var testRow = document.getElementById('pm-test-row');
+  if (testRow) { testRow.style.borderColor = isTest ? '#f0c040' : 'var(--border)'; testRow.style.background = isTest ? 'rgba(240,192,64,.1)' : 'var(--bg4)'; }
+
+  // Production fields visibility
   var fields = document.getElementById('pm-production-fields');
-  var row = document.getElementById('pm-bez-vyroby-row');
-  var isBez = chk && chk.checked;
   if (fields) fields.style.display = isBez ? 'none' : '';
-  if (row) {
-    row.style.borderColor = isBez ? '#ff4444' : 'var(--border)';
-    row.style.background = isBez ? 'rgba(255,68,68,.12)' : 'var(--bg4)';
+
+  // Test mode: force custom forma input, unlock material
+  var formaSel = document.getElementById('pm-forma');
+  var formaInp = document.getElementById('pm-forma-custom');
+  var formaChk = document.getElementById('pm-forma-custom-chk');
+  if (isTest) {
+    if (formaSel) formaSel.style.display = 'none';
+    if (formaInp) { formaInp.style.display = 'block'; if (!formaInp.value) formaInp.placeholder = 'Číslo testovací formy'; }
+    if (formaChk) formaChk.checked = true;
+    // Unlock material for test
+    var pmMat = document.getElementById('pm-mat');
+    var pmMatId = document.getElementById('pm-mat-id');
+    if (pmMat) { pmMat.disabled = false; pmMat.style.opacity = '1'; pmMat.style.cursor = ''; }
+    if (pmMatId) pmMatId.style.display = 'none';
+  } else if (!isBez && changed === 'test') {
+    // Switching test off → restore to select if not custom
+    if (formaChk && !formaChk.checked) {
+      if (formaSel) formaSel.style.display = 'block';
+      if (formaInp) formaInp.style.display = 'none';
+    }
   }
 }
+// Keep old name as alias for openPlanModal which calls togglePmBezVyroby
+function togglePmBezVyroby() { togglePmMode('bez'); }
 
 function onPmFormaChange() {
   var cislo = document.getElementById('pm-forma').value;
@@ -2003,14 +2044,16 @@ function renderPlan() {
         var cellId = 'pc-'+mi+'-'+di+'-'+si;
         var todayBg = today ? 'filter:brightness(1.3);' : '';
         if (p && (p.forma || p.qty)) {
-          var isBez = !!p.bezVyroby;
-          var cellBg = isBez ? 'rgba(255,68,68,.13)' : smenyBg[si];
-          var cellBorder = isBez ? '2px solid rgba(255,68,68,.6)' : '2px solid '+smenyBorder[si];
+          var isBez  = !!p.bezVyroby;
+          var isTest = !!p.isTest;
+          var cellBg     = isBez ? 'rgba(255,68,68,.13)' : isTest ? 'rgba(240,192,64,.1)' : smenyBg[si];
+          var cellBorder = isBez ? '2px solid rgba(255,68,68,.6)' : isTest ? '2px solid rgba(240,192,64,.55)' : '2px solid '+smenyBorder[si];
           html += '<td style="padding:0;background:'+cellBg+';border-left:'+cellBorder+todayBg+'">';
           html += '<div id="'+cellId+'" class="plan-cell has-plan" style="padding:10px 8px;text-align:center;border-left:none">';
-          if (isBez) html += '<div style="font-size:9px;font-weight:800;color:#ff6666;letter-spacing:.8px;margin-bottom:4px">⛔ BEZ VÝROBY</div>';
+          if (isBez)  html += '<div style="font-size:9px;font-weight:800;color:#ff6666;letter-spacing:.8px;margin-bottom:4px">⛔ BEZ VÝROBY</div>';
+          if (isTest) html += '<div style="font-size:9px;font-weight:800;color:#f0c040;letter-spacing:.8px;margin-bottom:4px">🧪 TEST</div>';
           if (p.forma) html += '<div style="font-size:17px;font-weight:900;color:var(--text);line-height:1;margin-bottom:3px">'+p.forma+'</div>';
-          if (p.cas)   html += '<div style="font-size:13px;font-weight:700;color:'+(isBez?'#ff8888':smenyColors[si])+';margin-bottom:6px">'+p.cas+'</div>';
+          if (p.cas)   html += '<div style="font-size:13px;font-weight:700;color:'+(isBez?'#ff8888':isTest?'#f0c040':smenyColors[si])+';margin-bottom:6px">'+p.cas+'</div>';
           if (isBez) {
             if (p.note) html += '<div style="font-size:9px;color:var(--text3);margin-top:4px;font-style:italic">'+p.note+'</div>';
           } else {
@@ -2108,15 +2151,28 @@ function renderPlanTodayIn(containerId) {
       var borderColors = ['rgba(74,158,255,.3)','rgba(255,156,0,.3)','rgba(160,112,255,.25)'];
       if (p && (p.forma || p.qty)) {
         machHasAny = true; hasAny = true;
-        cells += '<td style="padding:16px 14px;vertical-align:top;background:'+bgColors[si]+';border-left:3px solid '+borderColors[si]+';text-align:center">';
+        var isBezT = !!p.bezVyroby; var isTestT = !!p.isTest;
+        var tdBg  = isBezT ? 'rgba(255,68,68,.13)'   : isTestT ? 'rgba(240,192,64,.1)'  : bgColors[si];
+        var tdBdr = isBezT ? '3px solid rgba(255,68,68,.6)' : isTestT ? '3px solid rgba(240,192,64,.55)' : '3px solid '+borderColors[si];
+        var casClr = isBezT ? '#ff8888' : isTestT ? '#f0c040' : accentColors[si];
+        cells += '<td style="padding:16px 14px;vertical-align:top;background:'+tdBg+';border-left:'+tdBdr+';text-align:center">';
+        // Mode badge
+        if (isBezT)  cells += '<div style="display:inline-block;margin-bottom:8px;padding:3px 9px;border-radius:4px;font-size:10px;font-weight:800;letter-spacing:.8px;color:#ff6666;background:rgba(255,68,68,.15);border:1px solid rgba(255,68,68,.35)">⛔ BEZ VÝROBY</div>';
+        if (isTestT) cells += '<div style="display:inline-block;margin-bottom:8px;padding:3px 9px;border-radius:4px;font-size:10px;font-weight:800;letter-spacing:.8px;color:#f0c040;background:rgba(240,192,64,.12);border:1px solid rgba(240,192,64,.35)">🧪 TEST</div>';
         if (p.forma) cells += '<div style="font-size:26px;font-weight:900;color:var(--text);line-height:1;letter-spacing:.5px">'+p.forma+'</div>';
-        if (p.cas) cells += '<div style="font-size:18px;font-weight:700;color:'+accentColors[si]+';margin:5px 0 8px;letter-spacing:1px">'+p.cas+'</div>';
-        cells += '<div style="border-top:1px solid rgba(255,255,255,.06);padding-top:8px">';
-        if (p.mat) cells += '<div style="font-size:11px;color:var(--text2);line-height:1.4">'+p.mat.split('(')[0].trim()+'</div>';
-        if (p.qty) cells += '<div style="font-size:13px;color:var(--green-text);font-weight:700;margin-top:5px">'+parseInt(p.qty).toLocaleString()+' ks</div>';
-        if (p.susen) cells += '<div style="display:inline-block;margin-top:5px;font-size:10px;font-weight:700;color:var(--orange);background:rgba(255,156,0,.12);border:1px solid rgba(255,156,0,.25);border-radius:3px;padding:2px 7px;letter-spacing:.5px">SUŠIT</div>';
-        if (p.note) cells += '<div style="font-size:10px;color:var(--text3);margin-top:5px;font-style:italic">'+p.note+'</div>';
-        cells += '</div></td>';
+        if (p.cas) cells += '<div style="font-size:18px;font-weight:700;color:'+casClr+';margin:5px 0 8px;letter-spacing:1px">'+p.cas+'</div>';
+        if (isBezT) {
+          if (p.note) cells += '<div style="font-size:10px;color:var(--text3);margin-top:5px;font-style:italic">'+p.note+'</div>';
+        } else {
+          cells += '<div style="border-top:1px solid rgba(255,255,255,.06);padding-top:8px">';
+          if (p.mat) cells += '<div style="font-size:11px;color:var(--text2);line-height:1.4">'+p.mat.split('(')[0].trim()+'</div>';
+          if (p.qty) cells += '<div style="font-size:13px;color:var(--green-text);font-weight:700;margin-top:5px">'+parseInt(p.qty).toLocaleString()+' ks</div>';
+          if (p.susen) cells += '<div style="display:inline-block;margin-top:5px;font-size:10px;font-weight:700;color:var(--orange);background:rgba(255,156,0,.12);border:1px solid rgba(255,156,0,.25);border-radius:3px;padding:2px 7px;letter-spacing:.5px">SUŠIT</div>';
+          if (p.note) cells += '<div style="font-size:10px;color:var(--text3);margin-top:5px;font-style:italic">'+p.note+'</div>';
+          if (p.platido) { var pd3=p.platido; cells += '<div style="display:inline-block;margin-top:6px;font-size:10px;font-weight:700;color:var(--orange);background:rgba(255,156,0,.1);border:1px solid rgba(255,156,0,.25);border-radius:3px;padding:2px 7px">do '+pd3.slice(8,10)+'.'+pd3.slice(5,7)+'. '+pd3.slice(11,16)+'</div>'; }
+          cells += '</div>';
+        }
+        cells += '</td>';
       } else {
         cells += '<td style="padding:16px 14px;vertical-align:middle;text-align:center;background:'+bgColors[si]+'">';
         cells += '<span style="font-size:22px;color:var(--text3);opacity:.3">—</span>';
@@ -2222,9 +2278,12 @@ function openPlanModal(planKey, mach, dk, smena) {
   if (pdCas) pdCas.value = platido ? platido.slice(11,16) : '';
   var susenEl = document.getElementById('pm-susen');
   if (susenEl) susenEl.checked = !!p.susen;
-  // Bez výroby
-  var bezChk = document.getElementById('pm-bez-vyroby');
-  if (bezChk) { bezChk.checked = !!p.bezVyroby; togglePmBezVyroby(); }
+  // Mode: Bez výroby / Test
+  var bezChkEl = document.getElementById('pm-bez-vyroby');
+  var testChkEl = document.getElementById('pm-test');
+  if (bezChkEl) bezChkEl.checked = !!p.bezVyroby;
+  if (testChkEl) testChkEl.checked = !!p.isTest;
+  if (p.isTest) togglePmMode('test'); else togglePmMode('bez');
   document.getElementById('pm-note').value = p.note || '';
   document.getElementById('mod-plan').classList.add('on');
 }
@@ -2245,11 +2304,12 @@ function savePlan() {
   var barva = (barvaSel && barvaSel.style.display !== 'none') ? barvaSel.value : (barvaInp ? barvaInp.value.trim() : '');
   var susen = document.getElementById('pm-susen').checked;
   var bezVyroby = !!(document.getElementById('pm-bez-vyroby') && document.getElementById('pm-bez-vyroby').checked);
+  var isTest    = !!(document.getElementById('pm-test') && document.getElementById('pm-test').checked);
   var note  = document.getElementById('pm-note').value.trim();
   if (!forma) { toast('err','Chyba','Zadejte číslo formy.'); return; }
   // When bezVyroby, clear production-only fields
   if (bezVyroby) { platido=''; qty=''; barva=''; mat=''; susen=false; }
-  var entry = {forma:forma, mat:mat, qty:qty, barva:barva, cas:cas, platido:platido, susen:susen, bezVyroby:bezVyroby, note:note, updatedAt:nowFull()};
+  var entry = {forma:forma, mat:mat, qty:qty, barva:barva, cas:cas, platido:platido, susen:susen, bezVyroby:bezVyroby, isTest:isTest, note:note, updatedAt:nowFull()};
   fbSet('plan/'+editPlanKey, entry);
   // Notifikace o sušení
   if (susen && mat) {
