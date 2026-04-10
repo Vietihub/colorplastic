@@ -573,90 +573,6 @@ input[type="time"]::-webkit-date-and-time-value { text-align: left; }
     </div>
 
     <!-- POŽADAVKY (seřizovač) -->
-    <div class="page" id="page-pozadavky">
-      <div class="ptitle">Požadavky na materiál</div>
-      <div class="psub">Odeslat nový požadavek do skladu</div>
-      <div class="two">
-        <div class="card cpad">
-          <div class="ctitle2">Nový požadavek</div>
-          <div class="fgrid">
-            <div class="frow">
-              <div class="fg"><label class="fl">Materiál</label>
-                <select class="fs" id="req-mat"><option value="">Vyberte...</option></select>
-              </div>
-              <div class="fg"><label class="fl">Množství (kg)</label>
-                <div class="ww"><input type="number" class="fi" id="req-qty" placeholder="0" min="1"><span class="ws">kg</span></div>
-              </div>
-            </div>
-            <div class="frow">
-              <div class="fg"><label class="fl">Stroj</label>
-                <select class="fs" id="req-stroj"><option value="">Vyberte...</option>
-                  <option>Engel duo 300T</option><option>Engel duo 550T</option><option>Engel duo 700T</option>
-                  <option>Engel duo 900T</option><option>Engel duo 1700T</option><option>Engel duo 2000T</option>
-                </select>
-              </div>
-              <div class="fg"><label class="fl">Priorita</label>
-                <select class="fs" id="req-prior"><option value="normal">Normální</option><option value="urgent">Urgentní</option></select>
-              </div>
-            </div>
-            <div class="fg"><label class="fl">Poznámka</label><textarea class="fta" id="req-note" placeholder="Volitelná..."></textarea></div>
-            <button class="btn br bful" onclick="submitReq()">📤 Odeslat do skladu</button>
-          </div>
-        </div>
-        <div class="card">
-          <div class="chdr"><span class="ct">Moje požadavky dnes</span><div class="live">Live</div></div>
-          <div class="tw tw-scroll"><table>
-            <thead><tr><th>Čas</th><th>Materiál</th><th>kg</th><th>Stav</th></tr></thead>
-            <tbody id="tbl-my-req"></tbody>
-          </table></div>
-        </div>
-      </div>
-    </div>
-
-    <!-- SCRAP -->
-    <div class="page" id="page-scrap">
-      <div class="ptitle">Evidence scrapu</div>
-      <div class="psub">Zápis zmetkovitosti z výroby</div>
-      <div class="two">
-        <div class="card cpad" id="scrap-form">
-          <div class="ctitle2">Zápis nového scrapu</div>
-          <div class="fgrid">
-            <div class="frow">
-              <div class="fg"><label class="fl">Materiál</label>
-                <select class="fs" id="sc-mat"><option value="">Vyberte...</option></select>
-              </div>
-              <div class="fg"><label class="fl">Hmotnost</label>
-                <div class="ww"><input type="number" class="fi" id="sc-wt" placeholder="0.0" min="0" step="0.1"><span class="ws">kg</span></div>
-              </div>
-            </div>
-            <div class="frow">
-              <div class="fg"><label class="fl">Stroj</label>
-                <select class="fs" id="sc-stroj"><option value="">Vyberte...</option>
-                  <option>Engel duo 300T</option><option>Engel duo 550T</option><option>Engel duo 700T</option>
-                  <option>Engel duo 900T</option><option>Engel duo 1700T</option><option>Engel duo 2000T</option>
-                </select>
-              </div>
-              <div class="fg"><label class="fl">Typ zmetku</label>
-                <select class="fs" id="sc-typ"><option value="">Vyberte...</option>
-                  <option>Startovní zmetek</option><option>Technologický zmetek</option>
-                  <option>Rozjezdový odpad</option><option>Vtokový zbytek</option>
-                  <option>Zkouška kvality</option><option>Havárie stroje</option><option>Jiný</option>
-                </select>
-              </div>
-            </div>
-            <div class="fg"><label class="fl">Důvod</label><textarea class="fta" id="sc-reason" placeholder="Popis..."></textarea></div>
-            <button class="btn br bful" onclick="submitScrap()">⚖️ Zapsat scrap</button>
-          </div>
-        </div>
-        <div class="card">
-          <div class="chdr"><span class="ct">Dnešní záznamy</span><div class="live">Live</div></div>
-          <div class="tw"><table>
-            <thead><tr><th>Čas</th><th>Materiál</th><th>Typ</th><th>kg</th><th>Stroj</th></tr></thead>
-            <tbody id="tbl-scrap"></tbody>
-          </table></div>
-        </div>
-      </div>
-    </div>
 
     <!-- SKLAD (požadavky + objednávky) -->
     <div class="page" id="page-sklad">
@@ -1164,9 +1080,7 @@ var NAV = {
     {id:'ser-prehled', lbl:'Přehled',    ic:'📊'},
     {id:'plan',        lbl:'Plánování',  ic:'📅'},
     {id:'materialy',   lbl:'Materiály',  ic:'🧪'},
-    {id:'pozadavky',   lbl:'Požadavky',  ic:'📤'},
-    {id:'vyroba',      lbl:'Výroba',     ic:'🏭'},
-    {id:'scrap',       lbl:'Scrap',      ic:'♻️'}
+    {id:'vyroba',      lbl:'Výroba',     ic:'🏭'}
   ]
 };
 
