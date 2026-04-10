@@ -837,6 +837,7 @@ input[type="time"]::-webkit-date-and-time-value { text-align: left; }
       <button class="btn bwarn bsm" onclick="deletePlanEntry()" style="margin-top:2px">✕ Smazat</button>
     </div>
     <div class="fgrid">
+      <div id="pm-forma-section">
       <div class="frow">
         <div class="fg">
           <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">
@@ -851,21 +852,23 @@ input[type="time"]::-webkit-date-and-time-value { text-align: left; }
         </div>
         <div class="fg"><label class="fl">Čas výměny (start)</label><input type="time" class="fi" id="pm-cas"></div>
       </div>
-      <!-- MODE toggles: Bez výroby / Test -->
-      <div style="display:flex;gap:8px">
-        <label id="pm-bez-vyroby-row" style="flex:1;display:flex;align-items:center;gap:10px;cursor:pointer;padding:10px 12px;border-radius:8px;border:2px solid var(--border);background:var(--bg4);transition:all .2s">
-          <input type="checkbox" id="pm-bez-vyroby" onchange="togglePmMode('bez')" style="width:16px;height:16px;accent-color:#ff4444;cursor:pointer">
-          <div>
-            <div style="font-size:13px;font-weight:700;color:var(--text)">Bez výroby</div>
-            <div style="font-size:11px;color:var(--text3);margin-top:1px">Pouze výměna formy</div>
-          </div>
+      </div><!-- /pm-forma-section -->
+      <!-- MODE toggles: Výměna / Test / Lis stojí -->
+      <div style="display:flex;gap:6px">
+        <label id="pm-bez-vyroby-row" style="flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;cursor:pointer;padding:10px 8px;border-radius:8px;border:2px solid var(--border);background:var(--bg4);transition:all .2s;text-align:center">
+          <input type="checkbox" id="pm-bez-vyroby" onchange="togglePmMode('bez')" style="width:16px;height:16px;accent-color:#e6b800;cursor:pointer">
+          <div style="font-size:12px;font-weight:800;color:var(--text);letter-spacing:.3px">Výměna</div>
+          <div style="font-size:10px;color:var(--text3)">Bez výroby</div>
         </label>
-        <label id="pm-test-row" style="flex:1;display:flex;align-items:center;gap:10px;cursor:pointer;padding:10px 12px;border-radius:8px;border:2px solid var(--border);background:var(--bg4);transition:all .2s">
-          <input type="checkbox" id="pm-test" onchange="togglePmMode('test')" style="width:16px;height:16px;accent-color:#f0c040;cursor:pointer">
-          <div>
-            <div style="font-size:13px;font-weight:700;color:var(--text)">🧪 Test</div>
-            <div style="font-size:11px;color:var(--text3);margin-top:1px">Forma není v systému</div>
-          </div>
+        <label id="pm-test-row" style="flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;cursor:pointer;padding:10px 8px;border-radius:8px;border:2px solid var(--border);background:var(--bg4);transition:all .2s;text-align:center">
+          <input type="checkbox" id="pm-test" onchange="togglePmMode('test')" style="width:16px;height:16px;accent-color:#e03030;cursor:pointer">
+          <div style="font-size:12px;font-weight:800;color:var(--text);letter-spacing:.3px">Test</div>
+          <div style="font-size:10px;color:var(--text3)">Forma mimo systém</div>
+        </label>
+        <label id="pm-stoji-row" style="flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;cursor:pointer;padding:10px 8px;border-radius:8px;border:2px solid var(--border);background:var(--bg4);transition:all .2s;text-align:center">
+          <input type="checkbox" id="pm-stoji" onchange="togglePmMode('stoji')" style="width:16px;height:16px;accent-color:#1e88e5;cursor:pointer">
+          <div style="font-size:12px;font-weight:800;color:var(--text);letter-spacing:.3px">Lis stojí</div>
+          <div style="font-size:10px;color:var(--text3)">Bez výroby</div>
         </label>
       </div>
       <div id="pm-production-fields">
@@ -1430,26 +1433,34 @@ function togglePmFormaCustom() {
 }
 
 function togglePmMode(changed) {
-  var bezChk  = document.getElementById('pm-bez-vyroby');
-  var testChk = document.getElementById('pm-test');
-  // Mutual exclusivity
-  if (changed === 'bez' && bezChk && bezChk.checked) { if (testChk) testChk.checked = false; }
-  if (changed === 'test' && testChk && testChk.checked) { if (bezChk) bezChk.checked = false; }
-  var isBez  = bezChk  && bezChk.checked;
-  var isTest = testChk && testChk.checked;
+  var bezChk   = document.getElementById('pm-bez-vyroby');
+  var testChk  = document.getElementById('pm-test');
+  var stojiChk = document.getElementById('pm-stoji');
+  // Mutual exclusivity — uncheck the other two
+  if (changed === 'bez'   && bezChk   && bezChk.checked)   { if (testChk) testChk.checked=false;  if (stojiChk) stojiChk.checked=false; }
+  if (changed === 'test'  && testChk  && testChk.checked)  { if (bezChk) bezChk.checked=false;    if (stojiChk) stojiChk.checked=false; }
+  if (changed === 'stoji' && stojiChk && stojiChk.checked) { if (bezChk) bezChk.checked=false;    if (testChk) testChk.checked=false; }
+  var isBez   = bezChk   && bezChk.checked;
+  var isTest  = testChk  && testChk.checked;
+  var isStoji = stojiChk && stojiChk.checked;
 
-  // Bez výroby row style
-  var bezRow = document.getElementById('pm-bez-vyroby-row');
-  if (bezRow) { bezRow.style.borderColor = isBez ? '#ff4444' : 'var(--border)'; bezRow.style.background = isBez ? 'rgba(255,68,68,.12)' : 'var(--bg4)'; }
-  // Test row style
-  var testRow = document.getElementById('pm-test-row');
-  if (testRow) { testRow.style.borderColor = isTest ? '#f0c040' : 'var(--border)'; testRow.style.background = isTest ? 'rgba(240,192,64,.1)' : 'var(--bg4)'; }
+  // Row highlight styles  (yellow=výměna, red=test, blue=lis stojí)
+  var bezRow   = document.getElementById('pm-bez-vyroby-row');
+  var testRow  = document.getElementById('pm-test-row');
+  var stojiRow = document.getElementById('pm-stoji-row');
+  if (bezRow)   { bezRow.style.borderColor   = isBez   ? '#e6b800' : 'var(--border)'; bezRow.style.background   = isBez   ? 'rgba(230,184,0,.15)'  : 'var(--bg4)'; }
+  if (testRow)  { testRow.style.borderColor  = isTest  ? '#e03030' : 'var(--border)'; testRow.style.background  = isTest  ? 'rgba(220,50,50,.12)'  : 'var(--bg4)'; }
+  if (stojiRow) { stojiRow.style.borderColor = isStoji ? '#1e88e5' : 'var(--border)'; stojiRow.style.background = isStoji ? 'rgba(30,136,229,.12)' : 'var(--bg4)'; }
 
-  // Production fields visibility
+  // Hide production fields when výměna or lis stojí
   var fields = document.getElementById('pm-production-fields');
-  if (fields) fields.style.display = isBez ? 'none' : '';
+  if (fields) fields.style.display = (isBez || isStoji) ? 'none' : '';
 
-  // Test mode: force custom forma input, unlock material
+  // Lis stojí: hide forma section too
+  var formaSection = document.getElementById('pm-forma-section');
+  if (formaSection) formaSection.style.display = isStoji ? 'none' : '';
+
+  // Test mode: force free-text forma
   var formaSel = document.getElementById('pm-forma');
   var formaInp = document.getElementById('pm-forma-custom');
   var formaChk = document.getElementById('pm-forma-custom-chk');
@@ -1457,20 +1468,17 @@ function togglePmMode(changed) {
     if (formaSel) formaSel.style.display = 'none';
     if (formaInp) { formaInp.style.display = 'block'; if (!formaInp.value) formaInp.placeholder = 'Číslo testovací formy'; }
     if (formaChk) formaChk.checked = true;
-    // Unlock material for test
     var pmMat = document.getElementById('pm-mat');
     var pmMatId = document.getElementById('pm-mat-id');
     if (pmMat) { pmMat.disabled = false; pmMat.style.opacity = '1'; pmMat.style.cursor = ''; }
     if (pmMatId) pmMatId.style.display = 'none';
-  } else if (!isBez && changed === 'test') {
-    // Switching test off → restore to select if not custom
+  } else if (!isBez && !isStoji && changed === 'test') {
     if (formaChk && !formaChk.checked) {
       if (formaSel) formaSel.style.display = 'block';
       if (formaInp) formaInp.style.display = 'none';
     }
   }
 }
-// Keep old name as alias for openPlanModal which calls togglePmBezVyroby
 function togglePmBezVyroby() { togglePmMode('bez'); }
 
 function onPmFormaChange() {
@@ -1932,28 +1940,37 @@ function renderPlan() {
         var p = D.plan[planKey];
         var cellId = 'pc-'+mi+'-'+di+'-'+si;
         var todayBg = today ? 'filter:brightness(1.3);' : '';
-        if (p && (p.forma || p.qty)) {
-          var isBez  = !!p.bezVyroby;
-          var isTest = !!p.isTest;
-          var cellBg     = isBez ? 'rgba(255,68,68,.13)' : isTest ? 'rgba(240,192,64,.1)' : smenyBg[si];
-          var cellBorder = isBez ? '2px solid rgba(255,68,68,.6)' : isTest ? '2px solid rgba(240,192,64,.55)' : '2px solid '+smenyBorder[si];
+        if (p && (p.forma || p.qty || p.isStoji)) {
+          var isBez   = !!p.bezVyroby;
+          var isTest  = !!p.isTest;
+          var isStoji = !!p.isStoji;
+          // Colors: yellow=výměna, red=test, blue=lis stojí, default=shift color
+          var cellBg     = isBez   ? 'rgba(230,184,0,.18)'   : isTest  ? 'rgba(200,40,40,.15)'   : isStoji ? 'rgba(30,136,229,.15)'  : smenyBg[si];
+          var cellBorder = isBez   ? '2px solid rgba(230,184,0,.7)' : isTest  ? '2px solid rgba(200,40,40,.65)' : isStoji ? '2px solid rgba(30,136,229,.6)' : '2px solid '+smenyBorder[si];
+          var modeClr    = isBez   ? '#e6b800' : isTest ? '#e03030' : isStoji ? '#1e88e5' : smenyColors[si];
           html += '<td style="padding:0;background:'+cellBg+';border-left:'+cellBorder+todayBg+'">';
           html += '<div id="'+cellId+'" class="plan-cell has-plan" style="padding:10px 8px;text-align:center;border-left:none">';
-          if (isBez)  html += '<div style="font-size:9px;font-weight:800;color:#ff6666;letter-spacing:.8px;margin-bottom:4px">⛔ BEZ VÝROBY</div>';
-          if (isTest) html += '<div style="font-size:9px;font-weight:800;color:#f0c040;letter-spacing:.8px;margin-bottom:4px">🧪 TEST</div>';
-          if (p.forma) html += '<div style="font-size:17px;font-weight:900;color:var(--text);line-height:1;margin-bottom:3px">'+p.forma+'</div>';
-          if (p.cas)   html += '<div style="font-size:13px;font-weight:700;color:'+(isBez?'#ff8888':isTest?'#f0c040':smenyColors[si])+';margin-bottom:6px">'+p.cas+'</div>';
-          if (isBez) {
-            if (p.note) html += '<div style="font-size:9px;color:var(--text3);margin-top:4px;font-style:italic">'+p.note+'</div>';
+          if (isStoji) {
+            html += '<div style="font-size:11px;font-weight:900;color:#1e88e5;letter-spacing:.8px;margin-bottom:2px">🔵</div>';
+            html += '<div style="font-size:12px;font-weight:800;color:#1e88e5;letter-spacing:.5px">LIS STOJÍ</div>';
+            if (p.note) html += '<div style="font-size:9px;color:var(--text3);margin-top:5px;font-style:italic">'+p.note+'</div>';
           } else {
-            html += '<div style="border-top:1px solid rgba(255,255,255,.06);padding-top:6px">';
-            if (p.mat)   html += '<div style="font-size:10px;color:var(--text2);line-height:1.3;margin-bottom:2px">'+p.mat.split('(')[0].trim()+'</div>';
-            if (p.qty)   html += '<div style="font-size:11px;color:var(--green-text);font-weight:700">'+parseInt(p.qty).toLocaleString()+' ks</div>';
-            if (p.barva) html += '<div style="font-size:10px;color:var(--text3);margin-top:2px">'+p.barva+'</div>';
-            if (p.susen) html += '<div style="font-size:9px;font-weight:700;color:var(--orange);margin-top:3px;letter-spacing:.3px">SUŠIT</div>';
-            if (p.note)  html += '<div style="font-size:9px;color:var(--text3);margin-top:2px;font-style:italic">'+p.note+'</div>';
-            if (p.platido) { var pdDisp2=p.platido.slice(8,10)+'.'+p.platido.slice(5,7)+'. '+p.platido.slice(11,16); html += '<div style="font-size:9px;color:var(--orange);font-weight:700;margin-top:4px;letter-spacing:.2px">do '+pdDisp2+'</div>'; }
-            html += '</div>';
+            if (isBez)  html += '<div style="font-size:9px;font-weight:800;color:#e6b800;letter-spacing:.8px;margin-bottom:4px">🟡 VÝMĚNA</div>';
+            if (isTest) html += '<div style="font-size:9px;font-weight:800;color:#e03030;letter-spacing:.8px;margin-bottom:4px">🔴 TEST</div>';
+            if (p.forma) html += '<div style="font-size:17px;font-weight:900;color:var(--text);line-height:1;margin-bottom:3px">'+p.forma+'</div>';
+            if (p.cas)   html += '<div style="font-size:13px;font-weight:700;color:'+modeClr+';margin-bottom:6px">'+p.cas+'</div>';
+            if (isBez) {
+              if (p.note) html += '<div style="font-size:9px;color:var(--text3);margin-top:4px;font-style:italic">'+p.note+'</div>';
+            } else {
+              html += '<div style="border-top:1px solid rgba(255,255,255,.06);padding-top:6px">';
+              if (p.mat)   html += '<div style="font-size:10px;color:var(--text2);line-height:1.3;margin-bottom:2px">'+p.mat.split('(')[0].trim()+'</div>';
+              if (p.qty)   html += '<div style="font-size:11px;color:var(--green-text);font-weight:700">'+parseInt(p.qty).toLocaleString()+' ks</div>';
+              if (p.barva) html += '<div style="font-size:10px;color:var(--text3);margin-top:2px">'+p.barva+'</div>';
+              if (p.susen) html += '<div style="font-size:9px;font-weight:700;color:var(--orange);margin-top:3px;letter-spacing:.3px">SUŠIT</div>';
+              if (p.note)  html += '<div style="font-size:9px;color:var(--text3);margin-top:2px;font-style:italic">'+p.note+'</div>';
+              if (p.platido) { var pdDisp2=p.platido.slice(8,10)+'.'+p.platido.slice(5,7)+'. '+p.platido.slice(11,16); html += '<div style="font-size:9px;color:var(--orange);font-weight:700;margin-top:4px;letter-spacing:.2px">do '+pdDisp2+'</div>'; }
+              html += '</div>';
+            }
           }
           html += '</div></td>';
         } else {
@@ -2036,28 +2053,35 @@ function renderPlanTodayIn(containerId) {
       var bgColors = ['rgba(160,112,255,.05)','rgba(74,158,255,.07)','rgba(255,156,0,.07)'];
       var accentColors = ['#a070ff','#4a9eff','var(--orange)'];
       var borderColors = ['rgba(160,112,255,.25)','rgba(74,158,255,.3)','rgba(255,156,0,.3)'];
-      if (p && (p.forma || p.qty)) {
+      if (p && (p.forma || p.qty || p.isStoji)) {
         machHasAny = true; hasAny = true;
-        var isBezT = !!p.bezVyroby; var isTestT = !!p.isTest;
-        var tdBg  = isBezT ? 'rgba(255,68,68,.13)'   : isTestT ? 'rgba(240,192,64,.1)'  : bgColors[si];
-        var tdBdr = isBezT ? '3px solid rgba(255,68,68,.6)' : isTestT ? '3px solid rgba(240,192,64,.55)' : '3px solid '+borderColors[si];
-        var casClr = isBezT ? '#ff8888' : isTestT ? '#f0c040' : accentColors[si];
+        var isBezT   = !!p.bezVyroby;
+        var isTestT  = !!p.isTest;
+        var isStojT  = !!p.isStoji;
+        var tdBg  = isBezT ? 'rgba(230,184,0,.18)'  : isTestT ? 'rgba(200,40,40,.15)'  : isStojT ? 'rgba(30,136,229,.15)' : bgColors[si];
+        var tdBdr = isBezT ? '3px solid rgba(230,184,0,.7)' : isTestT ? '3px solid rgba(200,40,40,.65)' : isStojT ? '3px solid rgba(30,136,229,.6)' : '3px solid '+borderColors[si];
+        var casClr = isBezT ? '#e6b800' : isTestT ? '#e03030' : isStojT ? '#1e88e5' : accentColors[si];
         cells += '<td style="padding:16px 14px;vertical-align:top;background:'+tdBg+';border-left:'+tdBdr+';text-align:center">';
         // Mode badge
-        if (isBezT)  cells += '<div style="display:inline-block;margin-bottom:8px;padding:3px 9px;border-radius:4px;font-size:10px;font-weight:800;letter-spacing:.8px;color:#ff6666;background:rgba(255,68,68,.15);border:1px solid rgba(255,68,68,.35)">⛔ BEZ VÝROBY</div>';
-        if (isTestT) cells += '<div style="display:inline-block;margin-bottom:8px;padding:3px 9px;border-radius:4px;font-size:10px;font-weight:800;letter-spacing:.8px;color:#f0c040;background:rgba(240,192,64,.12);border:1px solid rgba(240,192,64,.35)">🧪 TEST</div>';
-        if (p.forma) cells += '<div style="font-size:26px;font-weight:900;color:var(--text);line-height:1;letter-spacing:.5px">'+p.forma+'</div>';
-        if (p.cas) cells += '<div style="font-size:18px;font-weight:700;color:'+casClr+';margin:5px 0 8px;letter-spacing:1px">'+p.cas+'</div>';
-        if (isBezT) {
+        if (isStojT) {
+          cells += '<div style="font-size:15px;font-weight:900;color:#1e88e5;letter-spacing:.5px;margin-bottom:4px">🔵 LIS STOJÍ</div>';
           if (p.note) cells += '<div style="font-size:10px;color:var(--text3);margin-top:5px;font-style:italic">'+p.note+'</div>';
         } else {
-          cells += '<div style="border-top:1px solid rgba(255,255,255,.06);padding-top:8px">';
-          if (p.mat) cells += '<div style="font-size:11px;color:var(--text2);line-height:1.4">'+p.mat.split('(')[0].trim()+'</div>';
-          if (p.qty) cells += '<div style="font-size:13px;color:var(--green-text);font-weight:700;margin-top:5px">'+parseInt(p.qty).toLocaleString()+' ks</div>';
-          if (p.susen) cells += '<div style="display:inline-block;margin-top:5px;font-size:10px;font-weight:700;color:var(--orange);background:rgba(255,156,0,.12);border:1px solid rgba(255,156,0,.25);border-radius:3px;padding:2px 7px;letter-spacing:.5px">SUŠIT</div>';
-          if (p.note) cells += '<div style="font-size:10px;color:var(--text3);margin-top:5px;font-style:italic">'+p.note+'</div>';
-          if (p.platido) { var pd3=p.platido; cells += '<div style="display:inline-block;margin-top:6px;font-size:10px;font-weight:700;color:var(--orange);background:rgba(255,156,0,.1);border:1px solid rgba(255,156,0,.25);border-radius:3px;padding:2px 7px">do '+pd3.slice(8,10)+'.'+pd3.slice(5,7)+'. '+pd3.slice(11,16)+'</div>'; }
-          cells += '</div>';
+          if (isBezT)  cells += '<div style="display:inline-block;margin-bottom:8px;padding:3px 9px;border-radius:4px;font-size:10px;font-weight:800;letter-spacing:.8px;color:#e6b800;background:rgba(230,184,0,.15);border:1px solid rgba(230,184,0,.4)">🟡 VÝMĚNA</div>';
+          if (isTestT) cells += '<div style="display:inline-block;margin-bottom:8px;padding:3px 9px;border-radius:4px;font-size:10px;font-weight:800;letter-spacing:.8px;color:#e03030;background:rgba(200,40,40,.12);border:1px solid rgba(200,40,40,.35)">🔴 TEST</div>';
+          if (p.forma) cells += '<div style="font-size:26px;font-weight:900;color:var(--text);line-height:1;letter-spacing:.5px">'+p.forma+'</div>';
+          if (p.cas) cells += '<div style="font-size:18px;font-weight:700;color:'+casClr+';margin:5px 0 8px;letter-spacing:1px">'+p.cas+'</div>';
+          if (isBezT) {
+            if (p.note) cells += '<div style="font-size:10px;color:var(--text3);margin-top:5px;font-style:italic">'+p.note+'</div>';
+          } else {
+            cells += '<div style="border-top:1px solid rgba(255,255,255,.06);padding-top:8px">';
+            if (p.mat) cells += '<div style="font-size:11px;color:var(--text2);line-height:1.4">'+p.mat.split('(')[0].trim()+'</div>';
+            if (p.qty) cells += '<div style="font-size:13px;color:var(--green-text);font-weight:700;margin-top:5px">'+parseInt(p.qty).toLocaleString()+' ks</div>';
+            if (p.susen) cells += '<div style="display:inline-block;margin-top:5px;font-size:10px;font-weight:700;color:var(--orange);background:rgba(255,156,0,.12);border:1px solid rgba(255,156,0,.25);border-radius:3px;padding:2px 7px;letter-spacing:.5px">SUŠIT</div>';
+            if (p.note) cells += '<div style="font-size:10px;color:var(--text3);margin-top:5px;font-style:italic">'+p.note+'</div>';
+            if (p.platido) { var pd3=p.platido; cells += '<div style="display:inline-block;margin-top:6px;font-size:10px;font-weight:700;color:var(--orange);background:rgba(255,156,0,.1);border:1px solid rgba(255,156,0,.25);border-radius:3px;padding:2px 7px">do '+pd3.slice(8,10)+'.'+pd3.slice(5,7)+'. '+pd3.slice(11,16)+'</div>'; }
+            cells += '</div>';
+          }
         }
         cells += '</td>';
       } else {
@@ -2165,11 +2189,15 @@ function openPlanModal(planKey, mach, dk, smena) {
   var susenEl = document.getElementById('pm-susen');
   if (susenEl) susenEl.checked = !!p.susen;
   // Mode: Bez výroby / Test
-  var bezChkEl = document.getElementById('pm-bez-vyroby');
-  var testChkEl = document.getElementById('pm-test');
-  if (bezChkEl) bezChkEl.checked = !!p.bezVyroby;
-  if (testChkEl) testChkEl.checked = !!p.isTest;
-  if (p.isTest) togglePmMode('test'); else togglePmMode('bez');
+  var bezChkEl   = document.getElementById('pm-bez-vyroby');
+  var testChkEl  = document.getElementById('pm-test');
+  var stojiChkEl = document.getElementById('pm-stoji');
+  if (bezChkEl)   bezChkEl.checked   = !!p.bezVyroby;
+  if (testChkEl)  testChkEl.checked  = !!p.isTest;
+  if (stojiChkEl) stojiChkEl.checked = !!p.isStoji;
+  if (p.isStoji) togglePmMode('stoji');
+  else if (p.isTest) togglePmMode('test');
+  else togglePmMode('bez');
   document.getElementById('pm-note').value = p.note || '';
   document.getElementById('mod-plan').classList.add('on');
 }
@@ -2190,14 +2218,15 @@ function savePlan() {
   var barva = (barvaSel && barvaSel.style.display !== 'none') ? barvaSel.value : (barvaInp ? barvaInp.value.trim() : '');
   var susen = document.getElementById('pm-susen').checked;
   var bezVyroby = !!(document.getElementById('pm-bez-vyroby') && document.getElementById('pm-bez-vyroby').checked);
-  var isTest    = !!(document.getElementById('pm-test') && document.getElementById('pm-test').checked);
+  var isTest    = !!(document.getElementById('pm-test')       && document.getElementById('pm-test').checked);
+  var isStoji   = !!(document.getElementById('pm-stoji')      && document.getElementById('pm-stoji').checked);
   var note  = document.getElementById('pm-note').value.trim();
-  if (!forma) { toast('err','Chyba','Zadejte číslo formy.'); return; }
-  // When bezVyroby, clear production-only fields
-  if (bezVyroby) { platido=''; qty=''; barva=''; mat=''; susen=false; }
-  var entry = {forma:forma, mat:mat, qty:qty, barva:barva, cas:cas, platido:platido, susen:susen, bezVyroby:bezVyroby, isTest:isTest, note:note, updatedAt:nowFull()};
+  if (!isStoji && !forma) { toast('err','Chyba','Zadejte číslo formy.'); return; }
+  // Clear production fields for výměna or lis stojí
+  if (bezVyroby || isStoji) { platido=''; qty=''; barva=''; mat=''; susen=false; }
+  if (isStoji) { forma=''; cas=''; }
+  var entry = {forma:forma, mat:mat, qty:qty, barva:barva, cas:cas, platido:platido, susen:susen, bezVyroby:bezVyroby, isTest:isTest, isStoji:isStoji, note:note, updatedAt:nowFull()};
   fbSet('plan/'+editPlanKey, entry);
-  // Notifikace o sušení
   if (susen && mat) {
     fbPush('notifications', {
       typ:'susen', mat:mat, forma:forma,
@@ -2206,7 +2235,7 @@ function savePlan() {
     });
   }
   closeModal('mod-plan');
-  toast('ok','Plán uložen', (forma||'')+(qty?' · '+qty+' ks':''));
+  toast('ok','Plán uložen', isStoji ? 'Lis stojí' : (forma||'')+(qty?' · '+qty+' ks':''));
 }
 
 function deletePlanEntry() {
@@ -2648,14 +2677,26 @@ function renderProd(containerId) {
   el.innerHTML = D.production.map(function(p){
     var planned = getPlanForMachineNow(p.machine);
     var planBadge = '';
-    if (planned && planned.forma) {
-      if (planned.bezVyroby) {
-        planBadge = '<div style="margin-top:7px;padding:5px 9px;border-radius:5px;font-size:11px;font-weight:700;letter-spacing:.4px;display:flex;align-items:center;gap:6px;background:rgba(255,68,68,.1);border:1px solid rgba(255,68,68,.3);color:#ff8888">' +
-          '<span style="font-size:13px">⛔</span>' +
-          '<span>BEZ VÝROBY</span>' +
-          '<span style="opacity:.6;font-weight:400;font-size:10px">výměna č. ' + planned.forma + (planned.cas?' v '+planned.cas:'') + '</span>' +
+    if (planned) {
+      if (planned.isStoji) {
+        planBadge = '<div style="margin-top:7px;padding:5px 9px;border-radius:5px;font-size:11px;font-weight:700;letter-spacing:.4px;display:flex;align-items:center;gap:6px;background:rgba(30,136,229,.12);border:1px solid rgba(30,136,229,.35);color:#1e88e5">' +
+          '<span style="font-size:13px">🔵</span>' +
+          '<span>LIS STOJÍ</span>' +
+          (planned.note ? '<span style="opacity:.6;font-weight:400;font-size:10px">' + planned.note + '</span>' : '') +
         '</div>';
-      } else {
+      } else if (planned.bezVyroby) {
+        planBadge = '<div style="margin-top:7px;padding:5px 9px;border-radius:5px;font-size:11px;font-weight:700;letter-spacing:.4px;display:flex;align-items:center;gap:6px;background:rgba(230,184,0,.12);border:1px solid rgba(230,184,0,.4);color:#e6b800">' +
+          '<span style="font-size:13px">🟡</span>' +
+          '<span>VÝMĚNA</span>' +
+          '<span style="opacity:.6;font-weight:400;font-size:10px">č. ' + (planned.forma||'') + (planned.cas?' v '+planned.cas:'') + '</span>' +
+        '</div>';
+      } else if (planned.isTest) {
+        planBadge = '<div style="margin-top:7px;padding:5px 9px;border-radius:5px;font-size:11px;font-weight:700;letter-spacing:.4px;display:flex;align-items:center;gap:6px;background:rgba(200,40,40,.12);border:1px solid rgba(200,40,40,.35);color:#e03030">' +
+          '<span style="font-size:13px">🔴</span>' +
+          '<span>TEST</span>' +
+          (planned.forma ? '<span style="opacity:.6;font-weight:400;font-size:10px">č. ' + planned.forma + '</span>' : '') +
+        '</div>';
+      } else if (planned.forma) {
         var match = p.forma && p.forma.toString() === planned.forma.toString();
         var platidoLabel = '';
         if (planned.platido) {
