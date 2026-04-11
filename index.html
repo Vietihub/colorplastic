@@ -1741,6 +1741,10 @@ function initFCM() {
   if (_fcmInitialized) return;
   _fcmInitialized = true;
   if (!('serviceWorker' in navigator) || !('Notification' in window)) return;
+  // Na iOS: notifikace jen v PWA (přidáno na plochu), ne v Safari prohlížeči
+  var isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+  var isStandalone = navigator.standalone === true || window.matchMedia('(display-mode: standalone)').matches;
+  if (isIOS && !isStandalone) return;
   navigator.serviceWorker.register('./firebase-messaging-sw.js')
     .then(function(reg) {
       _fcmReg = reg;
