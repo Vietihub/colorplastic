@@ -638,10 +638,69 @@
                 color: var(--text3);
             }
 
+            /* Activity panel toggle */
+            .activity-panel {
+                transition: width .2s ease, min-width .2s ease;
+            }
+            .activity-panel.ap-collapsed {
+                width: 0 !important;
+                min-width: 0 !important;
+                overflow: hidden;
+                border-left: none;
+            }
+            .ap-toggle-btn {
+                background: none;
+                border: none;
+                color: rgba(255,255,255,.32);
+                cursor: pointer;
+                font-size: 15px;
+                padding: 3px 7px;
+                line-height: 1;
+                border-radius: 6px;
+                margin-left: auto;
+                transition: color .15s, background .15s;
+            }
+            .ap-toggle-btn:hover {
+                color: rgba(255,255,255,.72);
+                background: rgba(255,255,255,.06);
+            }
+            .ap-expand-tab {
+                display: none;
+                position: sticky;
+                top: 50vh;
+                width: 24px;
+                flex-shrink: 0;
+                align-items: flex-start;
+                justify-content: center;
+                padding-top: 16px;
+            }
+            .ap-expand-tab.show { display: flex; }
+            .ap-expand-tab button {
+                writing-mode: vertical-rl;
+                text-orientation: mixed;
+                background: rgba(255,255,255,.04);
+                border: 1px solid rgba(255,255,255,.08);
+                border-radius: 0 6px 6px 0;
+                color: rgba(255,255,255,.35);
+                font-family: 'Inter', sans-serif;
+                font-size: 9px;
+                font-weight: 500;
+                letter-spacing: .1em;
+                text-transform: uppercase;
+                padding: 10px 5px;
+                cursor: pointer;
+                transition: color .15s, background .15s;
+            }
+            .ap-expand-tab button:hover {
+                background: rgba(255,255,255,.08);
+                color: rgba(255,255,255,.7);
+            }
+
             @media (max-width: 1200px) {
                 .activity-panel {
                     display: none;
                 }
+                .ap-expand-tab { display: none !important; }
             }
             @media (max-width: 768px) {
                 .main-wrap {
@@ -2574,10 +2633,11 @@
                 z-index: 5;
             }
 
-            /* Plan cells */
+            /* Plan cells — fixed height so all rows are uniform */
             .plan-cell {
                 padding: 10px 9px;
-                min-height: 86px;
+                height: 110px;
+                max-height: 110px;
                 cursor: pointer;
                 position: relative;
                 transition: background .15s;
@@ -2586,9 +2646,7 @@
             }
             .plan-cell:hover { background: rgba(255,255,255,.035); }
             .plan-cell.has-plan { background: rgba(227,6,19,.04); }
-            .plan-cell.today {
-                background: rgba(74,158,255,.04);
-            }
+            .plan-cell.today { background: rgba(74,158,255,.04); }
             .plan-cell.today.has-plan { background: rgba(74,158,255,.07); }
 
             /* Plan content */
@@ -2638,11 +2696,13 @@
                 font-style: italic;
                 line-height: 1.35;
             }
-            /* Empty cell */
+            /* Empty cell — same fixed height as filled cells */
             .plan-cell-empty {
                 font-size: 16px;
                 color: rgba(255,255,255,.05);
-                min-height: 86px;
+                height: 110px;
+                max-height: 110px;
+                box-sizing: border-box;
                 display: flex;
                 align-items: center;
                 justify-content: center;
@@ -2705,7 +2765,7 @@
 
             /* Mobile touch targets */
             @media (max-width: 768px) {
-                .plan-cell, .plan-cell-empty { min-height: 56px; }
+                .plan-cell, .plan-cell-empty { height: 80px; max-height: 80px; }
                 .plan-cell { padding: 8px 7px; }
                 .plan-cell-forma { font-size: 14px; }
             }
@@ -4072,11 +4132,16 @@
                         </div>
                     </div>
                 </div>
+                <!-- ACTIVITY PANEL expand tab (shown when panel is collapsed) -->
+                <div class="ap-expand-tab" id="ap-expand-tab">
+                    <button onclick="toggleActivityPanel()" title="Zobrazit aktivitu">Aktivita</button>
+                </div>
                 <!-- ACTIVITY PANEL -->
                 <div class="activity-panel" id="activity-panel">
                     <div class="ap-head">
                         <span class="ap-title">Aktivita</span>
                         <span class="ap-live">Live</span>
+                        <button class="ap-toggle-btn" onclick="toggleActivityPanel()" title="Skrýt aktivitu">‹</button>
                     </div>
                     <div class="ap-feed" id="ap-feed">
                         <div class="af-empty">Žádná aktivita</div>
@@ -5000,6 +5065,15 @@
             function startApp() {
                 buildSidebar();
                 buildBottomNav();
+                // Restore activity panel state
+                try {
+                    if (localStorage.getItem('cp-ap-hidden') === '1') {
+                        var ap = document.getElementById('activity-panel');
+                        var at = document.getElementById('ap-expand-tab');
+                        if (ap) ap.classList.add('ap-collapsed');
+                        if (at) at.classList.add('show');
+                    }
+                } catch(e) {}
                 var fab = document.getElementById("fab");
                 if (fab) fab.classList.add("show");
                 document.getElementById("sb-avatar").textContent = SHORT[role]
@@ -5088,6 +5162,15 @@
                     };
                     nav.appendChild(btn);
                 });
+            }
+
+            function toggleActivityPanel() {
+                var panel = document.getElementById('activity-panel');
+                var tab   = document.getElementById('ap-expand-tab');
+                if (!panel) return;
+                var collapsed = panel.classList.toggle('ap-collapsed');
+                if (tab) tab.classList.toggle('show', collapsed);
+                try { localStorage.setItem('cp-ap-hidden', collapsed ? '1' : '0'); } catch(e) {}
             }
 
             function toggleSidebar() {
