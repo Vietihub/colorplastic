@@ -15,7 +15,7 @@
         <link rel="shortcut icon" href="favicon.ico" />
         <link rel="apple-touch-icon" href="favicon.ico" />
         <link
-            href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700;900&family=Barlow+Condensed:wght@600;700;900&family=JetBrains+Mono:wght@400;500&family=Inter:wght@200;300;400;500;600&family=Bodoni+Moda:wght@400;600;700&family=Jost:wght@300;400;500;600&display=swap"
+            href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700;900&family=Barlow+Condensed:wght@600;700;900&family=JetBrains+Mono:wght@400;500&family=Inter:wght@200;300;400;500;600&family=Bodoni+Moda:wght@400;600;700&family=Jost:wght@300;400;500;600&family=Fira+Code:wght@400;500;600&family=Fira+Sans:wght@300;400;500;600;700&display=swap"
             rel="stylesheet"
         />
         <style>
@@ -1406,110 +1406,127 @@
                 }
             }
             .pc {
-                background: var(--card);
+                background: linear-gradient(160deg,
+                    rgba(255,255,255,.048) 0%,
+                    rgba(255,255,255,.016) 55%,
+                    rgba(255,255,255,.030) 100%);
                 border: 1px solid var(--border);
+                border-top-color: rgba(255,255,255,.11);
                 border-radius: var(--radius);
-                padding: 14px 16px;
+                padding: 0;
                 position: relative;
                 overflow: hidden;
-                transition:
-                    border-color var(--transition),
-                    box-shadow var(--transition);
-                box-shadow: var(--shadow);
+                backdrop-filter: blur(24px);
+                -webkit-backdrop-filter: blur(24px);
+                box-shadow: 0 8px 32px rgba(0,0,0,.4), 0 2px 8px rgba(0,0,0,.25);
+                transition: transform var(--transition), box-shadow var(--transition);
+                cursor: pointer;
             }
             .pc:hover {
-                border-color: var(--border2);
+                transform: translateY(-2px);
+                box-shadow: 0 14px 42px rgba(0,0,0,.5), 0 4px 14px rgba(0,0,0,.3);
             }
             .pc.run {
-                border-color: rgba(57, 211, 83, 0.25);
-                box-shadow: 0 2px 16px rgba(57, 211, 83, 0.06);
+                border-color: rgba(34,197,94,.2);
+                box-shadow: 0 8px 32px rgba(0,0,0,.4), 0 0 0 1px rgba(34,197,94,.06) inset;
             }
             .pc::before {
                 content: "";
                 position: absolute;
-                left: 0;
-                top: 0;
-                bottom: 0;
+                left: 0; top: 0; bottom: 0;
                 width: 3px;
                 background: var(--bg4);
+                border-radius: var(--radius) 0 0 var(--radius);
             }
             .pc.run::before {
-                background: var(--green);
+                background: linear-gradient(180deg, #22c55e, #16a34a);
             }
+            .pc-inner { padding: 14px 15px 14px 18px; }
             .pc-mach {
                 font-family: "Barlow Condensed", sans-serif;
-                font-size: 12px;
+                font-size: 11px;
                 font-weight: 700;
                 color: var(--text3);
                 display: flex;
                 align-items: center;
                 justify-content: space-between;
-                margin-bottom: 7px;
-                letter-spacing: 0.5px;
+                margin-bottom: 8px;
+                letter-spacing: 0.6px;
                 text-transform: uppercase;
             }
             .dot {
-                width: 8px;
-                height: 8px;
+                width: 7px; height: 7px;
                 border-radius: 50%;
-                background: var(--text3);
+                background: var(--bg4);
+                flex-shrink: 0;
             }
             .dot.on {
                 background: var(--green);
-                animation: p 1.5s infinite;
-                box-shadow: 0 0 6px rgba(57, 211, 83, 0.5);
+                animation: p 1.5s ease-in-out infinite;
+                box-shadow: 0 0 7px rgba(34,197,94,.7);
             }
             .pc-forma {
-                font-family: "Barlow Condensed", sans-serif;
-                font-size: 28px;
-                font-weight: 900;
-                line-height: 1;
-                letter-spacing: -0.5px;
+                font-family: "Fira Code", "JetBrains Mono", monospace;
+                font-size: 22px;
+                font-weight: 600;
+                line-height: 1.1;
+                letter-spacing: -.01em;
+                color: var(--text);
             }
             .pc-flbl {
-                font-size: 10px;
-                font-weight: 500;
-                color: var(--text3);
-                margin-top: 2px;
+                font-size: 11px;
+                font-weight: 400;
+                color: var(--text2);
+                margin-top: 3px;
+                margin-bottom: 8px;
                 line-height: 1.4;
             }
             .pc-mat {
-                font-size: 12px;
+                font-size: 11px;
                 color: var(--text2);
-                margin-top: 8px;
+                margin-top: 6px;
                 padding-top: 8px;
                 border-top: 1px solid var(--border);
+                display: flex;
+                align-items: center;
+                gap: 5px;
             }
             .pc-upd {
                 font-size: 10px;
                 color: var(--text3);
-                margin-top: 3px;
-                font-family: "JetBrains Mono", monospace;
+                margin-top: 6px;
+                font-family: "Fira Code", monospace;
+                letter-spacing: .02em;
             }
             .pc-edit {
-                background: none;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                gap: 5px;
+                width: 100%;
+                background: rgba(255,255,255,.05);
                 border: 1px solid var(--border);
                 border-radius: var(--radius-sm);
-                color: var(--text3);
+                color: var(--text2);
                 font-size: 11px;
-                font-weight: 600;
-                padding: 5px 10px;
+                font-weight: 500;
+                padding: 6px 10px;
                 cursor: pointer;
-                margin-top: 9px;
+                margin-top: 10px;
                 transition: all var(--transition);
-                font-family: "Barlow", sans-serif;
-                letter-spacing: 0.3px;
+                font-family: "Fira Sans", "Barlow", sans-serif;
+                letter-spacing: 0.03em;
             }
             .pc-edit:hover {
-                color: var(--text);
-                border-color: var(--border2);
-                background: var(--bg4);
+                background: rgba(232,0,30,.10);
+                border-color: rgba(232,0,30,.25);
+                color: #ff8090;
             }
             .pc-idle {
                 font-size: 13px;
                 color: var(--text3);
-                font-style: italic;
-                padding: 4px 0;
+                padding: 4px 0 8px;
+                font-family: "Fira Sans", sans-serif;
             }
 
             .moverlay {
@@ -2037,36 +2054,150 @@
                 letter-spacing: 0.3px;
             }
 
-            .plan-today-card {
-                background: var(--card);
-                border: 1px solid var(--blue-dim);
-                border-left: 3px solid var(--blue);
-                border-radius: 8px;
-                padding: 12px 14px;
-                margin-bottom: 10px;
+            .plan-today-card { display: none; }
+            /* plan table wrapper */
+            .pt-wrap {
+                background: linear-gradient(160deg,
+                    rgba(255,255,255,.042) 0%,
+                    rgba(255,255,255,.014) 60%,
+                    rgba(255,255,255,.026) 100%);
+                border: 1px solid var(--border);
+                border-top-color: rgba(255,255,255,.12);
+                border-radius: var(--radius);
+                overflow: hidden;
+                backdrop-filter: blur(24px);
+                -webkit-backdrop-filter: blur(24px);
+                box-shadow: 0 12px 40px rgba(0,0,0,.45), 0 2px 10px rgba(0,0,0,.25);
+                margin-bottom: 18px;
             }
-            .plan-today-mach {
-                font-family: "Barlow Condensed", sans-serif;
-                font-size: 13px;
-                font-weight: 700;
-                color: var(--text2);
-                margin-bottom: 6px;
+            .pt-header {
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                padding: 14px 20px 12px;
+                border-bottom: 1px solid rgba(255,255,255,.06);
+                background: rgba(255,255,255,.018);
             }
-            .plan-today-forma {
-                font-family: "Barlow Condensed", sans-serif;
-                font-size: 22px;
-                font-weight: 900;
+            .pt-title {
+                font-family: 'Fira Sans', 'Barlow', sans-serif;
+                font-size: 11px;
+                font-weight: 600;
+                letter-spacing: .20em;
+                text-transform: uppercase;
+                color: rgba(248,250,252,.65);
+            }
+            .pt-live {
+                display: flex;
+                align-items: center;
+                gap: 5px;
+                font-family: 'Fira Sans', sans-serif;
+                font-size: 9px;
+                font-weight: 600;
+                letter-spacing: .18em;
+                text-transform: uppercase;
+                color: var(--red);
+                opacity: .8;
+            }
+            .pt-live-dot {
+                width: 5px; height: 5px;
+                border-radius: 50%;
+                background: var(--red);
+                animation: p 1.8s ease-in-out infinite;
+            }
+            .pt-scroll { overflow-x: auto; }
+            table.pt-tbl {
+                width: 100%;
+                border-collapse: collapse;
+                table-layout: fixed;
+            }
+            table.pt-tbl thead tr { border-bottom: 2px solid rgba(255,255,255,.06); }
+            table.pt-tbl thead th {
+                padding: 10px 12px;
+                font-family: 'Fira Sans', 'Barlow Condensed', sans-serif;
+                font-size: 9px;
+                font-weight: 600;
+                letter-spacing: .26em;
+                text-transform: uppercase;
+                text-align: center;
+                background: rgba(255,255,255,.02);
+            }
+            .pt-th-mach { color: var(--text3) !important; text-align:left !important; padding-left:18px !important; }
+            .pt-th-n { color: #b08aff; border-left: 3px solid rgba(160,112,255,.22); background:rgba(160,112,255,.04) !important; }
+            .pt-th-r { color: #4a9eff; border-left: 3px solid rgba(74,158,255,.25);  background:rgba(74,158,255,.05)  !important; }
+            .pt-th-o { color: #ff9c00; border-left: 3px solid rgba(255,156,0,.25);   background:rgba(255,156,0,.05)   !important; }
+            table.pt-tbl tbody tr { border-bottom: 1px solid rgba(255,255,255,.04); transition: background .18s; }
+            table.pt-tbl tbody tr:last-child { border-bottom: none; }
+            table.pt-tbl tbody tr:hover { background: rgba(255,255,255,.024); }
+            .pt-td-mach {
+                padding: 12px 12px 12px 18px;
+                vertical-align: middle;
+                background: rgba(255,255,255,.016);
+                border-right: 1px solid rgba(255,255,255,.05);
+                white-space: nowrap;
+            }
+            .pt-td-mach-num {
+                font-family: 'Fira Code', monospace;
+                font-size: 16px;
+                font-weight: 600;
                 color: var(--text);
                 line-height: 1;
             }
-            .plan-today-meta {
-                font-size: 12px;
-                color: var(--text2);
-                margin-top: 5px;
-                display: flex;
-                flex-wrap: wrap;
-                gap: 10px;
+            .pt-td-mach-sub {
+                font-size: 9px;
+                font-weight: 500;
+                letter-spacing: .22em;
+                text-transform: uppercase;
+                color: var(--text3);
+                margin-top: 2px;
             }
+            .pt-td {
+                padding: 10px 12px;
+                vertical-align: top;
+                text-align: center;
+            }
+            .pt-td.n { border-left: 3px solid rgba(160,112,255,.16); background:rgba(160,112,255,.025); }
+            .pt-td.r { border-left: 3px solid rgba(74,158,255,.18);  background:rgba(74,158,255,.03);  }
+            .pt-td.o { border-left: 3px solid rgba(255,156,0,.18);   background:rgba(255,156,0,.025);  }
+            .pt-forma {
+                font-family: 'Fira Code', monospace;
+                font-size: 17px;
+                font-weight: 600;
+                color: var(--text);
+                line-height: 1.1;
+                letter-spacing: -.01em;
+            }
+            .pt-cas {
+                font-family: 'Fira Code', monospace;
+                font-size: 12px;
+                font-weight: 500;
+                margin: 3px 0 4px;
+            }
+            .pt-mat {
+                font-size: 10px;
+                color: var(--text2);
+                padding-top: 5px;
+                border-top: 1px solid rgba(255,255,255,.05);
+                margin-top: 2px;
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
+            }
+            .pt-badge {
+                display: inline-flex;
+                align-items: center;
+                font-family: 'Fira Sans', sans-serif;
+                font-size: 9px;
+                font-weight: 700;
+                letter-spacing: .10em;
+                padding: 2px 7px;
+                border-radius: 4px;
+                margin-bottom: 4px;
+            }
+            .pt-badge.v { color:#e6b800; background:rgba(230,184,0,.12); border:1px solid rgba(230,184,0,.28); }
+            .pt-badge.t { color:#e03030; background:rgba(200,40,40,.10); border:1px solid rgba(200,40,40,.25); }
+            .pt-badge.s { color:#4a9eff; background:rgba(74,158,255,.09); border:1px solid rgba(74,158,255,.22); }
+            .pt-badge.su{ color:#ff9c00; background:rgba(255,156,0,.09);  border:1px solid rgba(255,156,0,.22); }
+            .pt-empty { color: rgba(248,250,252,.15); font-size: 18px; line-height: 3; }
 
             input[type="time"],
             input[type="date"] {
@@ -6991,167 +7122,56 @@
                         var k =
                             mach.replace(/ /g, "_") + "_" + today + "_" + smena;
                         var p = D.plan[k];
-                        var bgColors = [
-                            "rgba(160,112,255,.05)",
-                            "rgba(74,158,255,.07)",
-                            "rgba(255,156,0,.07)",
-                        ];
-                        var accentColors = [
-                            "#a070ff",
-                            "#4a9eff",
-                            "var(--orange)",
-                        ];
-                        var borderColors = [
-                            "rgba(160,112,255,.25)",
-                            "rgba(74,158,255,.3)",
-                            "rgba(255,156,0,.3)",
-                        ];
+                        var clsMap = ["n", "r", "o"];
+                        var casClrMap = ["#a070ff", "#4a9eff", "var(--orange)"];
                         if (p && (p.forma || p.qty || p.isStoji)) {
                             machHasAny = true;
                             hasAny = true;
                             var isBezT = !!p.bezVyroby;
                             var isTestT = !!p.isTest;
                             var isStojT = !!p.isStoji;
-                            var tdBg = isBezT
-                                ? "rgba(230,184,0,.18)"
-                                : isTestT
-                                  ? "rgba(200,40,40,.15)"
-                                  : isStojT
-                                    ? "rgba(30,136,229,.15)"
-                                    : bgColors[si];
-                            var tdBdr = isBezT
-                                ? "3px solid rgba(230,184,0,.7)"
-                                : isTestT
-                                  ? "3px solid rgba(200,40,40,.65)"
-                                  : isStojT
-                                    ? "3px solid rgba(30,136,229,.6)"
-                                    : "3px solid " + borderColors[si];
-                            var casClr = isBezT
-                                ? "#e6b800"
-                                : isTestT
-                                  ? "#e03030"
-                                  : isStojT
-                                    ? "#1e88e5"
-                                    : accentColors[si];
-                            cells +=
-                                '<td style="padding:16px 14px;vertical-align:top;background:' +
-                                tdBg +
-                                ";border-left:" +
-                                tdBdr +
-                                ';text-align:center">';
-                            // Mode badge
+                            var casClr = isBezT ? "#e6b800" : isTestT ? "#e03030" : isStojT ? "#1e88e5" : casClrMap[si];
+                            cells += '<td class="pt-td ' + clsMap[si] + '">';
                             if (isStojT) {
-                                cells +=
-                                    '<div style="font-size:13px;font-weight:600;color:rgba(74,158,255,.7);letter-spacing:.3px;margin-bottom:4px">Bez výroby</div>';
+                                cells += '<span class="pt-badge s">Bez výroby</span>';
                                 if (p.stojiOd || p.stojiDo) {
-                                    var odT = p.stojiOd
-                                        ? p.stojiOd.slice(8, 10) +
-                                          "." +
-                                          p.stojiOd.slice(5, 7) +
-                                          ". " +
-                                          p.stojiOd.slice(11, 16)
-                                        : "?";
-                                    var doT = p.stojiDo
-                                        ? p.stojiDo.slice(8, 10) +
-                                          "." +
-                                          p.stojiDo.slice(5, 7) +
-                                          ". " +
-                                          p.stojiDo.slice(11, 16)
-                                        : "?";
-                                    cells +=
-                                        '<div style="font-size:11px;color:rgba(74,158,255,.5);margin-top:3px">' +
-                                        odT +
-                                        " – " +
-                                        doT +
-                                        "</div>";
+                                    var odT = p.stojiOd ? p.stojiOd.slice(8,10)+"."+p.stojiOd.slice(5,7)+". "+p.stojiOd.slice(11,16) : "?";
+                                    var doT = p.stojiDo ? p.stojiDo.slice(8,10)+"."+p.stojiDo.slice(5,7)+". "+p.stojiDo.slice(11,16) : "?";
+                                    cells += '<div style="font-size:10px;color:rgba(74,158,255,.5);margin-top:3px">' + odT + " – " + doT + "</div>";
                                 }
-                                if (p.note)
-                                    cells +=
-                                        '<div style="font-size:10px;color:var(--text3);margin-top:5px;font-style:italic">' +
-                                        p.note +
-                                        "</div>";
+                                if (p.note) cells += '<div style="font-size:10px;color:var(--text3);margin-top:4px;font-style:italic">' + p.note + "</div>";
                             } else {
-                                if (isBezT)
-                                    cells +=
-                                        '<div style="display:inline-block;margin-bottom:8px;padding:3px 9px;border-radius:4px;font-size:10px;font-weight:800;letter-spacing:.8px;color:#e6b800;background:rgba(230,184,0,.15);border:1px solid rgba(230,184,0,.4)">🟡 VÝMĚNA</div>';
-                                if (isTestT)
-                                    cells +=
-                                        '<div style="display:inline-block;margin-bottom:8px;padding:3px 9px;border-radius:4px;font-size:10px;font-weight:800;letter-spacing:.8px;color:#e03030;background:rgba(200,40,40,.12);border:1px solid rgba(200,40,40,.35)">🔴 TEST</div>';
-                                if (p.forma)
-                                    cells +=
-                                        '<div style="font-size:26px;font-weight:900;color:var(--text);line-height:1;letter-spacing:.5px">' +
-                                        p.forma +
-                                        "</div>";
-                                if (p.cas)
-                                    cells +=
-                                        '<div style="font-size:18px;font-weight:700;color:' +
-                                        casClr +
-                                        ';margin:5px 0 8px;letter-spacing:1px">' +
-                                        p.cas +
-                                        "</div>";
+                                if (isBezT) cells += '<span class="pt-badge v">Výměna</span>';
+                                if (isTestT) cells += '<span class="pt-badge t">Test</span>';
+                                if (p.forma) cells += '<div class="pt-forma">' + p.forma + "</div>";
+                                if (p.cas) cells += '<div class="pt-cas" style="color:' + casClr + '">' + p.cas + "</div>";
                                 if (isBezT) {
-                                    if (p.note)
-                                        cells +=
-                                            '<div style="font-size:10px;color:var(--text3);margin-top:5px;font-style:italic">' +
-                                            p.note +
-                                            "</div>";
+                                    if (p.note) cells += '<div style="font-size:10px;color:var(--text3);margin-top:4px;font-style:italic">' + p.note + "</div>";
                                 } else {
-                                    cells +=
-                                        '<div style="border-top:1px solid rgba(255,255,255,.06);padding-top:8px">';
                                     var matLbl = (D.formy && p.forma && D.formy[p.forma] && D.formy[p.forma].matId)
                                         ? D.formy[p.forma].matId
                                         : (p.mat ? p.mat.split("(")[0].trim() : null);
-                                    if (matLbl)
-                                        cells +=
-                                            '<div style="font-size:11px;color:var(--text2);line-height:1.4">' +
-                                            matLbl +
-                                            "</div>";
-                                    if (p.susen)
-                                        cells +=
-                                            '<div style="display:inline-block;margin-top:5px;font-size:10px;font-weight:700;color:var(--orange);background:rgba(255,156,0,.12);border:1px solid rgba(255,156,0,.25);border-radius:3px;padding:2px 7px;letter-spacing:.5px">SUŠIT</div>';
-                                    if (p.note)
-                                        cells +=
-                                            '<div style="font-size:10px;color:var(--text3);margin-top:5px;font-style:italic">' +
-                                            p.note +
-                                            "</div>";
+                                    if (matLbl) cells += '<div class="pt-mat">' + matLbl + "</div>";
+                                    if (p.susen) cells += '<span class="pt-badge su" style="margin-top:4px">Sušit</span>';
+                                    if (p.note) cells += '<div style="font-size:10px;color:var(--text3);margin-top:4px;font-style:italic">' + p.note + "</div>";
                                     if (p.platido) {
                                         var pd3 = p.platido;
-                                        cells +=
-                                            '<div style="display:inline-block;margin-top:6px;font-size:10px;font-weight:700;color:var(--orange);background:rgba(255,156,0,.1);border:1px solid rgba(255,156,0,.25);border-radius:3px;padding:2px 7px">do ' +
-                                            pd3.slice(8, 10) +
-                                            "." +
-                                            pd3.slice(5, 7) +
-                                            ". " +
-                                            pd3.slice(11, 16) +
-                                            "</div>";
+                                        cells += '<div style="display:inline-block;margin-top:5px;font-size:10px;font-weight:700;color:var(--orange);background:rgba(255,156,0,.1);border:1px solid rgba(255,156,0,.25);border-radius:3px;padding:2px 7px">do ' + pd3.slice(8,10)+"."+pd3.slice(5,7)+". "+pd3.slice(11,16) + "</div>";
                                     }
-                                    cells += "</div>";
                                 }
                             }
                             cells += "</td>";
                         } else {
-                            cells +=
-                                '<td style="padding:16px 14px;vertical-align:middle;text-align:center;background:' +
-                                bgColors[si] +
-                                '">';
-                            cells +=
-                                '<span style="font-size:22px;color:var(--text3);opacity:.3">—</span>';
-                            cells += "</td>";
+                            cells += '<td class="pt-td ' + clsMap[si] + '"><span class="pt-empty">—</span></td>';
                         }
                     });
                     if (machHasAny) {
                         var machShort = mach.replace("Engel duo ", "");
-                        rows +=
-                            '<tr style="border-bottom:2px solid var(--bg2)">';
-                        rows +=
-                            '<td style="padding:14px 16px;vertical-align:middle;background:rgba(255,255,255,.02);border-right:1px solid var(--border);white-space:nowrap;text-align:center">';
-                        rows +=
-                            '<div style="font-size:20px;font-weight:900;color:var(--text);line-height:1">' +
-                            machShort +
-                            "</div>";
-                        rows +=
-                            '<div style="font-size:10px;color:var(--text3);margin-top:2px;letter-spacing:.5px">ENGEL DUO</div>';
-                        rows += "</td>";
+                        rows += '<tr>';
+                        rows += '<td class="pt-td-mach">' +
+                            '<div class="pt-td-mach-num">' + machShort + '</div>' +
+                            '<div class="pt-td-mach-sub">Engel duo</div>' +
+                            '</td>';
                         rows += cells + "</tr>";
                     }
                 });
@@ -7163,20 +7183,23 @@
 
                 el.innerHTML =
                     '<div class="stitle">Dnešní plán výroby</div>' +
-                    '<div class="card" style="overflow-x:auto;padding:0;margin-bottom:18px">' +
-                    '<table style="width:100%;border-collapse:collapse;table-layout:fixed">' +
-                    '<colgroup><col style="width:90px"><col style="width:calc((100% - 90px)/3)"><col style="width:calc((100% - 90px)/3)"><col style="width:calc((100% - 90px)/3)"></colgroup>' +
-                    '<thead><tr style="border-bottom:2px solid var(--bg2)">' +
-                    '<th style="padding:10px 16px;text-align:center;font-size:10px;font-weight:700;letter-spacing:1px;color:var(--text3);background:rgba(255,255,255,.02)">LIS</th>' +
-                    '<th style="padding:10px 14px;text-align:center;font-size:11px;font-weight:700;color:#a070ff;background:rgba(160,112,255,.05);border-left:3px solid rgba(160,112,255,.25)">NOČNÍ<div style="font-size:9px;font-weight:400;opacity:.6;margin-top:1px">22:00 – 06:00</div></th>' +
-                    '<th style="padding:10px 14px;text-align:center;font-size:11px;font-weight:700;color:#4a9eff;background:rgba(74,158,255,.07);border-left:3px solid rgba(74,158,255,.3)">RANNÍ<div style="font-size:9px;font-weight:400;opacity:.6;margin-top:1px">06:00 – 14:00</div></th>' +
-                    '<th style="padding:10px 14px;text-align:center;font-size:11px;font-weight:700;color:var(--orange);background:rgba(255,156,0,.07);border-left:3px solid rgba(255,156,0,.3)">ODPOLEDNÍ<div style="font-size:9px;font-weight:400;opacity:.6;margin-top:1px">14:00 – 22:00</div></th>' +
-                    "</tr></thead>" +
-                    "<tbody>" +
-                    rows +
-                    "</tbody>" +
-                    "</table>" +
-                    "</div>";
+                    '<div class="pt-wrap">' +
+                    '<div class="pt-header">' +
+                    '<span class="pt-title">Plán výroby</span>' +
+                    '<span class="pt-live"><span class="pt-live-dot"></span>Live</span>' +
+                    '</div>' +
+                    '<div class="pt-scroll">' +
+                    '<table class="pt-tbl">' +
+                    '<colgroup><col style="width:95px"><col><col><col></colgroup>' +
+                    '<thead><tr>' +
+                    '<th class="pt-th-mach">Lis</th>' +
+                    '<th class="pt-th-n">Noční<div style="font-size:8px;opacity:.55;font-weight:400;margin-top:1px">22:00–06:00</div></th>' +
+                    '<th class="pt-th-r">Ranní<div style="font-size:8px;opacity:.55;font-weight:400;margin-top:1px">06:00–14:00</div></th>' +
+                    '<th class="pt-th-o">Odpolední<div style="font-size:8px;opacity:.55;font-weight:400;margin-top:1px">14:00–22:00</div></th>' +
+                    '</tr></thead>' +
+                    '<tbody>' + rows + '</tbody>' +
+                    '</table>' +
+                    '</div></div>';
             }
 
             function openPlanModal(planKey, mach, dk, smena) {
@@ -8509,7 +8532,7 @@
                         return (
                             '<div class="pc' +
                             (p.running ? " run" : "") +
-                            '">' +
+                            '"><div class="pc-inner">' +
                             '<div class="pc-mach"><span>' +
                             p.machine +
                             '</span><div class="dot' +
@@ -8520,13 +8543,11 @@
                                   p.forma +
                                   "</div>" +
                                   (formaNazev
-                                      ? '<div class="pc-flbl" style="font-size:11px;color:var(--text2);margin-top:2px;white-space:normal;line-height:1.3">' +
-                                        formaNazev +
-                                        "</div>"
+                                      ? '<div class="pc-flbl">' + formaNazev + "</div>"
                                       : '<div class="pc-flbl">Nasazená forma</div>')
                                 : '<div class="pc-idle">Bez výroby</div>') +
                             (p.mat
-                                ? '<div class="pc-mat">🎨 ' + p.mat + "</div>"
+                                ? '<div class="pc-mat"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="opacity:.5;flex-shrink:0"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg>' + p.mat + "</div>"
                                 : "") +
                             planBadge +
                             upcomingBadge +
@@ -8538,9 +8559,9 @@
                             (canEdit
                                 ? '<button class="pc-edit" data-m="' +
                                   p.machine +
-                                  '" onclick="openProdModal(this.dataset.m)">✏ Upravit</button>'
+                                  '" onclick="openProdModal(this.dataset.m)"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>Upravit</button>'
                                 : "") +
-                            "</div>"
+                            "</div></div>"
                         );
                     })
                     .join("");
