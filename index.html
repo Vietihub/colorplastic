@@ -2487,9 +2487,27 @@
             }
             .plan-scroll::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,.2); }
 
-            .plan-table { border-collapse: collapse; border-spacing: 0; }
+            .plan-table {
+                border-collapse: collapse;
+                border-spacing: 0;
+                table-layout: fixed;
+                width: 100%;
+            }
 
-            /* Header row */
+            /* ── Column widths (fixed, consistent th ↔ td) ─── */
+            .plan-table th.mach-col,
+            .plan-table td.mach-cell {
+                width: 72px;
+                min-width: 72px;
+                max-width: 72px;
+            }
+            .plan-table th:not(.mach-col),
+            .plan-table td:not(.mach-cell) {
+                width: 90px;
+                min-width: 90px;
+            }
+
+            /* All header cells */
             .plan-table th {
                 font-family: 'Inter', sans-serif;
                 font-size: 9px;
@@ -2500,20 +2518,26 @@
                 background: rgba(255,255,255,.02);
                 border: none;
                 border-bottom: 1px solid rgba(255,255,255,.07);
-                padding: 13px 8px;
+                padding: 10px 8px;
                 white-space: nowrap;
+                text-align: center;
+                vertical-align: middle;
             }
             /* Sticky LIS header */
             .plan-table th.mach-col {
                 background: #0a0c0f;
                 border-right: 1px solid rgba(255,255,255,.07);
                 border-bottom: 1px solid rgba(255,255,255,.07);
-                text-align: center;
-                min-width: 104px;
+                padding: 10px 6px;
             }
             @media (max-width: 768px) {
-                .plan-table th.mach-col {
-                    min-width: 58px; max-width: 58px; width: 58px; padding: 10px 4px;
+                .plan-table th.mach-col,
+                .plan-table td.mach-cell {
+                    width: 58px; min-width: 58px; max-width: 58px;
+                }
+                .plan-table th:not(.mach-col),
+                .plan-table td:not(.mach-cell) {
+                    width: 78px; min-width: 78px;
                 }
             }
             /* Data cells */
@@ -2521,18 +2545,17 @@
                 border: none;
                 border-bottom: 1px solid rgba(255,255,255,.05);
                 vertical-align: top;
-                min-width: 92px;
                 padding: 0;
             }
-            @media (max-width: 768px) { .plan-table td { min-width: 72px; } }
 
             /* Sticky machine name */
             .mach-cell {
                 background: #0a0c0f !important;
                 border-right: 1px solid rgba(255,255,255,.07) !important;
                 border-bottom: 1px solid rgba(255,255,255,.05) !important;
-                padding: 0 10px !important;
-                vertical-align: middle;
+                padding: 12px 6px !important;
+                vertical-align: middle !important;
+                text-align: center;
                 white-space: nowrap;
                 position: sticky;
                 left: 0;
@@ -6346,7 +6369,7 @@
                     var today = isToday(d);
                     smeny.forEach(function (s, si) {
                         html +=
-                            '<th style="padding:6px 4px;border-top:none;min-width:80px;text-align:center;background:transparent;border-left:2px solid ' +
+                            '<th style="padding:6px 4px;border-top:none;text-align:center;background:transparent;border-left:2px solid ' +
                             smenyBorder[si] +
                             ';border-bottom:1px solid rgba(255,255,255,.06)">' +
                             '<span style="display:inline-flex;align-items:center;gap:3px;padding:2px 7px;border-radius:20px;font-family:\'Inter\',sans-serif;font-size:8px;font-weight:600;letter-spacing:.1em;color:' +
@@ -6367,14 +6390,13 @@
                 MACHINES_LIST.forEach(function (mach, mi) {
                     var machShort = mach.replace("Engel duo ", "");
                     html +=
-                        '<tr><td class="mach-cell" style="text-align:center;padding:10px 8px">';
-                    html +=
-                        '<div style="font-family:\'Inter\',sans-serif;font-size:14px;font-weight:700;color:rgba(255,255,255,.88);line-height:1;letter-spacing:.04em">' +
+                        '<tr><td class="mach-cell">' +
+                        '<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px">' +
+                        '<div style="font-family:\'Inter\',sans-serif;font-size:13px;font-weight:700;color:rgba(255,255,255,.88);line-height:1;letter-spacing:.04em">' +
                         machShort +
-                        "</div>";
-                    html +=
-                        '<div style="font-family:\'Inter\',sans-serif;font-size:7px;color:rgba(255,255,255,.2);letter-spacing:.14em;margin-top:3px;text-transform:uppercase">Engel Duo</div>';
-                    html += "</td>";
+                        "</div>" +
+                        '<div style="font-family:\'Inter\',sans-serif;font-size:7px;color:rgba(255,255,255,.2);letter-spacing:.13em;text-transform:uppercase">Engel Duo</div>' +
+                        "</div></td>";
                     dates.forEach(function (d, di) {
                         var dk = dateKey(d);
                         var today = isToday(d);
