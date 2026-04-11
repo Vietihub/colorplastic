@@ -2495,13 +2495,26 @@
             }
 
             /* ── Column widths (fixed, consistent th ↔ td) ─── */
+            /*  mach-col th + mach-cell td — same 72px */
             .plan-table th.mach-col,
             .plan-table td.mach-cell {
                 width: 72px;
                 min-width: 72px;
                 max-width: 72px;
             }
-            .plan-table th:not(.mach-col),
+            /*  Shift sub-headers (N/R/O): individual ths, NO colspan,
+                these are the cells that drive column widths in fixed layout */
+            .plan-table th:not(.mach-col):not([colspan]) {
+                width: 90px;
+                min-width: 90px;
+            }
+            /*  Day-header ths have colspan="3" — they must NOT set a width
+                or fixed layout will divide 90px÷3 = 30px per column */
+            .plan-table th[colspan] {
+                width: auto;
+                min-width: auto;
+            }
+            /*  Data cells — same 90px as shift sub-headers */
             .plan-table td:not(.mach-cell) {
                 width: 90px;
                 min-width: 90px;
@@ -2535,9 +2548,9 @@
                 .plan-table td.mach-cell {
                     width: 58px; min-width: 58px; max-width: 58px;
                 }
-                .plan-table th:not(.mach-col),
+                .plan-table th:not(.mach-col):not([colspan]),
                 .plan-table td:not(.mach-cell) {
-                    width: 78px; min-width: 78px;
+                    width: 76px; min-width: 76px;
                 }
             }
             /* Data cells */
@@ -2569,6 +2582,8 @@
                 cursor: pointer;
                 position: relative;
                 transition: background .15s;
+                overflow: hidden;
+                box-sizing: border-box;
             }
             .plan-cell:hover { background: rgba(255,255,255,.035); }
             .plan-cell.has-plan { background: rgba(227,6,19,.04); }
