@@ -873,6 +873,16 @@ input[type="time"]::-webkit-date-and-time-value { text-align: left; }
           <div style="font-size:10px;color:var(--text3)">Bez výroby</div>
         </label>
       </div>
+      <div id="pm-stoji-fields" style="display:none">
+        <div class="frow">
+          <div class="fg"><label class="fl">Od – datum</label><input type="date" class="fi" id="pm-stoji-od-dat"></div>
+          <div class="fg"><label class="fl">Od – čas</label><input type="time" class="fi" id="pm-stoji-od-cas"></div>
+        </div>
+        <div class="frow">
+          <div class="fg"><label class="fl">Do – datum</label><input type="date" class="fi" id="pm-stoji-do-dat"></div>
+          <div class="fg"><label class="fl">Do – čas</label><input type="time" class="fi" id="pm-stoji-do-cas"></div>
+        </div>
+      </div>
       <div id="pm-production-fields">
       <div class="frow">
         <div class="fg"><label class="fl">Platí do – datum</label><input type="date" class="fi" id="pm-platido-dat"></div>
@@ -1457,6 +1467,9 @@ function togglePmMode(changed) {
   // Hide production fields when výměna or lis stojí
   var fields = document.getElementById('pm-production-fields');
   if (fields) fields.style.display = (isBez || isStoji) ? 'none' : '';
+  // Show od/do fields only for lis stojí
+  var stojiFields = document.getElementById('pm-stoji-fields');
+  if (stojiFields) stojiFields.style.display = isStoji ? '' : 'none';
 
   // Lis stojí: hide forma section too
   var formaSection = document.getElementById('pm-forma-section');
@@ -1971,6 +1984,11 @@ function renderPlan() {
           if (isStoji) {
             html += '<div style="font-size:11px;font-weight:900;color:#1e88e5;letter-spacing:.8px;margin-bottom:2px">🔵</div>';
             html += '<div style="font-size:12px;font-weight:800;color:#1e88e5;letter-spacing:.5px">LIS STOJÍ</div>';
+            if (p.stojiOd || p.stojiDo) {
+              var odD = p.stojiOd ? p.stojiOd.slice(8,10)+'.'+p.stojiOd.slice(5,7)+'. '+p.stojiOd.slice(11,16) : '?';
+              var doD = p.stojiDo ? p.stojiDo.slice(8,10)+'.'+p.stojiDo.slice(5,7)+'. '+p.stojiDo.slice(11,16) : '?';
+              html += '<div style="font-size:9px;color:#7ab8f5;margin-top:4px;line-height:1.5">'+odD+'<br>↓ '+doD+'</div>';
+            }
             if (p.note) html += '<div style="font-size:9px;color:var(--text3);margin-top:5px;font-style:italic">'+p.note+'</div>';
           } else {
             if (isBez)  html += '<div style="font-size:9px;font-weight:800;color:#e6b800;letter-spacing:.8px;margin-bottom:4px">🟡 VÝMĚNA</div>';
@@ -2083,6 +2101,11 @@ function renderPlanTodayIn(containerId) {
         // Mode badge
         if (isStojT) {
           cells += '<div style="font-size:15px;font-weight:900;color:#1e88e5;letter-spacing:.5px;margin-bottom:4px">🔵 LIS STOJÍ</div>';
+          if (p.stojiOd || p.stojiDo) {
+            var odT = p.stojiOd ? p.stojiOd.slice(8,10)+'.'+p.stojiOd.slice(5,7)+'. '+p.stojiOd.slice(11,16) : '?';
+            var doT = p.stojiDo ? p.stojiDo.slice(8,10)+'.'+p.stojiDo.slice(5,7)+'. '+p.stojiDo.slice(11,16) : '?';
+            cells += '<div style="font-size:11px;color:#7ab8f5;margin-top:3px">'+odT+' – '+doT+'</div>';
+          }
           if (p.note) cells += '<div style="font-size:10px;color:var(--text3);margin-top:5px;font-style:italic">'+p.note+'</div>';
         } else {
           if (isBezT)  cells += '<div style="display:inline-block;margin-bottom:8px;padding:3px 9px;border-radius:4px;font-size:10px;font-weight:800;letter-spacing:.8px;color:#e6b800;background:rgba(230,184,0,.15);border:1px solid rgba(230,184,0,.4)">🟡 VÝMĚNA</div>';
@@ -2216,6 +2239,15 @@ function openPlanModal(planKey, mach, dk, smena) {
   if (p.isStoji) togglePmMode('stoji');
   else if (p.isTest) togglePmMode('test');
   else togglePmMode('bez');
+  // Lis stojí od/do
+  var soOdDat = document.getElementById('pm-stoji-od-dat');
+  var soOdCas = document.getElementById('pm-stoji-od-cas');
+  var soDoDat = document.getElementById('pm-stoji-do-dat');
+  var soDoCas = document.getElementById('pm-stoji-do-cas');
+  if (soOdDat) soOdDat.value = p.stojiOd ? p.stojiOd.slice(0,10) : '';
+  if (soOdCas) soOdCas.value = p.stojiOd ? p.stojiOd.slice(11,16) : '';
+  if (soDoDat) soDoDat.value = p.stojiDo ? p.stojiDo.slice(0,10) : '';
+  if (soDoCas) soDoCas.value = p.stojiDo ? p.stojiDo.slice(11,16) : '';
   document.getElementById('pm-note').value = p.note || '';
   document.getElementById('mod-plan').classList.add('on');
 }
@@ -2243,7 +2275,13 @@ function savePlan() {
   // Clear production fields for výměna or lis stojí
   if (bezVyroby || isStoji) { platido=''; qty=''; barva=''; mat=''; susen=false; }
   if (isStoji) { forma=''; cas=''; }
-  var entry = {forma:forma, mat:mat, qty:qty, barva:barva, cas:cas, platido:platido, susen:susen, bezVyroby:bezVyroby, isTest:isTest, isStoji:isStoji, note:note, updatedAt:nowFull()};
+  var soOdDat = document.getElementById('pm-stoji-od-dat');
+  var soOdCas = document.getElementById('pm-stoji-od-cas');
+  var soDoDat = document.getElementById('pm-stoji-do-dat');
+  var soDoCas = document.getElementById('pm-stoji-do-cas');
+  var stojiOd = (isStoji && soOdDat && soOdDat.value && soOdCas && soOdCas.value) ? soOdDat.value + ' ' + soOdCas.value : '';
+  var stojiDo = (isStoji && soDoDat && soDoDat.value && soDoCas && soDoCas.value) ? soDoDat.value + ' ' + soDoCas.value : '';
+  var entry = {forma:forma, mat:mat, qty:qty, barva:barva, cas:cas, platido:platido, susen:susen, bezVyroby:bezVyroby, isTest:isTest, isStoji:isStoji, stojiOd:stojiOd, stojiDo:stojiDo, note:note, updatedAt:nowFull()};
   fbSet('plan/'+editPlanKey, entry);
   if (susen && mat) {
     fbPush('notifications', {
