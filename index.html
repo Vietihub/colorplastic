@@ -7465,33 +7465,23 @@
                 var susenNotifs = D.notifications.filter(function (n) {
                     return n.typ === "susen";
                 });
-                var containers = ["unavail-ser"];
+                var containers = ["susen-alert-ser", "susen-alert-prehled"];
                 containers.forEach(function (id) {
                     var el = document.getElementById(id);
                     if (!el) return;
-                    if (!susenNotifs.length) return;
-                    var html = susenNotifs
-                        .map(function (n) {
-                            return (
-                                '<div class="banner ban-o" style="margin-bottom:10px">' +
-                                '<div><div style="display:flex;align-items:center;gap:8px">' +
-                                '<span style="font-size:17px">🔥</span>' +
-                                '<span class="ban-title" style="color:var(--orange)">Nutno sušit materiál</span>' +
-                                "</div>" +
-                                '<div class="ban-body">' +
-                                n.msg +
-                                "</div>" +
-                                '<div class="ban-meta">Plán výroby · ' +
-                                n.time +
-                                "</div></div>" +
-                                '<button class="ban-x" data-k="' +
-                                n.fbKey +
-                                '" onclick="dismissSusen(this.dataset.k)">✕</button>' +
-                                "</div>"
-                            );
-                        })
-                        .join("");
-                    el.innerHTML = html + el.innerHTML;
+                    if (!susenNotifs.length) { el.innerHTML = ""; return; }
+                    el.innerHTML = susenNotifs.map(function (n) {
+                        return '<div class="notif warning" style="margin-bottom:10px">' +
+                            '<div class="notif-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" style="width:18px;height:18px;stroke-width:2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></div>' +
+                            '<div class="notif-body">' +
+                            '<div class="notif-title">Nutno sušit materiál</div>' +
+                            '<div class="notif-msg">' + n.msg + '</div>' +
+                            '<div class="notif-meta"><span class="notif-time">' + n.time + '</span><span class="notif-tag">Upozornění</span></div>' +
+                            '</div>' +
+                            '<button class="notif-close" data-k="' + n.fbKey + '" onclick="dismissSusen(this.dataset.k)">' +
+                            '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>' +
+                            '</div>';
+                    }).join("");
                 });
             }
 
