@@ -7524,6 +7524,41 @@
                         '<tr><td colspan="4" style="text-align:center;color:var(--text3);padding:18px">Žádný scrap</td></tr>';
             }
 
+            function getUpcomingVymena(machine) {
+                var now = new Date();
+                var nowMs = now.getTime();
+                var limitMs = 2 * 60 * 60 * 1000;
+                var candidates = [];
+                for (var dayOff = 0; dayOff <= 1; dayOff++) {
+                    [6, 14, 22].forEach(function (h) {
+                        var s = new Date(now);
+                        s.setDate(now.getDate() + dayOff);
+                        s.setHours(h, 0, 0, 0);
+                        var diff = s.getTime() - nowMs;
+                        if (diff > 0 && diff <= limitMs)
+                            candidates.push({ start: s, hour: h, diff: diff });
+                    });
+                }
+                for (var i = 0; i < candidates.length; i++) {
+                    var c = candidates[i];
+                    var shift, dk;
+                    if (c.hour === 6)  { shift = 'ranní';     dk = dateKey(c.start); }
+                    if (c.hour === 14) { shift = 'odpolední'; dk = dateKey(c.start); }
+                    if (c.hour === 22) {
+                        shift = 'noční';
+                        var nd = new Date(c.start);
+                        nd.setDate(nd.getDate() + 1);
+                        dk = dateKey(nd);
+                    }
+                    var planKey = machine.replace(/\s+/g, '_') + '_' + dk + '_' + shift;
+                    var plan = D.plan[planKey];
+                    if (plan && plan.bezVyroby) {
+                        return { plan: plan, diffMin: Math.round(c.diff / 60000), shift: shift };
+                    }
+                }
+                return null;
+            }
+
             function renderProd(containerId) {
                 var el = document.getElementById(containerId);
                 if (!el) return;
@@ -7608,6 +7643,18 @@
                                     "</div>";
                             }
                         }
+                        var upcoming = getUpcomingVymena(p.machine);
+                        var upcomingBadge = '';
+                        if (upcoming) {
+                            upcomingBadge =
+                                '<div style="margin-top:6px;padding:5px 9px;border-radius:5px;font-size:11px;font-weight:700;letter-spacing:.4px;display:flex;align-items:center;gap:6px;background:rgba(230,184,0,.15);border:1px solid rgba(230,184,0,.5);color:#e6b800">' +
+                                '<span style="font-size:13px">⏰</span>' +
+                                '<span>VÝMĚNA za ' + upcoming.diffMin + ' min</span>' +
+                                (upcoming.plan.forma
+                                    ? '<span style="opacity:.6;font-weight:400;font-size:10px">č. ' + upcoming.plan.forma + '</span>'
+                                    : '') +
+                                '</div>';
+                        }
                         var formaData = p.forma && D.formy && D.formy[p.forma];
                         var formaNazev = formaData ? formaData.nazev : null;
                         return (
@@ -7628,11 +7675,12 @@
                                         formaNazev +
                                         "</div>"
                                       : '<div class="pc-flbl">Nasazená forma</div>')
-                                : '<div class="pc-idle">Lis stojí</div>') +
+                                : '<div class="pc-idle">Bez výroby</div>') +
                             (p.mat
                                 ? '<div class="pc-mat">🎨 ' + p.mat + "</div>"
                                 : "") +
                             planBadge +
+                            upcomingBadge +
                             (p.updated
                                 ? '<div class="pc-upd">Aktualizováno v ' +
                                   p.updated +
