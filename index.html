@@ -1475,19 +1475,24 @@ function togglePmMode(changed) {
   var formaSection = document.getElementById('pm-forma-section');
   if (formaSection) formaSection.style.display = isStoji ? 'none' : '';
 
-  // Test mode: force free-text forma
+  // Test / Výměna mode: force free-text forma (formy mimo databázi)
   var formaSel = document.getElementById('pm-forma');
   var formaInp = document.getElementById('pm-forma-custom');
   var formaChk = document.getElementById('pm-forma-custom-chk');
-  if (isTest) {
+  if (isTest || (isBez && changed === 'bez')) {
     if (formaSel) formaSel.style.display = 'none';
-    if (formaInp) { formaInp.style.display = 'block'; if (!formaInp.value) formaInp.placeholder = 'Číslo testovací formy'; }
+    if (formaInp) {
+      formaInp.style.display = 'block';
+      // Přenést hodnotu z dropdownu do textového pole pokud je prázdné
+      if (!formaInp.value && formaSel && formaSel.value) formaInp.value = formaSel.value;
+      if (!formaInp.value) formaInp.placeholder = isTest ? 'Číslo testovací formy' : 'Číslo formy k výměně';
+    }
     if (formaChk) formaChk.checked = true;
     var pmMat = document.getElementById('pm-mat');
     var pmMatId = document.getElementById('pm-mat-id');
     if (pmMat) { pmMat.disabled = false; pmMat.style.opacity = '1'; pmMat.style.cursor = ''; }
     if (pmMatId) pmMatId.style.display = 'none';
-  } else if (!isBez && !isStoji && changed === 'test') {
+  } else if ((!isBez && !isStoji && changed === 'test') || (!isTest && !isStoji && changed === 'bez')) {
     if (formaChk && !formaChk.checked) {
       if (formaSel) formaSel.style.display = 'block';
       if (formaInp) formaInp.style.display = 'none';
