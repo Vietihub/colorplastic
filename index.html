@@ -1800,12 +1800,12 @@ function registerFCMToken() {
       }
       var tokenKey = role + '_' + deviceId;
       localStorage.setItem('cp_fcm_key', tokenKey);
-      // Smaž duplikáty: stejná FCM token hodnota pod jiným klíčem
-      // (prohlížeč + PWA na stejném zařízení mají různé deviceId, ale stejný FCM token)
+      // Smaž VŠECHNY ostatní tokeny pro tuto roli – Safari a PWA mají různé tokeny,
+      // takže dedup podle hodnoty nestačí. Vždy bude aktivní jen poslední registrace.
       db.ref('fcmTokens').once('value', function(snap) {
         var existing = snap.val() || {};
         Object.keys(existing).forEach(function(k) {
-          if (k !== tokenKey && existing[k].token === token) {
+          if (k !== tokenKey && existing[k].role === role) {
             db.ref('fcmTokens/' + k).remove();
           }
         });
