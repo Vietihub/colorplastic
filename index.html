@@ -869,7 +869,7 @@ input[type="time"]::-webkit-date-and-time-value { text-align: left; }
         </label>
         <label id="pm-stoji-row" style="flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;cursor:pointer;padding:10px 8px;border-radius:8px;border:2px solid var(--border);background:var(--bg4);transition:all .2s;text-align:center">
           <input type="checkbox" id="pm-stoji" onchange="togglePmMode('stoji')" style="width:16px;height:16px;accent-color:#1e88e5;cursor:pointer">
-          <div style="font-size:12px;font-weight:800;color:var(--text);letter-spacing:.3px">Lis stojí</div>
+          <div style="font-size:12px;font-weight:800;color:var(--text);letter-spacing:.3px">Bez výroby</div>
           <div style="font-size:10px;color:var(--text3)">Bez výroby</div>
         </label>
       </div>
@@ -1997,12 +1997,11 @@ function renderPlan() {
           html += '<td style="padding:0;background:'+cellBg+';border-left:'+cellBorder+todayBg+'">';
           html += '<div id="'+cellId+'" class="plan-cell has-plan" style="padding:10px 8px;text-align:center;border-left:none">';
           if (isStoji) {
-            html += '<div style="font-size:11px;font-weight:900;color:#1e88e5;letter-spacing:.8px;margin-bottom:2px">🔵</div>';
-            html += '<div style="font-size:12px;font-weight:800;color:#1e88e5;letter-spacing:.5px">LIS STOJÍ</div>';
+            html += '<div style="font-size:11px;font-weight:600;color:rgba(74,158,255,.7);letter-spacing:.3px">Bez výroby</div>';
             if (p.stojiOd || p.stojiDo) {
               var odD = p.stojiOd ? p.stojiOd.slice(8,10)+'.'+p.stojiOd.slice(5,7)+'. '+p.stojiOd.slice(11,16) : '?';
               var doD = p.stojiDo ? p.stojiDo.slice(8,10)+'.'+p.stojiDo.slice(5,7)+'. '+p.stojiDo.slice(11,16) : '?';
-              html += '<div style="font-size:9px;color:#7ab8f5;margin-top:4px;line-height:1.5">'+odD+'<br>↓ '+doD+'</div>';
+              html += '<div style="font-size:9px;color:rgba(74,158,255,.5);margin-top:4px;line-height:1.5">'+odD+'<br>↓ '+doD+'</div>';
             }
             if (p.note) html += '<div style="font-size:9px;color:var(--text3);margin-top:5px;font-style:italic">'+p.note+'</div>';
           } else {
@@ -2028,14 +2027,10 @@ function renderPlan() {
           var spanEntry = getSpanningPlanForCell(mach, dk, smena);
           if (spanEntry) {
             if (spanEntry.isStoji) {
-              // Lis stojí spanning – modrý, s časovým rozsahem
-              var odS = spanEntry.stojiOd ? spanEntry.stojiOd.slice(8,10)+'.'+spanEntry.stojiOd.slice(5,7)+'. '+spanEntry.stojiOd.slice(11,16) : '';
-              var doS = spanEntry.stojiDo ? spanEntry.stojiDo.slice(8,10)+'.'+spanEntry.stojiDo.slice(5,7)+'. '+spanEntry.stojiDo.slice(11,16) : '';
-              html += '<td style="padding:0;background:rgba(30,136,229,.12);border-left:2px solid rgba(30,136,229,.5)'+todayBg+'">';
+              // Bez výroby spanning – jemný, nenápadný
+              html += '<td style="padding:0;background:rgba(30,136,229,.05);border-left:1px solid rgba(30,136,229,.2)'+todayBg+'">';
               html += '<div id="'+cellId+'" class="plan-cell has-plan" style="padding:8px 6px;text-align:center;border-left:none">';
-              html += '<div style="font-size:11px;font-weight:900;color:#1e88e5;letter-spacing:.5px;margin-bottom:4px">🔵 LIS STOJÍ</div>';
-              if (odS || doS) html += '<div style="font-size:9px;color:#7ab8f5;line-height:1.7">'+(odS||'?')+'<br>↓ '+(doS||'?')+'</div>';
-              if (spanEntry.note) html += '<div style="font-size:9px;color:var(--text3);margin-top:3px;font-style:italic">'+spanEntry.note+'</div>';
+              html += '<div style="font-size:10px;font-weight:400;color:rgba(74,158,255,.4);letter-spacing:.2px">Bez výroby</div>';
               html += '</div></td>';
             } else {
               var pdDisp = spanEntry.platido ? spanEntry.platido.slice(8,10)+'.'+spanEntry.platido.slice(5,7)+'. '+spanEntry.platido.slice(11,16) : '';
@@ -2127,11 +2122,11 @@ function renderPlanTodayIn(containerId) {
         cells += '<td style="padding:16px 14px;vertical-align:top;background:'+tdBg+';border-left:'+tdBdr+';text-align:center">';
         // Mode badge
         if (isStojT) {
-          cells += '<div style="font-size:15px;font-weight:900;color:#1e88e5;letter-spacing:.5px;margin-bottom:4px">🔵 LIS STOJÍ</div>';
+          cells += '<div style="font-size:13px;font-weight:600;color:rgba(74,158,255,.7);letter-spacing:.3px;margin-bottom:4px">Bez výroby</div>';
           if (p.stojiOd || p.stojiDo) {
             var odT = p.stojiOd ? p.stojiOd.slice(8,10)+'.'+p.stojiOd.slice(5,7)+'. '+p.stojiOd.slice(11,16) : '?';
             var doT = p.stojiDo ? p.stojiDo.slice(8,10)+'.'+p.stojiDo.slice(5,7)+'. '+p.stojiDo.slice(11,16) : '?';
-            cells += '<div style="font-size:11px;color:#7ab8f5;margin-top:3px">'+odT+' – '+doT+'</div>';
+            cells += '<div style="font-size:11px;color:rgba(74,158,255,.5);margin-top:3px">'+odT+' – '+doT+'</div>';
           }
           if (p.note) cells += '<div style="font-size:10px;color:var(--text3);margin-top:5px;font-style:italic">'+p.note+'</div>';
         } else {
@@ -2346,7 +2341,7 @@ function savePlan() {
     });
   }
   closeModal('mod-plan');
-  toast('ok','Plán uložen', isStoji ? 'Lis stojí' : (forma||'')+(qty?' · '+qty+' ks':''));
+  toast('ok','Plán uložen', isStoji ? 'Bez výroby' : (forma||'')+(qty?' · '+qty+' ks':''));
 }
 
 function deletePlanEntry() {
@@ -2790,9 +2785,8 @@ function renderProd(containerId) {
     var planBadge = '';
     if (planned) {
       if (planned.isStoji) {
-        planBadge = '<div style="margin-top:7px;padding:5px 9px;border-radius:5px;font-size:11px;font-weight:700;letter-spacing:.4px;display:flex;align-items:center;gap:6px;background:rgba(30,136,229,.12);border:1px solid rgba(30,136,229,.35);color:#1e88e5">' +
-          '<span style="font-size:13px">🔵</span>' +
-          '<span>LIS STOJÍ</span>' +
+        planBadge = '<div style="margin-top:7px;padding:4px 9px;border-radius:5px;font-size:11px;font-weight:500;letter-spacing:.2px;display:flex;align-items:center;gap:6px;background:rgba(30,136,229,.07);border:1px solid rgba(30,136,229,.2);color:rgba(74,158,255,.75)">' +
+          '<span>Bez výroby</span>' +
           (planned.note ? '<span style="opacity:.6;font-weight:400;font-size:10px">' + planned.note + '</span>' : '') +
         '</div>';
       } else if (planned.bezVyroby) {
