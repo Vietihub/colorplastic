@@ -1793,27 +1793,16 @@ function registerFCMToken() {
   _fcmMessaging.getToken({ vapidKey: VAPID_KEY, serviceWorkerRegistration: _fcmReg })
     .then(function(token) {
       if (!token) return;
-      var deviceId = localStorage.getItem('cp_device_id');
-      if (!deviceId) {
-        deviceId = Math.random().toString(36).slice(2) + Date.now().toString(36);
-        localStorage.setItem('cp_device_id', deviceId);
-      }
-      var tokenKey = role + '_' + deviceId;
+      // Jeden fixní klíč pro celou aplikaci – garantuje max. 1 token v DB
+      var tokenKey = 'active_device';
       localStorage.setItem('cp_fcm_key', tokenKey);
-      // Smaž VŠECHNY ostatní tokeny pro tuto roli – Safari a PWA mají různé tokeny,
-      // takže dedup podle hodnoty nestačí. Vždy bude aktivní jen poslední registrace.
+      // Smaž vše ostatní (staré klíče s deviceId, Safari tokeny, duplicity z minulosti)
       db.ref('fcmTokens').once('value', function(snap) {
         var existing = snap.val() || {};
         Object.keys(existing).forEach(function(k) {
-          if (k !== tokenKey && existing[k].role === role) {
-            db.ref('fcmTokens/' + k).remove();
-          }
+          if (k !== tokenKey) db.ref('fcmTokens/' + k).remove();
         });
-        db.ref('fcmTokens/' + tokenKey).set({
-          token: token,
-          role: role,
-          updated: new Date().toISOString()
-        });
+        db.ref('fcmTokens/' + tokenKey).set({ token: token, role: role, updated: new Date().toISOString() });
       });
     }).catch(function(e) { console.warn('FCM token error:', e); });
 }
