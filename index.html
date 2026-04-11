@@ -93,27 +93,31 @@
             .login-logo {
                 margin-bottom: 56px;
                 user-select: none;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                text-align: center;
             }
             .login-logo-l1 {
                 font-family: 'Inter', sans-serif;
-                font-weight: 300;
+                font-weight: 700;
                 font-size: 46px;
-                letter-spacing: .55em;
+                letter-spacing: .10em;
                 text-transform: uppercase;
                 line-height: 1;
-                padding-right: .55em; /* compensate trailing letter-spacing */
+                padding-right: .10em;
             }
             .login-logo-c { color: #E30613; }
-            .login-logo-olor { color: rgba(255,255,255,.82); }
+            .login-logo-olor { color: rgba(255,255,255,.88); }
             .login-logo-l2 {
                 font-family: 'Inter', sans-serif;
-                font-weight: 200;
-                font-size: 9px;
-                letter-spacing: .72em;
+                font-weight: 500;
+                font-size: 13px;
+                letter-spacing: .20em;
                 text-transform: uppercase;
-                color: rgba(255,255,255,.22);
+                color: rgba(255,255,255,.82);
                 margin-top: 10px;
-                padding-right: .72em;
+                padding-right: .20em;
             }
             .lcard {
                 background: rgba(255,255,255,.028);
@@ -1639,7 +1643,7 @@
                     width: 100%;
                     padding: 0 16px;
                 }
-                .login-logo-l1 { font-size: 36px; }
+                .login-logo-l1 { font-size: 36px; letter-spacing: .09em; padding-right: .09em; }
                 .lcard {
                     padding: 28px 24px;
                 }
@@ -1689,8 +1693,8 @@
                     padding: 0 16px;
                 }
                 .login-logo { margin-bottom: 40px; }
-                .login-logo-l1 { font-size: 32px; letter-spacing: .42em; }
-                .login-logo-l2 { font-size: 8px; letter-spacing: .55em; }
+                .login-logo-l1 { font-size: 32px; letter-spacing: .08em; padding-right: .08em; }
+                .login-logo-l2 { font-size: 11px; letter-spacing: .18em; padding-right: .18em; }
                 .lcard {
                     padding: 28px 22px;
                 }
@@ -2488,6 +2492,7 @@
             .sb-logotype {
                 display: flex;
                 flex-direction: column;
+                align-items: flex-start;
                 line-height: 1;
                 user-select: none;
                 overflow: hidden;
@@ -2497,22 +2502,22 @@
             .sidebar.collapsed .sb-logotype { opacity: 0; width: 0; pointer-events: none; }
             .sb-logotype-l1 {
                 font-family: 'Inter', sans-serif;
-                font-size: 17px;
-                font-weight: 300;
-                letter-spacing: .4em;
-                padding-right: .4em;
+                font-size: 16px;
+                font-weight: 700;
+                letter-spacing: .10em;
+                padding-right: .10em;
             }
             .sb-logo-c  { color: #E30613; }
-            .sb-logo-olor { color: rgba(255,255,255,.8); }
+            .sb-logo-olor { color: rgba(255,255,255,.88); }
             .sb-logotype-l2 {
                 font-family: 'Inter', sans-serif;
-                font-size: 7px;
-                font-weight: 200;
-                letter-spacing: .52em;
+                font-size: 9px;
+                font-weight: 500;
+                letter-spacing: .20em;
                 text-transform: uppercase;
-                color: rgba(255,255,255,.2);
-                margin-top: 5px;
-                padding-right: .52em;
+                color: rgba(255,255,255,.55);
+                margin-top: 4px;
+                padding-right: .20em;
             }
             /* Toggle button */
             .sb-toggle {
@@ -2745,8 +2750,8 @@
         <!-- APP -->
         <div id="app" style="display: none">
             <header class="topbar" id="mob-topbar">
-                <div style="font-family:'Inter',sans-serif;font-size:15px;font-weight:300;letter-spacing:.38em;padding-right:.38em;line-height:1;user-select:none">
-                    <span style="color:#E30613">C</span><span style="color:rgba(255,255,255,.82)">OLOR</span>
+                <div style="font-family:'Inter',sans-serif;font-size:15px;font-weight:700;letter-spacing:.10em;padding-right:.10em;line-height:1;user-select:none">
+                    <span style="color:#E30613">C</span><span style="color:rgba(255,255,255,.88)">OLOR</span>
                 </div>
                 <div class="mob-live">Live</div>
                 <div class="mob-clk" id="mob-clk">--:--:--</div>
