@@ -11,9 +11,9 @@
         <meta http-equiv="pragma" content="no-cache" />
         <meta http-equiv="expires" content="0" />
         <title>ColorPlastic Automotive – Podpůrný systém pro Seřizovače</title>
-        <link rel="icon" type="image/x-icon" href="favicon.ico">
-        <link rel="shortcut icon" href="favicon.ico">
-        <link rel="apple-touch-icon" href="favicon.ico">
+        <link rel="icon" type="image/x-icon" href="favicon.ico" />
+        <link rel="shortcut icon" href="favicon.ico" />
+        <link rel="apple-touch-icon" href="favicon.ico" />
         <link
             href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700;900&family=Barlow+Condensed:wght@600;700;900&family=JetBrains+Mono:wght@400;500&display=swap"
             rel="stylesheet"
@@ -2116,18 +2116,54 @@
             }
 
             /* ── Text logo component ──────────────── */
-            .cp-logo{display:inline-flex;flex-direction:column;align-items:flex-start;line-height:1;user-select:none;}
-            .cp-logo-l1{font-family:'Barlow Condensed','Barlow',sans-serif;font-weight:200;letter-spacing:.32em;text-transform:uppercase;line-height:1;}
-            .cp-logo-c{color:#c8001a;}
-            .cp-logo-rest{color:#d6d6d6;}
-            .cp-logo-l2{font-family:'Barlow',sans-serif;font-weight:400;letter-spacing:.48em;color:#5a5a5a;text-transform:uppercase;margin-top:.38em;white-space:nowrap;}
+            .cp-logo {
+                display: inline-flex;
+                flex-direction: column;
+                align-items: flex-start;
+                line-height: 1;
+                user-select: none;
+            }
+            .cp-logo-l1 {
+                font-family: "Barlow Condensed", "Barlow", sans-serif;
+                font-weight: 200;
+                letter-spacing: 0.32em;
+                text-transform: uppercase;
+                line-height: 1;
+            }
+            .cp-logo-c {
+                color: #c8001a;
+            }
+            .cp-logo-rest {
+                color: #d6d6d6;
+            }
+            .cp-logo-l2 {
+                font-family: "Barlow", sans-serif;
+                font-weight: 400;
+                letter-spacing: 0.48em;
+                color: #5a5a5a;
+                text-transform: uppercase;
+                margin-top: 0.38em;
+                white-space: nowrap;
+            }
             /* sizes */
-            .cp-logo.xl .cp-logo-l1{font-size:42px;}
-            .cp-logo.xl .cp-logo-l2{font-size:10.5px;}
-            .cp-logo.md .cp-logo-l1{font-size:20px;}
-            .cp-logo.md .cp-logo-l2{font-size:7px;}
-            .cp-logo.sm .cp-logo-l1{font-size:16px;}
-            .cp-logo.sm .cp-logo-l2{display:none;}
+            .cp-logo.xl .cp-logo-l1 {
+                font-size: 42px;
+            }
+            .cp-logo.xl .cp-logo-l2 {
+                font-size: 10.5px;
+            }
+            .cp-logo.md .cp-logo-l1 {
+                font-size: 20px;
+            }
+            .cp-logo.md .cp-logo-l2 {
+                font-size: 7px;
+            }
+            .cp-logo.sm .cp-logo-l1 {
+                font-size: 16px;
+            }
+            .cp-logo.sm .cp-logo-l2 {
+                display: none;
+            }
 
             /* ── FAB – Přidat výměnu ───────────────────────── */
             .fab {
@@ -2385,16 +2421,16 @@
         <!-- LOGIN -->
         <div id="login">
             <div class="lw">
-                <div id="login">
-                    <div class="lw">
-                        <div style="text-align:center;margin-bottom:40px;">
-                            <div class="cp-logo xl" style="display: inline-flex; flex-direction: column; align-items: center;">
-                                <div class="cp-logo-l1">
-                                    <span class="cp-logo-c">C</span><span class="cp-logo-rest">OLOR</span>
-                                </div>
-                                <div class="cp-logo-l2">PLASTIC&nbsp;&nbsp;AUTOMOTIVE</div>
-                            </div>
+                <div style="text-align: center; margin-bottom: 40px">
+                    <div class="cp-logo xl" style="display: inline-flex">
+                        <div class="cp-logo-l1">
+                            <span class="cp-logo-c">C</span
+                            ><span class="cp-logo-rest">OLOR</span>
                         </div>
+                        <div class="cp-logo-l2">
+                            PLASTIC&nbsp;&nbsp;AUTOMOTIVE
+                        </div>
+                    </div>
                 </div>
                 <div class="lcard">
                     <div style="text-align: center; margin-bottom: 22px">
@@ -2459,7 +2495,10 @@
         <div id="app" style="display: none">
             <header class="topbar" id="mob-topbar">
                 <div class="cp-logo sm">
-                    <div class="cp-logo-l1"><span class="cp-logo-c">C</span><span class="cp-logo-rest">OLOR</span></div>
+                    <div class="cp-logo-l1">
+                        <span class="cp-logo-c">C</span
+                        ><span class="cp-logo-rest">OLOR</span>
+                    </div>
                 </div>
                 <div class="mob-live">Live</div>
                 <div class="mob-clk" id="mob-clk">--:--:--</div>
@@ -2491,8 +2530,13 @@
                 <div class="sb-top">
                     <div class="sb-logo">
                         <div class="cp-logo md">
-                            <div class="cp-logo-l1"><span class="cp-logo-c">C</span><span class="cp-logo-rest">OLOR</span></div>
-                            <div class="cp-logo-l2">PLASTIC&nbsp;&nbsp;AUTO</div>
+                            <div class="cp-logo-l1">
+                                <span class="cp-logo-c">C</span
+                                ><span class="cp-logo-rest">OLOR</span>
+                            </div>
+                            <div class="cp-logo-l2">
+                                PLASTIC&nbsp;&nbsp;AUTO
+                            </div>
                         </div>
                     </div>
                     <button class="sb-toggle" onclick="toggleSidebar()">
@@ -6486,7 +6530,7 @@
                               .value.trim()
                         : document.getElementById("pm-forma").value.trim();
                 var mat = document.getElementById("pm-mat").value.trim();
-                var qty = '';
+                var qty = "";
                 var cas = document.getElementById("pm-cas")
                     ? document.getElementById("pm-cas").value
                     : "";
@@ -6624,9 +6668,7 @@
                 toast(
                     "ok",
                     "Plán uložen",
-                    isStoji
-                        ? "Bez výroby"
-                        : (forma || ""),
+                    isStoji ? "Bez výroby" : forma || "",
                 );
             }
 
