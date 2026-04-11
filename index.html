@@ -2115,11 +2115,19 @@
                 max-height: 2000px;
             }
 
-            /* ── Brand logo image ─────────────────── */
-            .brand-logo-wrap{background:#fff;border-radius:8px;padding:7px 12px;display:inline-flex;align-items:center;justify-content:center;}
-            .brand-logo-wrap img{display:block;height:32px;width:auto;}
-            .brand-logo-wrap.sm img{height:22px;}
-            .brand-logo-wrap.xs img{height:16px;}
+            /* ── Text logo component ──────────────── */
+            .cp-logo{display:inline-flex;flex-direction:column;align-items:flex-start;line-height:1;user-select:none;}
+            .cp-logo-l1{font-family:'Barlow Condensed','Barlow',sans-serif;font-weight:200;letter-spacing:.32em;text-transform:uppercase;line-height:1;}
+            .cp-logo-c{color:#c8001a;}
+            .cp-logo-rest{color:#d6d6d6;}
+            .cp-logo-l2{font-family:'Barlow',sans-serif;font-weight:400;letter-spacing:.48em;color:#5a5a5a;text-transform:uppercase;margin-top:.38em;white-space:nowrap;}
+            /* sizes */
+            .cp-logo.xl .cp-logo-l1{font-size:42px;}
+            .cp-logo.xl .cp-logo-l2{font-size:10.5px;}
+            .cp-logo.md .cp-logo-l1{font-size:20px;}
+            .cp-logo.md .cp-logo-l2{font-size:7px;}
+            .cp-logo.sm .cp-logo-l1{font-size:16px;}
+            .cp-logo.sm .cp-logo-l2{display:none;}
 
             /* ── FAB – Přidat výměnu ───────────────────────── */
             .fab {
@@ -2377,9 +2385,10 @@
         <!-- LOGIN -->
         <div id="login">
             <div class="lw">
-                <div style="text-align:center;margin-bottom:36px;">
-                    <div class="brand-logo-wrap" style="padding:12px 20px;">
-                        <img src="colorplastic-logo.png" alt="ColorPlastic Automotive" style="height:48px;">
+                <div style="text-align:center;margin-bottom:40px;">
+                    <div class="cp-logo xl" style="display:inline-flex;">
+                        <div class="cp-logo-l1"><span class="cp-logo-c">C</span><span class="cp-logo-rest">OLOR</span></div>
+                        <div class="cp-logo-l2">PLASTIC&nbsp;&nbsp;AUTOMOTIVE</div>
                     </div>
                 </div>
                 <div class="lcard">
@@ -2444,8 +2453,8 @@
         <!-- APP -->
         <div id="app" style="display: none">
             <header class="topbar" id="mob-topbar">
-                <div class="brand-logo-wrap xs">
-                    <img src="colorplastic-logo.png" alt="ColorPlastic">
+                <div class="cp-logo sm">
+                    <div class="cp-logo-l1"><span class="cp-logo-c">C</span><span class="cp-logo-rest">OLOR</span></div>
                 </div>
                 <div class="mob-live">Live</div>
                 <div class="mob-clk" id="mob-clk">--:--:--</div>
@@ -2476,8 +2485,9 @@
             <nav class="sidebar" id="sidebar">
                 <div class="sb-top">
                     <div class="sb-logo">
-                        <div class="brand-logo-wrap sm">
-                            <img src="colorplastic-logo.png" alt="ColorPlastic">
+                        <div class="cp-logo md">
+                            <div class="cp-logo-l1"><span class="cp-logo-c">C</span><span class="cp-logo-rest">OLOR</span></div>
+                            <div class="cp-logo-l2">PLASTIC&nbsp;&nbsp;AUTO</div>
                         </div>
                     </div>
                     <button class="sb-toggle" onclick="toggleSidebar()">
