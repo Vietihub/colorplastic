@@ -3816,34 +3816,22 @@
                                 />
                             </div>
                         </div>
-                        <div class="frow">
-                            <div class="fg">
-                                <label class="fl">Počet kusů</label
-                                ><input
-                                    type="number"
-                                    class="fi"
-                                    id="pm-qty"
-                                    placeholder="0"
-                                    min="0"
-                                />
-                            </div>
-                            <div class="fg">
-                                <label class="fl">Barva</label>
-                                <select
-                                    class="fs"
-                                    id="pm-barva-sel"
-                                    style="display: none"
-                                    onchange="onPmBarvaSel()"
-                                >
-                                    <option value="">— Vyberte barvu —</option>
-                                </select>
-                                <input
-                                    type="text"
-                                    class="fi"
-                                    id="pm-barva"
-                                    placeholder="napr. RAL 9005 černá"
-                                />
-                            </div>
+                        <div class="fg">
+                            <label class="fl">Barva</label>
+                            <select
+                                class="fs"
+                                id="pm-barva-sel"
+                                style="display: none"
+                                onchange="onPmBarvaSel()"
+                            >
+                                <option value="">— Vyberte barvu —</option>
+                            </select>
+                            <input
+                                type="text"
+                                class="fi"
+                                id="pm-barva"
+                                placeholder="napr. RAL 9005 černá"
+                            />
                         </div>
                         <div class="fg">
                             <label class="fl">Materiál</label>
@@ -6465,7 +6453,7 @@
                     barvaInp.style.display = "block";
                     barvaInp.value = p.barva || "";
                 }
-                document.getElementById("pm-qty").value = p.qty || "";
+                // pm-qty removed from UI
                 var casEl = document.getElementById("pm-cas");
                 if (casEl) casEl.value = p.cas || "";
                 // Platí do
@@ -6512,7 +6500,7 @@
                               .value.trim()
                         : document.getElementById("pm-forma").value.trim();
                 var mat = document.getElementById("pm-mat").value.trim();
-                var qty = document.getElementById("pm-qty").value.trim();
+                var qty = '';
                 var cas = document.getElementById("pm-cas")
                     ? document.getElementById("pm-cas").value
                     : "";
