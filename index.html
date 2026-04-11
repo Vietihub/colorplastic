@@ -515,6 +515,7 @@
                 display: flex;
                 flex-direction: column;
                 min-width: 0;
+                overflow-x: hidden;
             }
             .content {
                 padding: 22px;
@@ -2475,7 +2476,8 @@
                PLÁNOVÁNÍ VÝROBY — Redesign
             ═══════════════════════════════════════════════════ */
             .plan-scroll {
-                overflow-x: auto;
+                overflow-x: auto !important;
+                overflow-y: visible;
                 -webkit-overflow-scrolling: touch;
                 border-radius: 0 0 12px 12px;
             }
@@ -2487,37 +2489,34 @@
             }
             .plan-scroll::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,.2); }
 
+            /* Table: natural width, scroll container handles overflow */
             .plan-table {
                 border-collapse: collapse;
                 border-spacing: 0;
-                table-layout: fixed;
-                width: 100%;
+                /* NO table-layout:fixed, NO width:100% — let columns define width */
             }
 
-            /* ── Column widths (fixed, consistent th ↔ td) ─── */
-            /*  mach-col th + mach-cell td — same 72px */
+            /* ── Column widths ─── */
             .plan-table th.mach-col,
             .plan-table td.mach-cell {
                 width: 72px;
                 min-width: 72px;
                 max-width: 72px;
             }
-            /*  Shift sub-headers (N/R/O): individual ths, NO colspan,
-                these are the cells that drive column widths in fixed layout */
+            /* Shift sub-headers (N/R/O) and data cells — 90px each */
             .plan-table th:not(.mach-col):not([colspan]) {
                 width: 90px;
                 min-width: 90px;
+                max-width: 90px;
             }
-            /*  Day-header ths have colspan="3" — they must NOT set a width
-                or fixed layout will divide 90px÷3 = 30px per column */
-            .plan-table th[colspan] {
-                width: auto;
-                min-width: auto;
-            }
-            /*  Data cells — same 90px as shift sub-headers */
             .plan-table td:not(.mach-cell) {
                 width: 90px;
                 min-width: 90px;
+                max-width: 90px;
+            }
+            /* Day-header ths with colspan span freely over 3×90px */
+            .plan-table th[colspan] {
+                min-width: 0;
             }
 
             /* All header cells */
@@ -2876,6 +2875,12 @@
                 border-top-color: rgba(255,255,255,.09);
                 border-radius: 12px;
                 box-shadow: 0 4px 28px rgba(0,0,0,.28);
+            }
+            /* Plan scroll card: must allow horizontal scroll,
+               not clip the table with overflow:hidden from .card */
+            .card.plan-scroll {
+                overflow-x: auto !important;
+                overflow-y: visible;
             }
             .chdr {
                 border-bottom: 1px solid rgba(255,255,255,.06);
