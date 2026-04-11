@@ -2282,7 +2282,8 @@ function savePlan() {
   var note  = document.getElementById('pm-note').value.trim();
   if (!isStoji && !forma) { toast('err','Chyba','Zadejte číslo formy.'); return; }
   // Clear production fields for výměna or lis stojí
-  if (bezVyroby || isStoji) { platido=''; qty=''; barva=''; mat=''; susen=false; }
+  if (bezVyroby) { platido=''; }          // výměna: smaž platido
+  if (bezVyroby || isStoji) { qty=''; barva=''; mat=''; susen=false; }
   if (isStoji) { forma=''; cas=''; }
   var soOdDat = document.getElementById('pm-stoji-od-dat');
   var soOdCas = document.getElementById('pm-stoji-od-cas');
@@ -2290,12 +2291,39 @@ function savePlan() {
   var soDoCas = document.getElementById('pm-stoji-do-cas');
   var stojiOd = (isStoji && soOdDat && soOdDat.value && soOdCas && soOdCas.value) ? soOdDat.value + ' ' + soOdCas.value : '';
   var stojiDo = (isStoji && soDoDat && soDoDat.value && soDoCas && soDoCas.value) ? soDoDat.value + ' ' + soDoCas.value : '';
+
+  // Lis stojí: přepočítej plan klíč ze stojiOd, nastav platido = stojiDo (spanning logika)
+  var saveKey = editPlanKey;
+  if (isStoji && stojiOd) {
+    platido = stojiDo;
+    var _mp = (editPlanKey.match(/^(.+)_\d{4}-\d{2}-\d{2}_[^_]+$/) || [])[1];
+    if (_mp) {
+      var _op = stojiOd.split(' ');
+      var _h  = parseInt((_op[1] || '').split(':')[0]);
+      var _sh, _kd;
+      if (_h >= 6 && _h < 14)       { _sh = 'ranní';     _kd = _op[0]; }
+      else if (_h >= 14 && _h < 22) { _sh = 'odpolední'; _kd = _op[0]; }
+      else {
+        _sh = 'noční';
+        var _nd = new Date(_op[0] + 'T12:00:00');
+        _nd.setDate(_nd.getDate() + 1);
+        _kd = dateKey(_nd);
+      }
+      var _nk = _mp + '_' + _kd + '_' + _sh;
+      if (_nk !== editPlanKey) {
+        db.ref('plan/' + editPlanKey).remove();
+        saveKey = _nk;
+      }
+    }
+  }
+  editPlanKey = saveKey; // aktualizuj pro případné smazání ve stejném modalu
+
   var entry = {forma:forma, mat:mat, qty:qty, barva:barva, cas:cas, platido:platido, susen:susen, bezVyroby:bezVyroby, isTest:isTest, isStoji:isStoji, stojiOd:stojiOd, stojiDo:stojiDo, note:note, updatedAt:nowFull()};
-  fbSet('plan/'+editPlanKey, entry);
+  fbSet('plan/'+saveKey, entry);
   if (susen && mat) {
     fbPush('notifications', {
       typ:'susen', mat:mat, forma:forma,
-      planKey:editPlanKey, msg:'Nutno sušit materiál '+mat+(forma?' pro formu '+forma:''),
+      planKey:saveKey, msg:'Nutno sušit materiál '+mat+(forma?' pro formu '+forma:''),
       time:now(), read:false
     });
   }
