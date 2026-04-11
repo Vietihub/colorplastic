@@ -2777,7 +2777,7 @@
                     justify-content: center;
                     padding: 4px 3px !important; /* !important overrides inline style */
                     text-align: center;
-                    gap: 2px;
+                    gap: 1px;
                 }
                 /* Prevent any sub-element from wrapping and pushing height */
                 .plan-cell > *,
@@ -2787,10 +2787,15 @@
                     text-overflow: ellipsis;
                     max-width: 100%;
                 }
-                .plan-cell-forma  { font-size: 13px !important; }
-                .plan-cell-mat    { font-size: 8px !important; max-width: 70px; margin-top: 0; }
-                .plan-cell-smena  { font-size: 7px; padding: 1px 5px; }
-                .plan-cell-note   { display: none; } /* hide italic note on mobile */
+                /* Scale down all content to fit 80px cell */
+                .plan-cell-badge    { font-size: 7px !important; padding: 1px 5px !important; margin-bottom: 2px !important; }
+                .plan-cell-forma    { font-size: 13px !important; margin-bottom: 1px !important; }
+                .plan-cell-cas      { font-size: 11px !important; margin-bottom: 2px !important; }
+                .plan-cell-detail   { padding-top: 3px !important; }
+                .plan-cell-mat      { font-size: 8px !important; max-width: 70px; margin: 0 !important; }
+                .plan-cell-continues { font-size: 7px !important; margin-bottom: 1px !important; }
+                .plan-cell-smena    { font-size: 7px; padding: 1px 5px; }
+                .plan-cell-note     { display: none !important; } /* hide italic note on mobile */
             }
 
             /* ═══════════════════════════════════════════════════
@@ -6608,18 +6613,18 @@
                                 } else {
                                     if (isBez)
                                         html +=
-                                            '<div style="display:inline-flex;align-items:center;padding:2px 8px;border-radius:20px;font-family:\'Inter\',sans-serif;font-size:8px;font-weight:600;letter-spacing:.08em;color:#e6b800;background:rgba(230,184,0,.12);border:1px solid rgba(230,184,0,.3);margin-bottom:5px">VÝMĚNA</div>';
+                                            '<div class="plan-cell-badge" style="display:inline-flex;align-items:center;padding:2px 8px;border-radius:20px;font-family:\'Inter\',sans-serif;font-size:8px;font-weight:600;letter-spacing:.08em;color:#e6b800;background:rgba(230,184,0,.12);border:1px solid rgba(230,184,0,.3);margin-bottom:5px">VÝMĚNA</div>';
                                     if (isTest)
                                         html +=
-                                            '<div style="display:inline-flex;align-items:center;padding:2px 8px;border-radius:20px;font-family:\'Inter\',sans-serif;font-size:8px;font-weight:600;letter-spacing:.08em;color:#e03030;background:rgba(200,40,40,.12);border:1px solid rgba(200,40,40,.3);margin-bottom:5px">TEST</div>';
+                                            '<div class="plan-cell-badge" style="display:inline-flex;align-items:center;padding:2px 8px;border-radius:20px;font-family:\'Inter\',sans-serif;font-size:8px;font-weight:600;letter-spacing:.08em;color:#e03030;background:rgba(200,40,40,.12);border:1px solid rgba(200,40,40,.3);margin-bottom:5px">TEST</div>';
                                     if (p.forma)
                                         html +=
-                                            '<div style="font-family:\'Inter\',sans-serif;font-size:16px;font-weight:700;color:rgba(255,255,255,.92);line-height:1;margin-bottom:3px">' +
+                                            '<div class="plan-cell-forma" style="font-family:\'Inter\',sans-serif;font-size:16px;font-weight:700;color:rgba(255,255,255,.92);line-height:1;margin-bottom:3px">' +
                                             p.forma +
                                             "</div>";
                                     if (p.cas)
                                         html +=
-                                            '<div style="font-size:13px;font-weight:700;color:' +
+                                            '<div class="plan-cell-cas" style="font-size:13px;font-weight:700;color:' +
                                             modeClr +
                                             ';margin-bottom:6px">' +
                                             p.cas +
@@ -6632,13 +6637,13 @@
                                                 "</div>";
                                     } else {
                                         html +=
-                                            '<div style="border-top:1px solid rgba(255,255,255,.06);padding-top:6px">';
+                                            '<div class="plan-cell-detail" style="border-top:1px solid rgba(255,255,255,.06);padding-top:6px">';
                                         var matLabel = (D.formy && p.forma && D.formy[p.forma] && D.formy[p.forma].matId)
                                             ? D.formy[p.forma].matId
                                             : (p.mat ? p.mat.split("(")[0].trim() : null);
                                         if (matLabel)
                                             html +=
-                                                '<div style="font-size:10px;color:var(--text2);line-height:1.3;margin-bottom:2px">' +
+                                                '<div class="plan-cell-mat" style="font-size:10px;color:var(--text2);line-height:1.3;margin-bottom:2px">' +
                                                 matLabel +
                                                 "</div>";
                                         if (p.barva)
@@ -6710,9 +6715,9 @@
                                             cellId +
                                             '" class="plan-cell has-plan" style="padding:8px 6px;text-align:center;border-left:none;opacity:.55">';
                                         html +=
-                                            '<div style="font-size:9px;color:var(--text3);margin-bottom:3px;letter-spacing:.4px">▶ pokračuje</div>';
+                                            '<div class="plan-cell-continues" style="font-size:9px;color:var(--text3);margin-bottom:3px;letter-spacing:.4px">▶ pokračuje</div>';
                                         html +=
-                                            '<div style="font-size:15px;font-weight:900;color:var(--text);line-height:1.1;margin-bottom:3px">' +
+                                            '<div class="plan-cell-forma" style="font-size:15px;font-weight:900;color:var(--text);line-height:1.1;margin-bottom:3px">' +
                                             spanEntry.forma +
                                             "</div>";
                                         var spanMatLabel = (D.formy && spanEntry.forma && D.formy[spanEntry.forma] && D.formy[spanEntry.forma].matId)
@@ -6720,7 +6725,7 @@
                                             : (spanEntry.mat ? spanEntry.mat.split(' ').slice(0, 2).join(' ') : null);
                                         if (spanMatLabel)
                                             html +=
-                                                '<div style="font-size:9px;color:var(--text2);margin-bottom:2px">' +
+                                                '<div class="plan-cell-mat" style="font-size:9px;color:var(--text2);margin-bottom:2px">' +
                                                 spanMatLabel +
                                                 "</div>";
                                         if (pdDisp)
