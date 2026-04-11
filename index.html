@@ -17,7 +17,7 @@
   --blue:#4a9eff; --blue-dim:rgba(74,158,255,.12);
   --bg:#13151a; --bg2:#191c21; --bg3:#20242b; --bg4:#2a2f38;
   --card:#1c2028; --border:rgba(255,255,255,.06); --border2:rgba(255,255,255,.11);
-  --text:#e9ecf0; --text2:#8891a0; --text3:#50586a;
+  --text:#ebeef2; --text2:#8e98a8; --text3:#68727f;
   --radius:10px; --radius-sm:7px;
   --shadow:0 2px 16px rgba(0,0,0,.4); --shadow-lg:0 8px 40px rgba(0,0,0,.6);
   --transition:.15s ease;
@@ -196,7 +196,7 @@ tbody td{padding:11px 14px;font-size:13px;}
 .ww .fi{padding-right:42px;}
 .ws{position:absolute;right:11px;top:50%;transform:translateY(-50%);font-size:12px;font-weight:600;color:var(--text2);pointer-events:none;}
 
-.btn{border:none;border-radius:var(--radius-sm);padding:9px 16px;font-family:'Barlow',sans-serif;font-size:12px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;cursor:pointer;transition:all var(--transition);display:inline-flex;align-items:center;gap:5px;}
+.btn{border:none;border-radius:var(--radius-sm);padding:9px 16px;min-height:46px;font-family:'Barlow',sans-serif;font-size:12px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;cursor:pointer;transition:all var(--transition);display:inline-flex;align-items:center;gap:5px;}
 .br{background:var(--red);color:#fff;box-shadow:0 2px 8px rgba(232,0,30,.25);}
 .br:hover{background:var(--red2);box-shadow:0 4px 16px rgba(232,0,30,.35);transform:translateY(-1px);}
 .br:active{transform:none;box-shadow:none;}
@@ -351,7 +351,7 @@ tbody td{padding:11px 14px;font-size:13px;}
 .plan-table th { padding:10px 10px; text-align:center; font-size:10px; font-weight:700; letter-spacing:.8px; text-transform:uppercase; color:var(--text3); background:rgba(255,255,255,.025); border:1px solid var(--border); white-space:nowrap; }
 .plan-table th.mach-col { text-align:center; min-width:104px; padding:10px 8px; position:sticky; left:0; z-index:10; background:var(--bg3); }
 .plan-table td { padding:0; border:1px solid var(--border); vertical-align:top; min-width:92px; }
-.plan-cell { padding:10px 10px; min-height:76px; cursor:pointer; transition:background var(--transition); position:relative; }
+.plan-cell { padding:10px 10px; min-height:90px; cursor:pointer; transition:background var(--transition); position:relative; }
 .plan-cell:hover { background:rgba(255,255,255,.04); }
 .plan-cell.has-plan { background:rgba(232,0,30,.06); }
 .plan-cell.today { background:rgba(74,158,255,.06); border:1px solid rgba(74,158,255,.18); }
@@ -420,6 +420,46 @@ input[type="time"]::-webkit-date-and-time-value { text-align: left; }
 .banner-group-body{overflow:hidden;transition:max-height .25s ease;}
 .banner-group-body.collapsed{max-height:0;}
 .banner-group-body.expanded{max-height:2000px;}
+
+/* ── FAB – Přidat výměnu ───────────────────────── */
+.fab{position:fixed;bottom:84px;right:20px;width:62px;height:62px;background:var(--red);border-radius:50%;border:none;color:#fff;font-size:28px;line-height:1;cursor:pointer;z-index:290;box-shadow:0 4px 20px rgba(232,0,30,.5),0 1px 6px rgba(0,0,0,.4);display:none;align-items:center;justify-content:center;transition:all var(--transition);}
+.fab.show{display:flex;}
+.fab:hover{transform:scale(1.08);box-shadow:0 6px 28px rgba(232,0,30,.65);}
+.fab:active{transform:scale(.93);}
+@media(min-width:769px){.fab{bottom:24px;right:28px;width:58px;height:58px;font-size:26px;display:flex;}}
+
+/* ── Quick výměna — bottom sheet ───────────────── */
+.qv-overlay{position:fixed;inset:0;background:rgba(0,0,0,.72);z-index:460;display:none;align-items:flex-end;justify-content:center;backdrop-filter:blur(5px);}
+.qv-overlay.on{display:flex;}
+.qv-sheet{background:var(--bg3);border:1px solid var(--border2);border-radius:18px 18px 0 0;padding:14px 18px calc(env(safe-area-inset-bottom,0px) + 24px);width:100%;max-width:520px;box-shadow:var(--shadow-lg);animation:qvup .22s ease;}
+@keyframes qvup{from{transform:translateY(60px);opacity:0;}to{transform:none;opacity:1;}}
+.qv-handle{width:38px;height:4px;background:var(--border2);border-radius:2px;margin:0 auto 16px;}
+.qv-title{font-family:'Barlow Condensed',sans-serif;font-size:18px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--text);}
+.qv-shift-badge{display:inline-block;margin-top:5px;margin-bottom:18px;padding:4px 12px;border-radius:6px;font-size:11px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;}
+.qv-machines{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;}
+.qv-btn{background:var(--bg4);border:2px solid var(--border2);border-radius:var(--radius);padding:14px 8px;cursor:pointer;text-align:center;transition:all var(--transition);min-height:78px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;font-family:'Barlow',sans-serif;}
+.qv-btn:hover,.qv-btn:focus{border-color:var(--red);background:rgba(232,0,30,.08);outline:none;}
+.qv-btn:active{transform:scale(.96);}
+.qv-btn.run{border-color:rgba(57,211,83,.4);background:rgba(57,211,83,.05);}
+.qv-mname{font-family:'Barlow Condensed',sans-serif;font-size:20px;font-weight:900;color:var(--text);line-height:1;}
+.qv-minfo{font-size:10px;color:var(--text3);font-weight:500;}
+.qv-mrun{font-size:10px;color:var(--green-text);font-weight:700;}
+
+/* ── Machine status bar ─────────────────────────── */
+.mach-bar{background:var(--bg2);border-bottom:2px solid var(--border);display:flex;flex-shrink:0;overflow-x:auto;scrollbar-width:none;position:sticky;top:0;z-index:90;}
+@media(max-width:768px){.mach-bar{top:56px;}}
+.mach-bar::-webkit-scrollbar{display:none;}
+.mach-bar-item{flex:1;min-width:72px;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:10px 6px;border-right:1px solid var(--border);cursor:pointer;transition:background var(--transition);position:relative;text-align:center;gap:3px;}
+.mach-bar-item:last-child{border-right:none;}
+.mach-bar-item:hover{background:var(--bg4);}
+.mach-bar-item:active{background:var(--bg4);}
+.mach-bar-item.run::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:var(--green);}
+.mach-bar-item.stoji::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:rgba(255,156,0,.6);}
+.mb-name{font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:700;color:var(--text3);letter-spacing:.5px;text-transform:uppercase;}
+.mb-forma{font-family:'Barlow Condensed',sans-serif;font-size:19px;font-weight:900;color:var(--text);line-height:1;}
+.mb-idle{font-size:9px;color:var(--text3);font-style:italic;}
+.mb-dot{width:7px;height:7px;border-radius:50%;background:var(--text3);flex-shrink:0;}
+.mb-dot.on{background:var(--green);animation:p 1.5s infinite;box-shadow:0 0 5px rgba(57,211,83,.5);}
 </style>
 </head>
 <body>
@@ -487,6 +527,7 @@ input[type="time"]::-webkit-date-and-time-value { text-align: left; }
 
   <div class="main-wrap" id="main-wrap">
     <div class="content-area">
+    <div class="mach-bar" id="mach-bar"></div>
     <div class="content">
 
     <!-- PŘEHLED -->
@@ -1034,6 +1075,19 @@ input[type="time"]::-webkit-date-and-time-value { text-align: left; }
   </div>
 </div>
 
+<!-- FAB -->
+<button class="fab" id="fab" onclick="openQuickVymena()" title="Přidat výměnu">＋</button>
+
+<!-- Quick výměna — bottom sheet -->
+<div class="qv-overlay" id="qv-overlay" onclick="if(event.target===this)closeQuickVymena()">
+  <div class="qv-sheet">
+    <div class="qv-handle"></div>
+    <div class="qv-title">Přidat výměnu</div>
+    <div id="qv-shift-badge" class="qv-shift-badge"></div>
+    <div class="qv-machines" id="qv-machines"></div>
+  </div>
+</div>
+
 <div class="toasts" id="toasts"></div>
 
 <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
@@ -1102,10 +1156,10 @@ var LABELS = {serizovac:'Seřizovač'};
 var SHORT = {serizovac:'Seřizovač'};
 var NAV = {
   serizovac:[
-    {id:'ser-prehled', lbl:'Přehled',    ic:'📊'},
     {id:'plan',        lbl:'Plánování',  ic:'📅'},
-    {id:'materialy',   lbl:'Materiály',  ic:'🧪'},
-    {id:'vyroba',      lbl:'Výroba',     ic:'🏭'}
+    {id:'ser-prehled', lbl:'Přehled',    ic:'📊'},
+    {id:'vyroba',      lbl:'Výroba',     ic:'🏭'},
+    {id:'materialy',   lbl:'Materiály',  ic:'🧪'}
   ]
 };
 
@@ -1148,7 +1202,10 @@ function doLogout() {
   document.getElementById('pin').value='';
   document.querySelectorAll('.rb').forEach(function(b){ b.classList.remove('on'); });
   document.getElementById('login').style.display='flex';
-  document.getElementById('app').style.display='none'; document.getElementById('sidebar') && (document.getElementById('sidebar').classList.remove('open')); document.getElementById('sb-overlay') && (document.getElementById('sb-overlay').classList.remove('on'));
+  document.getElementById('app').style.display='none';
+  var fab = document.getElementById('fab'); if (fab) fab.classList.remove('show');
+  document.getElementById('sidebar') && (document.getElementById('sidebar').classList.remove('open'));
+  document.getElementById('sb-overlay') && (document.getElementById('sb-overlay').classList.remove('on'));
 }
 
 // ═══════════════════════════════════════════════
@@ -1159,6 +1216,8 @@ var sidebarCollapsed = false;
 function startApp() {
   buildSidebar();
   buildBottomNav();
+  var fab = document.getElementById('fab');
+  if (fab) fab.classList.add('show');
   document.getElementById('sb-avatar').textContent = SHORT[role].slice(0,2).toUpperCase();
   document.getElementById('sb-role-name').textContent = LABELS[role];
   startFirebase();
@@ -1239,15 +1298,18 @@ function initResponsive() {
     var mob = window.innerWidth < 768;
     var tb = document.getElementById('mob-topbar');
     var bn = document.getElementById('bottom-nav');
+    var fab = document.getElementById('fab');
     var mw = document.getElementById('main-wrap');
     if (mob) {
       if (tb) tb.classList.add('show');
       if (bn) bn.classList.add('show');
       if (mw) mw.style.marginLeft = '0';
+      if (fab) { fab.style.bottom = '84px'; }
     } else {
       if (tb) tb.classList.remove('show');
       if (bn) bn.classList.remove('show');
       if (mw) mw.style.marginLeft = sidebarCollapsed ? '60px' : '224px';
+      if (fab) { fab.style.bottom = '24px'; }
       closeSidebar();
     }
   }
@@ -2469,6 +2531,82 @@ function renderSusenAlerts(alerts) {
   });
 }
 
+// ═══════════════════════════════════════════════
+//  MACHINE STATUS BAR
+// ═══════════════════════════════════════════════
+function renderMachineBar() {
+  var el = document.getElementById('mach-bar');
+  if (!el) return;
+  var shortName = function(m){ return m.replace('Engel duo ',''); };
+  el.innerHTML = D.production.map(function(p){
+    var running = p.running;
+    var planned = getPlanForMachineNow(p.machine);
+    var hasStoji = planned && planned.isStoji;
+    var cls = running ? 'run' : (hasStoji ? 'stoji' : '');
+    var dotCls = running ? 'on' : '';
+    return '<div class="mach-bar-item '+cls+'" onclick="openProdModal(\''+p.machine+'\')">' +
+      '<div class="mb-name">'+shortName(p.machine)+'</div>' +
+      (p.forma
+        ? '<div class="mb-forma">'+p.forma+'</div>'
+        : '<div class="mb-idle">stojí</div>') +
+      '<div class="mb-dot '+dotCls+'"></div>' +
+    '</div>';
+  }).join('');
+}
+
+// ═══════════════════════════════════════════════
+//  QUICK VÝMĚNA FAB
+// ═══════════════════════════════════════════════
+function openQuickVymena() {
+  var shift = currentShift();
+  var shiftLabels = {ranní:'Ranní směna · 06–14', odpolední:'Odpolední směna · 14–22', noční:'Noční směna · 22–06'};
+  var shiftColors = {ranní:'background:rgba(74,158,255,.15);color:#4a9eff;border:1px solid rgba(74,158,255,.35)', odpolední:'background:rgba(255,156,0,.15);color:#ff9c00;border:1px solid rgba(255,156,0,.35)', noční:'background:rgba(160,112,255,.15);color:#a070ff;border:1px solid rgba(160,112,255,.35)'};
+  var badge = document.getElementById('qv-shift-badge');
+  if (badge) { badge.textContent = shiftLabels[shift]||shift; badge.style.cssText = shiftColors[shift]||''; }
+  var shortName = function(m){ return m.replace('Engel duo ',''); };
+  var grid = document.getElementById('qv-machines');
+  if (grid) {
+    grid.innerHTML = D.production.map(function(p){
+      var runCls = p.running ? 'run' : '';
+      var statusHtml = p.running
+        ? '<span class="qv-mrun">▶ '+( p.forma||'—' )+'</span>'
+        : '<span class="qv-minfo">'+( p.forma ? p.forma : 'stojí' )+'</span>';
+      return '<button class="qv-btn '+runCls+'" onclick="quickVymenaSelect(\''+p.machine+'\')">' +
+        '<div class="qv-mname">'+shortName(p.machine)+'</div>' +
+        statusHtml +
+      '</button>';
+    }).join('');
+  }
+  document.getElementById('qv-overlay').classList.add('on');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeQuickVymena() {
+  document.getElementById('qv-overlay').classList.remove('on');
+  document.body.style.overflow = '';
+}
+
+function quickVymenaSelect(mach) {
+  closeQuickVymena();
+  var shift = currentShift();
+  var now = new Date();
+  var dk;
+  if (shift === 'noční') {
+    var nd = new Date(now); nd.setDate(nd.getDate() + 1);
+    dk = dateKey(nd);
+  } else {
+    dk = dateKey(now);
+  }
+  var machKey = mach.replace(/\s+/g, '_');
+  var planKey = machKey + '_' + dk + '_' + shift;
+  openPlanModal(planKey, mach, dk, shift);
+  // Pre-select výměna mode
+  setTimeout(function(){
+    var bezChk = document.getElementById('pm-bez-vyroby');
+    if (bezChk && !bezChk.checked) { bezChk.checked = true; togglePmMode('bez'); }
+  }, 50);
+}
+
 function startFirebase() {
   fbOn('requests', function(val){
     D.requests = fromFb(val).reverse();
@@ -2505,6 +2643,7 @@ function startFirebase() {
     if(ab && ab.dataset.page==='plan') renderPlan();
     renderPlanToday();
     renderActivityFeed();
+    renderMachineBar();
   });
   fbOn('materialy', function(val){
     D.materialy = val ? fromFb(val) : [];
@@ -2531,6 +2670,7 @@ function afterUpdate() {
   if (ab) render(ab.dataset.page);
   updateBadges();
   renderActivityFeed();
+  renderMachineBar();
 }
 
 function updateBadges() {
