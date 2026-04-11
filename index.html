@@ -2183,6 +2183,110 @@
             .notif.critical .notif-btn { background: #ef4444; color: #fff; }
             .notif.warning  .notif-btn { background: #f59e0b; color: #020617; }
             .notif.success  .notif-btn { background: #22c55e; color: #020617; }
+            /* ── Plan table high-end ──────────────────────────── */
+            .plan-heading {
+                font-family: 'Cormorant', Georgia, serif;
+                font-size: 22px; font-weight: 700; letter-spacing: -.01em;
+                color: var(--text); line-height: 1;
+            }
+            .plan-heading em { font-style: italic; color: rgba(248,250,252,.5); font-weight: 400; }
+            .plan-nav-btn {
+                display: inline-flex; align-items: center; gap: 4px;
+                padding: 5px 12px; border-radius: 7px;
+                background: rgba(255,255,255,.05); border: 1px solid var(--border);
+                color: var(--text2); font-size: 11px; font-weight: 500;
+                cursor: pointer; transition: background .2s, border-color .2s, color .2s;
+                white-space: nowrap;
+            }
+            .plan-nav-btn:hover { background: rgba(255,255,255,.09); border-color: rgba(255,255,255,.14); color: var(--text); }
+            .plan-nav-btn.primary { background: rgba(232,0,30,.12); border-color: rgba(232,0,30,.28); color: #ff8090; }
+            /* ptbl */
+            table.ptbl { width: 100%; border-collapse: collapse; border-spacing: 0; }
+            table.ptbl th {
+                padding: 10px 8px; font-size: 9px; font-weight: 600;
+                letter-spacing: .26em; text-transform: uppercase;
+                color: var(--text3); background: rgba(255,255,255,.02);
+                border: 1px solid var(--border); white-space: nowrap; text-align: center;
+            }
+            th.th-mach {
+                min-width: 90px; text-align: center;
+                position: sticky; left: 0; z-index: 10;
+                background: var(--bg3); border-right: 2px solid rgba(255,255,255,.08);
+            }
+            @media (max-width: 768px) { th.th-mach { min-width: 64px; } }
+            th.day-hdr { min-width: 88px; }
+            th.day-hdr.today-col {
+                color: var(--blue) !important;
+                background: rgba(74,158,255,.06) !important;
+                border-bottom: 2px solid rgba(74,158,255,.3) !important;
+            }
+            th.day-hdr .dh-day { font-size: 11px; font-weight: 700; letter-spacing: .12em; }
+            th.day-hdr .dh-date {
+                font-family: 'Fira Code', monospace; font-size: 12px; font-weight: 600;
+                display: block; margin-top: 2px; color: var(--text);
+            }
+            th.day-hdr.today-col .dh-date { color: var(--blue); }
+            th.sh-hdr {
+                padding: 5px 4px; font-size: 8px; font-weight: 600;
+                letter-spacing: .14em; border-top: none;
+                background: rgba(255,255,255,.015);
+            }
+            table.ptbl td { padding: 0; border: 1px solid var(--border); vertical-align: top; min-width: 88px; }
+            td.td-mach {
+                padding: 12px 10px; background: var(--bg3);
+                border-right: 2px solid rgba(255,255,255,.07);
+                text-align: center; vertical-align: middle;
+                position: sticky; left: 0; z-index: 5;
+            }
+            .td-mach-n {
+                font-family: 'Fira Code', monospace; font-size: 17px; font-weight: 600;
+                color: var(--text); line-height: 1;
+            }
+            .td-mach-s {
+                font-size: 8px; font-weight: 500; letter-spacing: .22em;
+                text-transform: uppercase; color: var(--text3); margin-top: 3px;
+            }
+            /* plan cell */
+            .pc2l { padding: 9px 10px; min-height: 82px; cursor: pointer; transition: background .18s; }
+            .pc2l:hover { background: rgba(255,255,255,.04); }
+            .pc2l.has-plan { background: rgba(232,0,30,.05); }
+            .pc2l.today-cell { background: rgba(74,158,255,.05); }
+            .pc2l.today-cell.has-plan { background: rgba(74,158,255,.08); }
+            /* shift badge */
+            .pcs {
+                display: inline-flex; align-items: center;
+                font-size: 8px; font-weight: 700; letter-spacing: .14em; text-transform: uppercase;
+                padding: 1px 5px; border-radius: 3px; margin-bottom: 5px;
+            }
+            .pcs.r { color: #4a9eff; background: rgba(74,158,255,.12); border: 1px solid rgba(74,158,255,.2); }
+            .pcs.o { color: #ff9c00; background: rgba(255,156,0,.10); border: 1px solid rgba(255,156,0,.2); }
+            .pcs.n { color: #b08aff; background: rgba(160,112,255,.10); border: 1px solid rgba(160,112,255,.2); }
+            .pcf { font-family: 'Fira Code', monospace; font-size: 16px; font-weight: 600; color: var(--text); line-height: 1.1; }
+            .pcm { font-size: 10px; color: var(--text2); margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 105px; }
+            .pck { font-family: 'Fira Code', monospace; font-size: 11px; font-weight: 500; margin-top: 3px; }
+            .pcbadge {
+                display: inline-flex; align-items: center;
+                font-size: 8px; font-weight: 700; letter-spacing: .10em;
+                padding: 1px 6px; border-radius: 3px; margin-top: 4px;
+            }
+            .pcbadge.v { color: #e6b800; background: rgba(230,184,0,.12); border: 1px solid rgba(230,184,0,.28); }
+            .pcbadge.t { color: #e03030; background: rgba(200,40,40,.10); border: 1px solid rgba(200,40,40,.25); }
+            .pcbadge.s { color: #4a9eff; background: rgba(74,158,255,.09); border: 1px solid rgba(74,158,255,.22); }
+            .pcbadge.su { color: #ff9c00; background: rgba(255,156,0,.09); border: 1px solid rgba(255,156,0,.22); }
+            .pc-empty {
+                display: flex; align-items: center; justify-content: center;
+                min-height: 82px; color: rgba(255,255,255,.08); font-size: 18px;
+                cursor: pointer; transition: color .18s;
+            }
+            .pc-empty:hover { color: rgba(255,255,255,.18); }
+            /* legend */
+            .plan-legend {
+                display: flex; gap: 16px; padding: 10px 22px;
+                border-top: 1px solid rgba(255,255,255,.05);
+                background: rgba(255,255,255,.012); flex-wrap: wrap;
+            }
+            .leg-item { display: flex; align-items: center; gap: 5px; font-size: 10px; color: var(--text3); }
+            .leg-dot { width: 7px; height: 7px; border-radius: 2px; flex-shrink: 0; }
             /* plan table wrapper */
             .pt-wrap {
                 background: linear-gradient(160deg,
@@ -3704,25 +3808,30 @@
                             <div class="pt-wrap">
                                 <div class="pt-header">
                                     <div>
-                                        <div class="pt-title">Plánování výroby</div>
-                                        <div style="font-size:11px;color:var(--text3);margin-top:3px">Týdenní plán · klikni na buňku pro zadání</div>
+                                        <div class="plan-heading">Plánování <em>výroby</em></div>
                                     </div>
                                     <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
-                                        <button class="btn bg bsm" onclick="planPrevWeek()">← Předchozí</button>
-                                        <span id="plan-week-label" style="font-family:'Fira Code',monospace;font-size:12px;color:var(--text2);white-space:nowrap"></span>
-                                        <button class="btn bg bsm" onclick="planNextWeek()">Další →</button>
-                                        <button class="btn br bsm" onclick="planThisWeek()">Tento týden</button>
+                                        <button class="plan-nav-btn" onclick="planPrevWeek()">
+                                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/></svg>
+                                            Předchozí
+                                        </button>
+                                        <span id="plan-week-label" class="plan-week-lbl"></span>
+                                        <button class="plan-nav-btn" onclick="planNextWeek()">
+                                            Další
+                                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
+                                        </button>
+                                        <button class="plan-nav-btn primary" onclick="planThisWeek()">Tento týden</button>
                                     </div>
                                 </div>
                                 <div class="pt-scroll">
-                                    <table class="plan-table" id="plan-grid"></table>
+                                    <table class="ptbl" id="plan-grid"></table>
                                 </div>
-                                <div style="display:flex;flex-wrap:wrap;gap:12px 20px;padding:12px 18px;border-top:1px solid rgba(255,255,255,.06);font-size:11px;color:var(--text2)">
-                                    <span style="display:flex;align-items:center;gap:5px"><span style="width:10px;height:10px;background:rgba(74,158,255,.2);border:1px solid rgba(74,158,255,.3);border-radius:2px;display:inline-block"></span>Dnes</span>
-                                    <span style="display:flex;align-items:center;gap:5px"><span style="width:10px;height:10px;background:rgba(232,0,30,.1);border:1px solid rgba(232,0,30,.2);border-radius:2px;display:inline-block"></span>Naplánováno</span>
-                                    <span style="color:#4a9eff;font-weight:600">■ R = Ranní</span>
-                                    <span style="color:var(--orange);font-weight:600">■ O = Odpolední</span>
-                                    <span style="color:#a070ff;font-weight:600">■ N = Noční</span>
+                                <div class="plan-legend">
+                                    <div class="leg-item"><div class="leg-dot" style="background:#4a9eff"></div>Ranní 06–14</div>
+                                    <div class="leg-item"><div class="leg-dot" style="background:#ff9c00"></div>Odpolední 14–22</div>
+                                    <div class="leg-item"><div class="leg-dot" style="background:#a070ff"></div>Noční 22–06</div>
+                                    <div class="leg-item"><div class="leg-dot" style="background:rgba(74,158,255,.3);border:1px solid rgba(74,158,255,.4)"></div>Dnes</div>
+                                    <div class="leg-item"><div class="leg-dot" style="background:rgba(232,0,30,.18)"></div>Naplánováno</div>
                                 </div>
                             </div>
                         </div>
@@ -6747,292 +6856,105 @@
                 var dates = getWeekDates(planWeekOffset);
                 var lbl = document.getElementById("plan-week-label");
                 if (lbl) {
-                    var d0 = dates[0],
-                        d6 = dates[6];
-                    lbl.textContent =
-                        d0.getDate() +
-                        "." +
-                        (d0.getMonth() + 1) +
-                        ". – " +
-                        d6.getDate() +
-                        "." +
-                        (d6.getMonth() + 1) +
-                        "." +
-                        d6.getFullYear();
+                    var d0 = dates[0], d6 = dates[6];
+                    lbl.textContent = d0.getDate() + "." + (d0.getMonth()+1) + ". – " + d6.getDate() + "." + (d6.getMonth()+1) + "." + d6.getFullYear();
                 }
                 var grid = document.getElementById("plan-grid");
                 if (!grid) return;
                 var smeny = ["noční", "ranní", "odpolední"];
                 var smenyShort = ["N", "R", "O"];
+                var smenyPcsCls = ["n", "r", "o"];
                 var smenyColors = ["#a070ff", "#4a9eff", "var(--orange)"];
-                var smenyBg = [
-                    "rgba(160,112,255,.05)",
-                    "rgba(74,158,255,.07)",
-                    "rgba(255,156,0,.07)",
-                ];
-                var smenyBorder = [
-                    "rgba(160,112,255,.25)",
-                    "rgba(74,158,255,.3)",
-                    "rgba(255,156,0,.3)",
-                ];
+                var smenyBg = ["rgba(160,112,255,.05)","rgba(74,158,255,.07)","rgba(255,156,0,.07)"];
+                var smenyBorder = ["rgba(160,112,255,.25)","rgba(74,158,255,.3)","rgba(255,156,0,.3)"];
 
-                var html =
-                    '<thead><tr><th class="mach-col" rowspan="2" style="text-align:center">Lis</th>';
+                // ── thead ──
+                var html = '<thead><tr><th class="th-mach" rowspan="2">Lis</th>';
                 dates.forEach(function (d, i) {
                     var today = isToday(d);
-                    html +=
-                        '<th colspan="3" style="text-align:center;border-bottom:1px solid var(--border)">';
-                    html +=
-                        '<div class="day-header' +
-                        (today ? " today-hdr" : "") +
-                        '">' +
-                        DAY_FULL[i] +
-                        "</div>";
-                    html +=
-                        '<div class="day-date">' +
-                        d.getDate() +
-                        "." +
-                        (d.getMonth() + 1) +
-                        "." +
-                        "</div></th>";
+                    html += '<th colspan="3" class="day-hdr' + (today ? ' today-col' : '') + '">' +
+                        '<span class="dh-day">' + DAY_FULL[i] + '</span>' +
+                        '<span class="dh-date">' + String(d.getDate()).padStart(2,'0') + '.' + String(d.getMonth()+1).padStart(2,'0') + '</span>' +
+                        '</th>';
                 });
-                html += "</tr><tr>";
+                html += '</tr><tr>';
                 dates.forEach(function (d) {
-                    var today = isToday(d);
                     smeny.forEach(function (s, si) {
-                        html +=
-                            '<th style="padding:6px 4px;border-top:none;text-align:center;background:transparent;border-left:2px solid ' +
-                            smenyBorder[si] +
-                            ';border-bottom:1px solid rgba(255,255,255,.06)">' +
-                            '<span style="display:inline-flex;align-items:center;gap:3px;padding:2px 7px;border-radius:20px;font-family:\'Inter\',sans-serif;font-size:8px;font-weight:600;letter-spacing:.1em;color:' +
-                            smenyColors[si] +
-                            ";background:" +
-                            smenyBg[si] +
-                            ";border:1px solid " +
-                            smenyBorder[si] +
-                            '">' +
-                            smenyShort[si] +
-                            '<span style="opacity:.55;font-weight:400;font-size:7px;margin-left:2px">' +
-                            ["22–06", "06–14", "14–22"][si] +
-                            "</span></span></th>";
+                        html += '<th class="sh-hdr" style="border-left:2px solid ' + smenyBorder[si] + '">' +
+                            '<span class="pcs ' + smenyPcsCls[si] + '" style="margin:0">' + smenyShort[si] + '</span></th>';
                     });
                 });
-                html += "</tr></thead><tbody>";
+                html += '</tr></thead><tbody>';
 
+                // ── tbody ──
                 MACHINES_LIST.forEach(function (mach, mi) {
                     var machShort = mach.replace("Engel duo ", "");
-                    html +=
-                        '<tr><td class="mach-cell">' +
-                        '<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px">' +
-                        '<div style="font-family:\'Fira Code\',monospace;font-size:13px;font-weight:700;color:rgba(255,255,255,.88);line-height:1;letter-spacing:.04em">' +
-                        machShort +
-                        "</div>" +
-                        '<div style="font-family:\'Fira Sans\',sans-serif;font-size:7px;color:rgba(255,255,255,.2);letter-spacing:.13em;text-transform:uppercase">Engel Duo</div>' +
-                        "</div></td>";
+                    html += '<tr><td class="td-mach"><div class="td-mach-n">' + machShort + '</div><div class="td-mach-s">Engel duo</div></td>';
+
                     dates.forEach(function (d, di) {
                         var dk = dateKey(d);
                         var today = isToday(d);
                         smeny.forEach(function (smena, si) {
-                            var planKey =
-                                mach.replace(/ /g, "_") +
-                                "_" +
-                                dk +
-                                "_" +
-                                smena;
+                            var planKey = mach.replace(/ /g, "_") + "_" + dk + "_" + smena;
                             var p = D.plan[planKey];
                             var cellId = "pc-" + mi + "-" + di + "-" + si;
-                            var todayBg = today
-                                ? "filter:brightness(1.3);"
-                                : "";
+                            var pcs = '<span class="pcs ' + smenyPcsCls[si] + '">' + smenyShort[si] + '</span>';
+                            var todayCls = today ? ' today-cell' : '';
+
                             if (p && (p.forma || p.qty || p.isStoji)) {
-                                var isBez = !!p.bezVyroby;
-                                var isTest = !!p.isTest;
-                                var isStoji = !!p.isStoji;
-                                // Colors: yellow=výměna, red=test, blue=lis stojí, default=shift color
-                                var cellBg = isBez
-                                    ? "rgba(230,184,0,.07)"
-                                    : isTest
-                                      ? "rgba(200,40,40,.07)"
-                                      : isStoji
-                                        ? "rgba(30,136,229,.07)"
-                                        : smenyBg[si];
-                                var cellBorder = isBez
-                                    ? "2px solid rgba(230,184,0,.7)"
-                                    : isTest
-                                      ? "2px solid rgba(200,40,40,.65)"
-                                      : isStoji
-                                        ? "2px solid rgba(30,136,229,.6)"
-                                        : "2px solid " + smenyBorder[si];
-                                var modeClr = isBez
-                                    ? "#e6b800"
-                                    : isTest
-                                      ? "#e03030"
-                                      : isStoji
-                                        ? "#1e88e5"
-                                        : smenyColors[si];
-                                html +=
-                                    '<td style="padding:0;background:' +
-                                    cellBg +
-                                    ";border-left:" +
-                                    cellBorder +
-                                    todayBg +
-                                    '">';
-                                html +=
-                                    '<div id="' +
-                                    cellId +
-                                    '" class="plan-cell has-plan" style="padding:10px 8px;text-align:center;border-left:none">';
+                                var isBez = !!p.bezVyroby, isTest = !!p.isTest, isStoji = !!p.isStoji;
+                                var cellBorderLeft = isBez ? '2px solid rgba(230,184,0,.5)'
+                                    : isTest   ? '2px solid rgba(200,40,40,.5)'
+                                    : isStoji  ? '2px solid rgba(30,136,229,.5)'
+                                    : '2px solid ' + smenyBorder[si];
+                                html += '<td style="border-left:' + cellBorderLeft + '">';
+                                html += '<div id="' + cellId + '" class="pc2l has-plan' + todayCls + '">' + pcs;
                                 if (isStoji) {
-                                    html +=
-                                        '<div style="display:inline-flex;align-items:center;padding:2px 8px;border-radius:20px;font-family:\'Inter\',sans-serif;font-size:8px;font-weight:600;letter-spacing:.08em;color:#4a9eff;background:rgba(74,158,255,.1);border:1px solid rgba(74,158,255,.25)">Bez výroby</div>';
+                                    html += '<div class="pcbadge s">Bez výroby</div>';
                                     if (p.stojiOd || p.stojiDo) {
-                                        var odD = p.stojiOd
-                                            ? p.stojiOd.slice(8, 10) +
-                                              "." +
-                                              p.stojiOd.slice(5, 7) +
-                                              ". " +
-                                              p.stojiOd.slice(11, 16)
-                                            : "?";
-                                        var doD = p.stojiDo
-                                            ? p.stojiDo.slice(8, 10) +
-                                              "." +
-                                              p.stojiDo.slice(5, 7) +
-                                              ". " +
-                                              p.stojiDo.slice(11, 16)
-                                            : "?";
-                                        html +=
-                                            '<div style="font-size:9px;color:rgba(74,158,255,.5);margin-top:4px;line-height:1.5">' +
-                                            odD +
-                                            "<br>↓ " +
-                                            doD +
-                                            "</div>";
+                                        html += '<div style="font-size:9px;color:rgba(74,158,255,.45);margin-top:4px;line-height:1.6">' +
+                                            (p.stojiOd ? p.stojiOd.slice(8,10)+'.'+p.stojiOd.slice(5,7) : '?') + ' → ' +
+                                            (p.stojiDo ? p.stojiDo.slice(8,10)+'.'+p.stojiDo.slice(5,7) : '?') + '</div>';
                                     }
-                                    if (p.note)
-                                        html +=
-                                            '<div style="font-size:9px;color:var(--text3);margin-top:5px;font-style:italic">' +
-                                            p.note +
-                                            "</div>";
                                 } else {
-                                    if (isBez)
-                                        html +=
-                                            '<div class="plan-cell-badge" style="display:inline-flex;align-items:center;padding:2px 8px;border-radius:20px;font-family:\'Inter\',sans-serif;font-size:8px;font-weight:600;letter-spacing:.08em;color:#e6b800;background:rgba(230,184,0,.12);border:1px solid rgba(230,184,0,.3);margin-bottom:5px">VÝMĚNA</div>';
-                                    if (isTest)
-                                        html +=
-                                            '<div class="plan-cell-badge" style="display:inline-flex;align-items:center;padding:2px 8px;border-radius:20px;font-family:\'Inter\',sans-serif;font-size:8px;font-weight:600;letter-spacing:.08em;color:#e03030;background:rgba(200,40,40,.12);border:1px solid rgba(200,40,40,.3);margin-bottom:5px">TEST</div>';
-                                    if (p.forma)
-                                        html +=
-                                            '<div class="plan-cell-forma" style="font-family:\'Inter\',sans-serif;font-size:16px;font-weight:700;color:rgba(255,255,255,.92);line-height:1;margin-bottom:3px">' +
-                                            p.forma +
-                                            "</div>";
-                                    if (p.cas)
-                                        html +=
-                                            '<div class="plan-cell-cas" style="font-size:13px;font-weight:700;color:' +
-                                            modeClr +
-                                            ';margin-bottom:6px">' +
-                                            p.cas +
-                                            "</div>";
-                                    if (isBez) {
-                                        if (p.note)
-                                            html +=
-                                                '<div style="font-size:9px;color:var(--text3);margin-top:4px;font-style:italic">' +
-                                                p.note +
-                                                "</div>";
-                                    } else {
-                                        html +=
-                                            '<div class="plan-cell-detail" style="border-top:1px solid rgba(255,255,255,.06);padding-top:6px">';
-                                        var matLabel = (D.formy && p.forma && D.formy[p.forma] && D.formy[p.forma].matId)
-                                            ? D.formy[p.forma].matId
-                                            : (p.mat ? p.mat.split("(")[0].trim() : null);
-                                        if (matLabel)
-                                            html +=
-                                                '<div class="plan-cell-mat" style="font-size:10px;color:var(--text2);line-height:1.3;margin-bottom:2px">' +
-                                                matLabel +
-                                                "</div>";
-                                        if (p.barva)
-                                            html +=
-                                                '<div style="font-size:10px;color:var(--text3);margin-top:2px">' +
-                                                p.barva +
-                                                "</div>";
-                                        if (p.susen)
-                                            html +=
-                                                '<div style="font-size:9px;font-weight:700;color:var(--orange);margin-top:3px;letter-spacing:.3px">SUŠIT</div>';
-                                        if (p.note)
-                                            html +=
-                                                '<div style="font-size:9px;color:var(--text3);margin-top:2px;font-style:italic">' +
-                                                p.note +
-                                                "</div>";
-                                        html += "</div>";
-                                    }
+                                    if (isBez) html += '<div class="pcbadge v">Výměna</div>';
+                                    if (isTest) html += '<div class="pcbadge t">Test</div>';
+                                    if (p.forma) html += '<div class="pcf"' + (isTest ? ' style="color:#e03030"' : '') + '>' + p.forma + '</div>';
+                                    if (p.cas) html += '<div class="pck" style="color:' + smenyColors[si] + '">' + p.cas + '</div>';
+                                    var matLabel = (D.formy && p.forma && D.formy[p.forma] && D.formy[p.forma].matId)
+                                        ? D.formy[p.forma].matId : (p.mat ? p.mat.split('(')[0].trim() : null);
+                                    if (matLabel) html += '<div class="pcm">' + matLabel + '</div>';
+                                    if (p.susen) html += '<div class="pcbadge su">Sušit</div>';
+                                    if (p.note) html += '<div style="font-size:9px;color:var(--text3);margin-top:2px;font-style:italic">' + p.note + '</div>';
                                 }
-                                html += "</div></td>";
+                                html += '</div></td>';
                             } else {
-                                var spanEntry = getSpanningPlanForCell(
-                                    mach,
-                                    dk,
-                                    smena,
-                                );
+                                var spanEntry = getSpanningPlanForCell(mach, dk, smena);
                                 if (spanEntry) {
                                     if (spanEntry.isStoji) {
-                                        // Bez výroby spanning – jemný, nenápadný
-                                        html +=
-                                            '<td style="padding:0;background:rgba(30,136,229,.05);border-left:1px solid rgba(30,136,229,.2)' +
-                                            todayBg +
-                                            '">';
-                                        html +=
-                                            '<div id="' +
-                                            cellId +
-                                            '" class="plan-cell has-plan" style="padding:8px 6px;text-align:center;border-left:none">';
-                                        html +=
-                                            '<div style="font-size:10px;font-weight:400;color:rgba(74,158,255,.4);letter-spacing:.2px">Bez výroby</div>';
-                                        html += "</div></td>";
+                                        html += '<td style="border-left:1px solid rgba(30,136,229,.2)">';
+                                        html += '<div id="' + cellId + '" class="pc2l has-plan' + todayCls + '">' + pcs;
+                                        html += '<div style="font-size:9px;color:rgba(74,158,255,.35)">Bez výroby</div>';
                                     } else {
-                                        html +=
-                                            '<td style="padding:0;background:' +
-                                            smenyBg[si] +
-                                            ";border-left:2px solid " +
-                                            smenyBorder[si] +
-                                            todayBg +
-                                            '">';
-                                        html +=
-                                            '<div id="' +
-                                            cellId +
-                                            '" class="plan-cell has-plan" style="padding:8px 6px;text-align:center;border-left:none;opacity:.55">';
-                                        html +=
-                                            '<div class="plan-cell-continues" style="font-size:9px;color:var(--text3);margin-bottom:3px;letter-spacing:.4px">▶ pokračuje</div>';
-                                        html +=
-                                            '<div class="plan-cell-forma" style="font-size:15px;font-weight:900;color:var(--text);line-height:1.1;margin-bottom:3px">' +
-                                            spanEntry.forma +
-                                            "</div>";
-                                        var spanMatLabel = (D.formy && spanEntry.forma && D.formy[spanEntry.forma] && D.formy[spanEntry.forma].matId)
-                                            ? D.formy[spanEntry.forma].matId
-                                            : (spanEntry.mat ? spanEntry.mat.split(' ').slice(0, 2).join(' ') : null);
-                                        if (spanMatLabel)
-                                            html +=
-                                                '<div class="plan-cell-mat" style="font-size:9px;color:var(--text2);margin-bottom:2px">' +
-                                                spanMatLabel +
-                                                "</div>";
-                                        html += "</div></td>";
+                                        html += '<td style="border-left:2px solid ' + smenyBorder[si] + '">';
+                                        html += '<div id="' + cellId + '" class="pc2l has-plan' + todayCls + '" style="opacity:.55">' + pcs;
+                                        html += '<div style="font-size:8px;color:var(--text3);letter-spacing:.3px;margin-bottom:3px">▶ pokračuje</div>';
+                                        if (spanEntry.forma) html += '<div class="pcf" style="font-size:14px">' + spanEntry.forma + '</div>';
+                                        var spanMat = (D.formy && spanEntry.forma && D.formy[spanEntry.forma] && D.formy[spanEntry.forma].matId)
+                                            ? D.formy[spanEntry.forma].matId : (spanEntry.mat ? spanEntry.mat.split(' ').slice(0,2).join(' ') : null);
+                                        if (spanMat) html += '<div class="pcm">' + spanMat + '</div>';
                                     }
+                                    html += '</div></td>';
                                 } else {
-                                    html +=
-                                        '<td style="padding:0;background:' +
-                                        smenyBg[si] +
-                                        ";border-left:2px solid " +
-                                        smenyBorder[si] +
-                                        todayBg +
-                                        '">';
-                                    html +=
-                                        '<div id="' +
-                                        cellId +
-                                        '" class="plan-cell-empty" style="min-height:80px;font-size:18px;color:var(--text3);opacity:.25">';
-                                    html += "+";
-                                    html += "</div></td>";
+                                    html += '<td style="border-left:2px solid ' + smenyBorder[si] + '">';
+                                    html += '<div id="' + cellId + '" class="pc-empty" data-k="' + planKey + '" data-m="' + mach + '" data-d="' + dk + '" data-s="' + smena + '">+</div></td>';
                                 }
                             }
                         });
                     });
-                    html += "</tr>";
+                    html += '</tr>';
                 });
-                html += "</tbody>";
+                html += '</tbody>';
                 grid.innerHTML = html;
 
                 MACHINES_LIST.forEach(function (mach, mi) {
