@@ -5995,13 +5995,6 @@
                                                 '<div style="font-size:10px;color:var(--text2);line-height:1.3;margin-bottom:2px">' +
                                                 p.mat.split("(")[0].trim() +
                                                 "</div>";
-                                        if (p.qty)
-                                            html +=
-                                                '<div style="font-size:11px;color:var(--green-text);font-weight:700">' +
-                                                parseInt(
-                                                    p.qty,
-                                                ).toLocaleString() +
-                                                " ks</div>";
                                         if (p.barva)
                                             html +=
                                                 '<div style="font-size:10px;color:var(--text3);margin-top:2px">' +
@@ -6289,11 +6282,6 @@
                                             '<div style="font-size:11px;color:var(--text2);line-height:1.4">' +
                                             p.mat.split("(")[0].trim() +
                                             "</div>";
-                                    if (p.qty)
-                                        cells +=
-                                            '<div style="font-size:13px;color:var(--green-text);font-weight:700;margin-top:5px">' +
-                                            parseInt(p.qty).toLocaleString() +
-                                            " ks</div>";
                                     if (p.susen)
                                         cells +=
                                             '<div style="display:inline-block;margin-top:5px;font-size:10px;font-weight:700;color:var(--orange);background:rgba(255,156,0,.12);border:1px solid rgba(255,156,0,.25);border-radius:3px;padding:2px 7px;letter-spacing:.5px">SUŠIT</div>';
@@ -6640,7 +6628,7 @@
                     "Plán uložen",
                     isStoji
                         ? "Bez výroby"
-                        : (forma || "") + (qty ? " · " + qty + " ks" : ""),
+                        : (forma || ""),
                 );
             }
 
@@ -7569,13 +7557,6 @@
                                     "<span>č. " +
                                     planned.forma +
                                     "</span>" +
-                                    (planned.qty
-                                        ? '<span style="opacity:.6;font-weight:400">· ' +
-                                          parseInt(
-                                              planned.qty,
-                                          ).toLocaleString() +
-                                          " ks</span>"
-                                        : "") +
                                     (platidoLabel
                                         ? '<span style="opacity:.7;font-weight:400;font-size:10px">' +
                                           platidoLabel +
