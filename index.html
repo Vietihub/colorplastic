@@ -2115,6 +2115,12 @@
                 max-height: 2000px;
             }
 
+            /* ── Brand logo image ─────────────────── */
+            .brand-logo-wrap{background:#fff;border-radius:8px;padding:7px 12px;display:inline-flex;align-items:center;justify-content:center;}
+            .brand-logo-wrap img{display:block;height:32px;width:auto;}
+            .brand-logo-wrap.sm img{height:22px;}
+            .brand-logo-wrap.xs img{height:16px;}
+
             /* ── FAB – Přidat výměnu ───────────────────────── */
             .fab {
                 position: fixed;
@@ -2371,11 +2377,11 @@
         <!-- LOGIN -->
         <div id="login">
             <div class="lw">
-                <div class="logo-big">
-                    <span class="logo-c">C</span><span>OLOR</span>
+                <div style="text-align:center;margin-bottom:36px;">
+                    <div class="brand-logo-wrap" style="padding:12px 20px;">
+                        <img src="colorplastic-logo.png" alt="ColorPlastic Automotive" style="height:48px;">
+                    </div>
                 </div>
-                <div class="logo-pl">PLASTIC</div>
-                <div class="logo-au">Automotive</div>
                 <div class="lcard">
                     <div style="text-align: center; margin-bottom: 22px">
                         <div
@@ -2438,22 +2444,9 @@
         <!-- APP -->
         <div id="app" style="display: none">
             <header class="topbar" id="mob-topbar">
-                <span class="mob-logo"
-                    ><span class="mob-lc">C</span
-                    ><span class="mob-lr">OLOR</span
-                    ><span
-                        style="
-                            font-size: 12px;
-                            font-weight: 600;
-                            color: var(--text3);
-                            letter-spacing: 1.5px;
-                            margin-left: 4px;
-                            align-self: flex-end;
-                            padding-bottom: 1px;
-                        "
-                        >PLASTIC</span
-                    ></span
-                >
+                <div class="brand-logo-wrap xs">
+                    <img src="colorplastic-logo.png" alt="ColorPlastic">
+                </div>
                 <div class="mob-live">Live</div>
                 <div class="mob-clk" id="mob-clk">--:--:--</div>
                 <button
@@ -2483,20 +2476,9 @@
             <nav class="sidebar" id="sidebar">
                 <div class="sb-top">
                     <div class="sb-logo">
-                        <span class="sb-lc">C</span
-                        ><span class="sb-lr">OLOR</span
-                        ><span class="sb-lp">PLASTIC</span
-                        ><span
-                            style="
-                                font-size: 9px;
-                                font-weight: 600;
-                                letter-spacing: 1.2px;
-                                color: var(--text3);
-                                margin-left: 6px;
-                                align-self: center;
-                            "
-                            >AUTOMOTIVE</span
-                        >
+                        <div class="brand-logo-wrap sm">
+                            <img src="colorplastic-logo.png" alt="ColorPlastic">
+                        </div>
                     </div>
                     <button class="sb-toggle" onclick="toggleSidebar()">
                         &#8942;
