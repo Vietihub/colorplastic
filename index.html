@@ -15,7 +15,7 @@
         <link rel="shortcut icon" href="favicon.ico" />
         <link rel="apple-touch-icon" href="favicon.ico" />
         <link
-            href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700;900&family=Barlow+Condensed:wght@600;700;900&family=JetBrains+Mono:wght@400;500&family=Inter:wght@200;300;400;500;600&display=swap"
+            href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700;900&family=Barlow+Condensed:wght@600;700;900&family=JetBrains+Mono:wght@400;500&family=Inter:wght@200;300;400;500;600&family=Bodoni+Moda:wght@400;600;700&family=Jost:wght@300;400;500;600&display=swap"
             rel="stylesheet"
         />
         <style>
@@ -2280,6 +2280,162 @@
                 display: none;
             }
 
+            /* ── KPI Cards ─────────────────────────────────── */
+            .kpi-cards {
+                display: grid;
+                grid-template-columns: repeat(3, 1fr);
+                gap: 16px;
+                margin-bottom: 24px;
+            }
+            @media (max-width: 900px) {
+                .kpi-cards { grid-template-columns: 1fr 1fr; }
+            }
+            @media (max-width: 560px) {
+                .kpi-cards { grid-template-columns: 1fr; }
+            }
+            .kpi-card {
+                background: linear-gradient(
+                    145deg,
+                    rgba(255,255,255,.055) 0%,
+                    rgba(255,255,255,.018) 50%,
+                    rgba(255,255,255,.032) 100%
+                );
+                border: 1px solid rgba(255,255,255,.08);
+                border-top-color: rgba(255,255,255,.14);
+                border-left-color: rgba(255,255,255,.10);
+                border-radius: 16px;
+                backdrop-filter: blur(32px) saturate(160%);
+                -webkit-backdrop-filter: blur(32px) saturate(160%);
+                box-shadow:
+                    0 0 0 1px rgba(255,255,255,.03) inset,
+                    0 16px 48px rgba(0,0,0,.45),
+                    0 4px 16px rgba(0,0,0,.3);
+                padding: 22px 22px 18px;
+                position: relative;
+                overflow: hidden;
+                cursor: default;
+                transition: transform .35s cubic-bezier(.23,1,.32,1),
+                            box-shadow .35s cubic-bezier(.23,1,.32,1);
+                animation: kpiIn .6s cubic-bezier(.23,1,.32,1) both;
+            }
+            .kpi-card:nth-child(1) { animation-delay: .05s; }
+            .kpi-card:nth-child(2) { animation-delay: .12s; }
+            .kpi-card:nth-child(3) { animation-delay: .19s; }
+            @keyframes kpiIn {
+                from { opacity: 0; transform: translateY(18px) scale(.97); }
+                to   { opacity: 1; transform: translateY(0) scale(1); }
+            }
+            .kpi-card::before {
+                content: '';
+                position: absolute;
+                top: 0; left: 20px; right: 20px;
+                height: 1px;
+                background: linear-gradient(90deg, transparent, var(--red) 40%, transparent);
+                opacity: .55;
+            }
+            .kpi-card:hover {
+                transform: translateY(-3px);
+                box-shadow:
+                    0 0 0 1px rgba(255,255,255,.06) inset,
+                    0 24px 64px rgba(0,0,0,.55),
+                    0 6px 24px rgba(0,0,0,.35);
+            }
+            .kpi-label {
+                font-family: 'Jost', sans-serif;
+                font-size: 9px;
+                font-weight: 500;
+                letter-spacing: .30em;
+                text-transform: uppercase;
+                color: rgba(248,250,252,.32);
+                margin-bottom: 4px;
+            }
+            .kpi-name {
+                font-family: 'Jost', sans-serif;
+                font-size: 12px;
+                font-weight: 500;
+                color: rgba(248,250,252,.65);
+                margin-bottom: 14px;
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
+            }
+            .kpi-value {
+                font-family: 'Bodoni Moda', Georgia, serif;
+                font-size: 48px;
+                font-weight: 700;
+                line-height: .95;
+                letter-spacing: -.02em;
+                background: linear-gradient(135deg, #f8fafc 40%, rgba(248,250,252,.5) 100%);
+                -webkit-background-clip: text;
+                -webkit-text-fill-color: transparent;
+                background-clip: text;
+                display: inline-block;
+                margin-bottom: 4px;
+            }
+            .kpi-unit {
+                font-family: 'Jost', sans-serif;
+                font-size: 13px;
+                font-weight: 300;
+                color: rgba(248,250,252,.32);
+                letter-spacing: .06em;
+                margin-left: 4px;
+                vertical-align: middle;
+                position: relative;
+                top: -6px;
+            }
+            .kpi-footer {
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                margin-top: 12px;
+                padding-top: 10px;
+                border-top: 1px solid rgba(255,255,255,.06);
+            }
+            .kpi-sub {
+                font-size: 11px;
+                font-weight: 400;
+                color: rgba(248,250,252,.30);
+                font-family: 'Jost', sans-serif;
+            }
+            .kpi-badge {
+                display: inline-flex;
+                align-items: center;
+                gap: 5px;
+                border-radius: 100px;
+                padding: 3px 9px 3px 7px;
+                font-size: 10px;
+                font-weight: 500;
+                font-family: 'Jost', sans-serif;
+                letter-spacing: .02em;
+            }
+            .kpi-badge.green {
+                background: rgba(34,197,94,.10);
+                border: 1px solid rgba(34,197,94,.18);
+                color: #4ade80;
+            }
+            .kpi-badge.red {
+                background: rgba(232,0,30,.10);
+                border: 1px solid rgba(232,0,30,.20);
+                color: #ff6b7a;
+            }
+            .kpi-badge.gold {
+                background: rgba(202,138,4,.10);
+                border: 1px solid rgba(202,138,4,.20);
+                color: #fbbf24;
+            }
+            .kpi-dot {
+                width: 5px; height: 5px;
+                border-radius: 50%;
+                background: currentColor;
+            }
+            .kpi-dot.pulse {
+                animation: kpiPulse 2s ease-in-out infinite;
+            }
+            @keyframes kpiPulse {
+                0%,100% { opacity:1; }
+                50%      { opacity:.4; }
+            }
+
             /* ── FAB – Přidat výměnu ───────────────────────── */
             .fab {
                 position: fixed;
@@ -3247,6 +3403,7 @@
                             <div class="psub">
                                 Aktuální výroba, požadavky a scrap
                             </div>
+                            <div class="kpi-cards" id="kpi-cards"></div>
                             <div class="stats" id="stats-prehled"></div>
                             <div class="stitle">🏭 Aktuální výroba</div>
                             <div class="pgrid" id="prod-prehled"></div>
@@ -8081,6 +8238,40 @@
                 var running = D.production.filter(function (p) {
                     return p.running;
                 }).length;
+
+                // ── KPI Cards ──
+                var kpiEl = document.getElementById("kpi-cards");
+                if (kpiEl) {
+                    var scrapBadge = totalScrap > 5
+                        ? '<span class="kpi-badge red"><span class="kpi-dot"></span>' + totalScrap.toFixed(1) + ' kg</span>'
+                        : '<span class="kpi-badge green"><span class="kpi-dot pulse"></span>V normě</span>';
+                    var reqBadge = pendReq > 0
+                        ? '<span class="kpi-badge gold"><span class="kpi-dot"></span>' + pendReq + ' čeká</span>'
+                        : '<span class="kpi-badge green"><span class="kpi-dot"></span>Vše vyřízeno</span>';
+                    var runBadge = running > 0
+                        ? '<span class="kpi-badge green"><span class="kpi-dot pulse"></span>Běží</span>'
+                        : '<span class="kpi-badge red"><span class="kpi-dot"></span>Stojí</span>';
+                    kpiEl.innerHTML =
+                        '<div class="kpi-card">' +
+                            '<div class="kpi-label">Výroba · Live</div>' +
+                            '<div class="kpi-name">Aktivní stroje</div>' +
+                            '<div><span class="kpi-value">' + running + '</span><span class="kpi-unit">/ ' + D.production.length + '</span></div>' +
+                            '<div class="kpi-footer"><span class="kpi-sub">Engel lisovny</span>' + runBadge + '</div>' +
+                        '</div>' +
+                        '<div class="kpi-card">' +
+                            '<div class="kpi-label">Scrap · Dnes</div>' +
+                            '<div class="kpi-name">Celkový odpad</div>' +
+                            '<div><span class="kpi-value">' + totalScrap.toFixed(1) + '</span><span class="kpi-unit">kg</span></div>' +
+                            '<div class="kpi-footer"><span class="kpi-sub">' + D.scrap.length + ' zápisů</span>' + scrapBadge + '</div>' +
+                        '</div>' +
+                        '<div class="kpi-card">' +
+                            '<div class="kpi-label">Materiál · Požadavky</div>' +
+                            '<div class="kpi-name">Čekající požadavky</div>' +
+                            '<div><span class="kpi-value">' + pendReq + '</span><span class="kpi-unit">ks</span></div>' +
+                            '<div class="kpi-footer"><span class="kpi-sub">Celkem ' + D.requests.length + ' dnes</span>' + reqBadge + '</div>' +
+                        '</div>';
+                }
+
                 var el = document.getElementById("stats-prehled");
                 if (el)
                     el.innerHTML =
