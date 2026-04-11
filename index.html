@@ -2064,114 +2064,125 @@
             }
 
             .plan-today-card { display: none; }
-            /* Notification banner */
-            .notif-wrap {
+            /* ── Notification banner ─────────────────────────── */
+            #notif-banner {
                 display: none;
                 position: fixed;
                 bottom: 20px;
                 right: 20px;
                 z-index: 9999;
-                max-width: 320px;
-                width: 100%;
+                width: 320px;
+                max-width: calc(100vw - 32px);
+            }
+            .notif {
+                display: flex;
+                align-items: flex-start;
+                gap: 14px;
+                padding: 14px 18px;
                 border-radius: 12px;
+                border: 1px solid;
+                backdrop-filter: blur(28px);
+                -webkit-backdrop-filter: blur(28px);
+                position: relative;
                 overflow: hidden;
-                box-shadow: 0 8px 32px rgba(0,0,0,.55);
-                backdrop-filter: blur(20px);
-                -webkit-backdrop-filter: blur(20px);
-                border: 1px solid rgba(255,255,255,.1);
-                animation: notifIn .25s ease;
+                animation: notifIn .45s cubic-bezier(.23,1,.32,1) both;
+                transition: transform .25s, box-shadow .25s;
             }
-            @keyframes notifIn {
-                from { opacity:0; transform:translateY(12px); }
-                to   { opacity:1; transform:translateY(0); }
+            .notif:hover { transform: translateX(-3px); }
+            @keyframes notifIn { from { opacity:0; transform:translateX(20px); } to { opacity:1; transform:none; } }
+            .notif::before {
+                content: '';
+                position: absolute;
+                left: 0; top: 0; bottom: 0;
+                width: 3px;
             }
-            .notif-wrap.info {
-                background: linear-gradient(135deg, rgba(74,158,255,.12), rgba(20,30,50,.92));
-                border-color: rgba(74,158,255,.35);
+            .notif::after {
+                content: '';
+                position: absolute;
+                inset: 0;
+                background: linear-gradient(90deg, transparent 0%, rgba(255,255,255,.025) 50%, transparent 100%);
+                transform: translateX(-100%);
+                animation: shimmer 3s ease-in-out infinite;
+                pointer-events: none;
             }
-            .notif-wrap.critical {
-                background: linear-gradient(135deg, rgba(232,0,30,.14), rgba(50,10,14,.92));
-                border-color: rgba(232,0,30,.4);
+            @keyframes shimmer { 0% { transform:translateX(-100%); } 60%,100% { transform:translateX(100%); } }
+            .notif.info {
+                background: linear-gradient(135deg, rgba(74,158,255,.09) 0%, rgba(74,158,255,.03) 100%);
+                border-color: rgba(74,158,255,.20);
+                box-shadow: 0 4px 20px rgba(74,158,255,.07), 0 1px 8px rgba(0,0,0,.3);
             }
-            .notif-wrap.warning {
-                background: linear-gradient(135deg, rgba(251,146,60,.12), rgba(40,28,10,.92));
-                border-color: rgba(251,146,60,.35);
+            .notif.info::before { background: linear-gradient(180deg,#60a5fa,#4a9eff); }
+            .notif.critical {
+                background: linear-gradient(135deg, rgba(220,38,38,.12) 0%, rgba(220,38,38,.04) 100%);
+                border-color: rgba(220,38,38,.25);
+                box-shadow: 0 4px 24px rgba(220,38,38,.12), 0 1px 8px rgba(0,0,0,.3);
             }
-            .notif-wrap.success {
-                background: linear-gradient(135deg, rgba(34,197,94,.12), rgba(10,40,20,.92));
-                border-color: rgba(34,197,94,.35);
+            .notif.critical::before { background: linear-gradient(180deg,#ef4444,#dc2626); }
+            .notif.warning {
+                background: linear-gradient(135deg, rgba(245,158,11,.10) 0%, rgba(245,158,11,.03) 100%);
+                border-color: rgba(245,158,11,.22);
+                box-shadow: 0 4px 24px rgba(245,158,11,.08), 0 1px 8px rgba(0,0,0,.3);
             }
-            .notif-accent {
-                height: 3px;
-                width: 100%;
+            .notif.warning::before { background: linear-gradient(180deg,#fbbf24,#f59e0b); }
+            .notif.success {
+                background: linear-gradient(135deg, rgba(34,197,94,.09) 0%, rgba(34,197,94,.03) 100%);
+                border-color: rgba(34,197,94,.20);
+                box-shadow: 0 4px 20px rgba(34,197,94,.07), 0 1px 8px rgba(0,0,0,.3);
             }
-            .notif-wrap.info    .notif-accent { background: #4a9eff; }
-            .notif-wrap.critical .notif-accent { background: #e8001e; }
-            .notif-wrap.warning .notif-accent { background: #fb923c; }
-            .notif-wrap.success .notif-accent { background: #22c55e; }
-            .notif-body {
-                padding: 14px 16px 16px;
-            }
-            .notif-header {
-                display: flex;
-                align-items: center;
-                gap: 10px;
-                margin-bottom: 10px;
-            }
+            .notif.success::before { background: linear-gradient(180deg,#4ade80,#22c55e); }
             .notif-icon {
-                width: 32px;
-                height: 32px;
-                border-radius: 8px;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                flex-shrink: 0;
+                width: 36px; height: 36px; border-radius: 9px;
+                display: flex; align-items: center; justify-content: center;
+                flex-shrink: 0; margin-top: 1px;
             }
-            .notif-wrap.info    .notif-icon { background: rgba(74,158,255,.18); color: #4a9eff; }
-            .notif-wrap.critical .notif-icon { background: rgba(232,0,30,.18); color: #e8001e; }
-            .notif-wrap.warning .notif-icon { background: rgba(251,146,60,.18); color: #fb923c; }
-            .notif-wrap.success .notif-icon { background: rgba(34,197,94,.18); color: #22c55e; }
+            .notif-icon svg { width: 18px; height: 18px; stroke-width: 2; }
+            .notif.info     .notif-icon { background: rgba(74,158,255,.14); color: #60a5fa; }
+            .notif.critical .notif-icon { background: rgba(220,38,38,.18);  color: #f87171; }
+            .notif.warning  .notif-icon { background: rgba(245,158,11,.15); color: #fbbf24; }
+            .notif.success  .notif-icon { background: rgba(34,197,94,.14);  color: #4ade80; }
+            .notif-body { flex: 1; min-width: 0; }
             .notif-title {
                 font-family: "Fira Sans", sans-serif;
-                font-size: 13px;
-                font-weight: 700;
-                color: var(--text);
-                line-height: 1.2;
+                font-size: 13px; font-weight: 600;
+                color: var(--text); margin-bottom: 3px; letter-spacing: .01em;
             }
-            .notif-sub {
-                font-size: 11px;
-                color: var(--text3);
-                margin-top: 2px;
-            }
-            .notif-close {
-                margin-left: auto;
-                background: none;
-                border: none;
-                color: var(--text3);
-                font-size: 16px;
-                cursor: pointer;
-                padding: 2px 6px;
-                border-radius: 4px;
-                line-height: 1;
-                transition: color var(--transition);
-            }
-            .notif-close:hover { color: var(--text); }
-            .notif-btn {
-                width: 100%;
-                border: none;
-                border-radius: 8px;
-                padding: 9px;
+            .notif-msg {
                 font-family: "Fira Sans", sans-serif;
-                font-size: 13px;
-                font-weight: 700;
-                cursor: pointer;
-                transition: opacity var(--transition);
+                font-size: 11px; color: var(--text2); line-height: 1.5;
+            }
+            .notif-msg strong { color: var(--text); font-weight: 600; }
+            .notif-meta { display: flex; align-items: center; gap: 8px; margin-top: 6px; }
+            .notif-time { font-family: "Fira Code", monospace; font-size: 10px; color: var(--text3); }
+            .notif-tag {
+                font-family: "Fira Sans", sans-serif; font-size: 9px; font-weight: 600;
+                letter-spacing: .12em; text-transform: uppercase;
+                padding: 1px 6px; border-radius: 3px;
+            }
+            .notif.info     .notif-tag { color:#60a5fa; background:rgba(74,158,255,.12);  border:1px solid rgba(74,158,255,.20); }
+            .notif.critical .notif-tag { color:#f87171; background:rgba(220,38,38,.15);   border:1px solid rgba(220,38,38,.25); }
+            .notif.warning  .notif-tag { color:#fbbf24; background:rgba(245,158,11,.12);  border:1px solid rgba(245,158,11,.22); }
+            .notif.success  .notif-tag { color:#4ade80; background:rgba(34,197,94,.12);   border:1px solid rgba(34,197,94,.20); }
+            .notif-close {
+                width: 24px; height: 24px; border-radius: 5px;
+                display: flex; align-items: center; justify-content: center;
+                background: none; border: none; color: var(--text3);
+                cursor: pointer; flex-shrink: 0; margin-top: 1px;
+                transition: background .18s, color .18s;
+            }
+            .notif-close:hover { background: rgba(255,255,255,.07); color: var(--text); }
+            .notif-close svg { width: 14px; height: 14px; stroke-width: 2; }
+            .notif-btn {
+                width: 100%; border: none; border-radius: 8px;
+                padding: 9px; margin-top: 10px;
+                font-family: "Fira Sans", sans-serif;
+                font-size: 13px; font-weight: 700;
+                cursor: pointer; transition: opacity .18s;
             }
             .notif-btn:hover { opacity: .85; }
-            .notif-wrap.info    .notif-btn { background: #4a9eff; color: #fff; }
-            .notif-wrap.critical .notif-btn { background: #e8001e; color: #fff; }
-            .notif-wrap.warning .notif-btn { background: #fb923c; color: #fff; }
-            .notif-wrap.success .notif-btn { background: #22c55e; color: #020617; }
+            .notif.info     .notif-btn { background: #4a9eff; color: #fff; }
+            .notif.critical .notif-btn { background: #ef4444; color: #fff; }
+            .notif.warning  .notif-btn { background: #f59e0b; color: #020617; }
+            .notif.success  .notif-btn { background: #22c55e; color: #020617; }
             /* plan table wrapper */
             .pt-wrap {
                 background: linear-gradient(160deg,
@@ -3586,23 +3597,26 @@
                     </button>
                 </div>
             </nav>
-            <div id="notif-banner" class="notif-wrap info">
-                <div class="notif-accent"></div>
-                <div class="notif-body">
-                    <div class="notif-header">
-                        <div class="notif-icon">
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-                                <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
-                                <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
-                            </svg>
-                        </div>
-                        <div>
-                            <div class="notif-title">Povolit notifikace</div>
-                            <div class="notif-sub">Upozornění při změnách výroby</div>
-                        </div>
-                        <button class="notif-close" onclick="document.getElementById('notif-banner').style.display='none'">✕</button>
+            <div id="notif-banner">
+                <div class="notif info">
+                    <div class="notif-icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
+                            <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
+                        </svg>
                     </div>
-                    <button class="notif-btn" onclick="requestNotifPermission()">Povolit notifikace</button>
+                    <div class="notif-body">
+                        <div class="notif-title">Povolit push notifikace</div>
+                        <div class="notif-msg">Dostávejte upozornění přímo do mobilu při změnách výroby a výměnách.</div>
+                        <div class="notif-meta">
+                            <span class="notif-time">Systém</span>
+                            <span class="notif-tag">Info</span>
+                        </div>
+                        <button class="notif-btn" onclick="requestNotifPermission()">Povolit notifikace</button>
+                    </div>
+                    <button class="notif-close" onclick="document.getElementById('notif-banner').style.display='none'">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                    </button>
                 </div>
             </div>
 
