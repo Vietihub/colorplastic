@@ -2466,6 +2466,249 @@
                 animation: p 1.5s infinite;
                 box-shadow: 0 0 5px rgba(57, 211, 83, 0.5);
             }
+
+            /* ═══════════════════════════════════════════════════
+               DASHBOARD REDESIGN — Tech-Industrial Luxury
+               Matches the high-end login screen aesthetic
+            ═══════════════════════════════════════════════════ */
+
+            /* ── Sidebar ────────────────────────────────────── */
+            .sidebar {
+                background: #0a0c0f;
+                border-right: 1px solid rgba(255,255,255,.055);
+                width: 220px;
+            }
+            .sidebar.collapsed { width: 60px; }
+            .sb-top {
+                border-bottom: 1px solid rgba(255,255,255,.055);
+                padding: 18px 16px 16px;
+                min-height: 62px;
+            }
+            /* New Inter sidebar logo */
+            .sb-logotype {
+                display: flex;
+                flex-direction: column;
+                line-height: 1;
+                user-select: none;
+                overflow: hidden;
+                white-space: nowrap;
+                transition: opacity .15s, width .15s;
+            }
+            .sidebar.collapsed .sb-logotype { opacity: 0; width: 0; pointer-events: none; }
+            .sb-logotype-l1 {
+                font-family: 'Inter', sans-serif;
+                font-size: 17px;
+                font-weight: 300;
+                letter-spacing: .4em;
+                padding-right: .4em;
+            }
+            .sb-logo-c  { color: #E30613; }
+            .sb-logo-olor { color: rgba(255,255,255,.8); }
+            .sb-logotype-l2 {
+                font-family: 'Inter', sans-serif;
+                font-size: 7px;
+                font-weight: 200;
+                letter-spacing: .52em;
+                text-transform: uppercase;
+                color: rgba(255,255,255,.2);
+                margin-top: 5px;
+                padding-right: .52em;
+            }
+            /* Toggle button */
+            .sb-toggle {
+                color: rgba(255,255,255,.28);
+                border-radius: 6px;
+                transition: color .15s, background .15s;
+            }
+            .sb-toggle:hover {
+                color: rgba(255,255,255,.7);
+                background: rgba(255,255,255,.05);
+            }
+            /* Nav items */
+            .sbn {
+                font-family: 'Inter', sans-serif;
+                font-size: 13px;
+                font-weight: 400;
+                color: rgba(255,255,255,.42);
+                border-radius: 8px;
+                padding: 11px 12px;
+                margin-bottom: 2px;
+                border-left: 2px solid transparent;
+                transition: background .15s, color .15s, border-color .15s;
+            }
+            .sbn-icon { color: rgba(255,255,255,.35); }
+            .sbn:hover {
+                background: rgba(255,255,255,.04);
+                color: rgba(255,255,255,.75);
+                border-left-color: transparent;
+            }
+            .sbn.on {
+                background: rgba(227,6,19,.07);
+                color: rgba(255,255,255,.92);
+                font-weight: 500;
+                border-left-color: #E30613;
+                padding-left: 10px;
+            }
+            .sbn.on .sbn-icon { color: rgba(255,255,255,.75); }
+            /* Bottom section */
+            .sb-bot {
+                border-top: 1px solid rgba(255,255,255,.055);
+                padding: 14px;
+            }
+            .sb-live {
+                font-family: 'Inter', sans-serif;
+                font-size: 9px;
+                font-weight: 300;
+                letter-spacing: .1em;
+                color: rgba(255,107,107,.7);
+                margin-bottom: 12px;
+            }
+            .sb-avatar {
+                background: rgba(227,6,19,.07);
+                border: 1px solid rgba(227,6,19,.18);
+                color: rgba(255,255,255,.7);
+                font-family: 'Inter', sans-serif;
+                font-weight: 500;
+            }
+            .sb-role-name {
+                font-family: 'Inter', sans-serif;
+                font-size: 12px;
+                font-weight: 500;
+                color: rgba(255,255,255,.82);
+            }
+            .sb-clk-sm {
+                font-family: 'Inter', sans-serif;
+                font-size: 10px;
+                font-weight: 300;
+                color: rgba(255,255,255,.28);
+            }
+            .lout-btn {
+                background: rgba(255,255,255,.03);
+                border: 1px solid rgba(255,255,255,.07);
+                border-radius: 8px;
+                font-family: 'Inter', sans-serif;
+                font-size: 11px;
+                font-weight: 400;
+                letter-spacing: .04em;
+                color: rgba(255,255,255,.32);
+                transition: background .15s, color .15s, border-color .15s;
+            }
+            .lout-btn:hover {
+                background: rgba(255,255,255,.06);
+                color: rgba(255,255,255,.62);
+                border-color: rgba(255,255,255,.12);
+            }
+            .main-wrap { margin-left: 220px; }
+            .main-wrap.collapsed { margin-left: 60px; }
+
+            /* ── Mobile topbar ────────────────────────────────── */
+            .topbar {
+                background: rgba(8,10,13,.9);
+                border-bottom: 1px solid rgba(255,255,255,.06);
+                backdrop-filter: blur(20px);
+                -webkit-backdrop-filter: blur(20px);
+                box-shadow: none;
+            }
+            .mob-clk {
+                font-family: 'Inter', sans-serif;
+                font-size: 11px;
+                font-weight: 300;
+                color: rgba(255,255,255,.38);
+                letter-spacing: .04em;
+            }
+            .mob-live {
+                font-family: 'Inter', sans-serif;
+                font-size: 9px;
+                font-weight: 400;
+                letter-spacing: .1em;
+                color: rgba(255,107,107,.75);
+            }
+
+            /* ── Cards ───────────────────────────────────────── */
+            .card {
+                background: rgba(255,255,255,.03);
+                border: 1px solid rgba(255,255,255,.06);
+                border-top-color: rgba(255,255,255,.09);
+                border-radius: 12px;
+                box-shadow: 0 4px 28px rgba(0,0,0,.28);
+            }
+            .chdr {
+                border-bottom: 1px solid rgba(255,255,255,.06);
+                padding: 14px 20px;
+            }
+            .ct {
+                font-family: 'Inter', sans-serif;
+                font-size: 9.5px;
+                font-weight: 500;
+                letter-spacing: .14em;
+                text-transform: uppercase;
+                color: rgba(255,255,255,.36);
+            }
+            .cpad { padding: 20px; }
+
+            /* ── Stat cards ──────────────────────────────────── */
+            .stat {
+                background: rgba(255,255,255,.03);
+                border: 1px solid rgba(255,255,255,.06);
+                border-top-color: rgba(255,255,255,.09);
+                border-radius: 12px;
+                box-shadow: 0 4px 28px rgba(0,0,0,.22);
+            }
+            .stat::before {
+                background: linear-gradient(90deg, #E30613, rgba(227,6,19,.25));
+            }
+            .sl {
+                font-family: 'Inter', sans-serif;
+                font-size: 9px;
+                font-weight: 500;
+                letter-spacing: .16em;
+                text-transform: uppercase;
+                color: rgba(255,255,255,.32);
+            }
+
+            /* ── Page headings ───────────────────────────────── */
+            .ptitle {
+                font-family: 'Inter', sans-serif;
+                font-size: 17px;
+                font-weight: 500;
+                letter-spacing: .02em;
+                text-transform: none;
+                color: rgba(255,255,255,.9);
+                margin-bottom: 3px;
+            }
+            .psub {
+                font-family: 'Inter', sans-serif;
+                font-size: 12px;
+                font-weight: 300;
+                color: rgba(255,255,255,.3);
+                letter-spacing: .01em;
+                margin-bottom: 20px;
+            }
+
+            /* ── Tables ──────────────────────────────────────── */
+            thead th {
+                font-family: 'Inter', sans-serif;
+                font-size: 9px;
+                font-weight: 500;
+                letter-spacing: .14em;
+                text-transform: uppercase;
+                color: rgba(255,255,255,.32);
+                background: rgba(255,255,255,.018);
+                border-bottom: 1px solid rgba(255,255,255,.06);
+                padding: 11px 16px;
+                white-space: nowrap;
+            }
+            tbody tr { border-bottom: 1px solid rgba(255,255,255,.04); }
+            tbody tr:last-child { border-bottom: none; }
+            tbody tr:nth-child(even) { background: rgba(255,255,255,.018); }
+            tbody tr:hover { background: rgba(255,255,255,.04); }
+            tbody td {
+                padding: 13px 16px;
+                font-size: 13px;
+                font-family: 'Inter', sans-serif;
+                color: rgba(255,255,255,.82);
+                line-height: 1.5;
+            }
         </style>
     </head>
     <body>
@@ -2502,11 +2745,8 @@
         <!-- APP -->
         <div id="app" style="display: none">
             <header class="topbar" id="mob-topbar">
-                <div class="cp-logo sm">
-                    <div class="cp-logo-l1">
-                        <span class="cp-logo-c">C</span
-                        ><span class="cp-logo-rest">OLOR</span>
-                    </div>
+                <div style="font-family:'Inter',sans-serif;font-size:15px;font-weight:300;letter-spacing:.38em;padding-right:.38em;line-height:1;user-select:none">
+                    <span style="color:#E30613">C</span><span style="color:rgba(255,255,255,.82)">OLOR</span>
                 </div>
                 <div class="mob-live">Live</div>
                 <div class="mob-clk" id="mob-clk">--:--:--</div>
@@ -2537,14 +2777,9 @@
             <nav class="sidebar" id="sidebar">
                 <div class="sb-top">
                     <div class="sb-logo">
-                        <div class="cp-logo md">
-                            <div class="cp-logo-l1">
-                                <span class="cp-logo-c">C</span
-                                ><span class="cp-logo-rest">OLOR</span>
-                            </div>
-                            <div class="cp-logo-l2">
-                                PLASTIC&nbsp;&nbsp;AUTO
-                            </div>
+                        <div class="sb-logotype">
+                            <div class="sb-logotype-l1"><span class="sb-logo-c">C</span><span class="sb-logo-olor">OLOR</span></div>
+                            <div class="sb-logotype-l2">Plastic</div>
                         </div>
                     </div>
                     <button class="sb-toggle" onclick="toggleSidebar()">
