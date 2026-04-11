@@ -19,17 +19,21 @@ const messaging = firebase.messaging();
 
 // ── Zpracování notifikací na pozadí (app zavřená nebo minimalizovaná) ─────────
 messaging.onBackgroundMessage(function(payload) {
-  console.log('[SW] Background message:', payload);
+  const title = (payload.notification && payload.notification.title) || 'ColorPlastic';
+  const body  = (payload.notification && payload.notification.body)  || '';
 
-  const title   = (payload.notification && payload.notification.title) || 'ColorPlastic';
+  // Tag = obsah zprávy: pokud přijde stejná zpráva vícekrát (více tokenů),
+  // prohlížeč nahradí předchozí notifikaci místo aby zobrazil duplicitu.
+  const tag = title + '|' + body;
+
   const options = {
-    body:    (payload.notification && payload.notification.body) || '',
-    icon:    '/icon-192.png',
-    badge:   '/badge-72.png',
-    tag:     payload.data && payload.data.type ? payload.data.type : 'colorplastic',
-    renotify: true,
-    vibrate: [200, 100, 200],
-    data:    payload.data || {}
+    body:     body,
+    icon:     '/icon-192.png',
+    badge:    '/badge-72.png',
+    tag:      tag,
+    renotify: false,
+    vibrate:  [200, 100, 200],
+    data:     payload.data || {}
   };
 
   return self.registration.showNotification(title, options);

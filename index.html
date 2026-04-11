@@ -1728,17 +1728,26 @@ var VAPID_KEY = 'BCON6lvLxriq7yGBzYBy2woLDTKb7ypazVl2LXX8Fg5dYyvG9ybA6eFJlFFSDB8
 
 var _fcmReg = null;
 var _fcmMessaging = null;
+var _fcmInitialized = false;
+var _recentNotifs = {};
 
 function initFCM() {
+  // Guard: onMessage se nesmí registrovat vícekrát na stejném singletonu
+  if (_fcmInitialized) return;
+  _fcmInitialized = true;
   if (!('serviceWorker' in navigator) || !('Notification' in window)) return;
   navigator.serviceWorker.register('./firebase-messaging-sw.js')
     .then(function(reg) {
       _fcmReg = reg;
       _fcmMessaging = firebase.messaging();
-      // Poslouchej foreground zprávy
+      // Poslouchej foreground zprávy – s deduplikací (5 s okno)
       _fcmMessaging.onMessage(function(payload) {
         var n = payload.notification;
         if (!n) return;
+        var key = (n.title || '') + '|' + (n.body || '');
+        var now = Date.now();
+        if (_recentNotifs[key] && now - _recentNotifs[key] < 5000) return;
+        _recentNotifs[key] = now;
         toast('ok', n.title, n.body);
       });
       // Pokud už je povoleno, rovnou zaregistruj token
