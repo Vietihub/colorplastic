@@ -7433,18 +7433,17 @@
                 };
                 fbSet("plan/" + saveKey, entry);
                 if (susen && mat) {
-                    fbPush("notifications", {
+                    fbSet("notifications/susen_" + saveKey, {
                         typ: "susen",
                         mat: mat,
                         forma: forma,
                         planKey: saveKey,
-                        msg:
-                            "Nutno sušit materiál " +
-                            mat +
-                            (forma ? " pro formu " + forma : ""),
+                        msg: "Nutno sušit materiál " + mat + (forma ? " pro formu " + forma : ""),
                         time: now(),
                         read: false,
                     });
+                } else {
+                    db.ref("notifications/susen_" + saveKey).remove();
                 }
                 closeModal("mod-plan");
                 toast(
@@ -7486,7 +7485,7 @@
             }
 
             function dismissSusen(key) {
-                db.ref("notifications/" + key + "/read").set(true);
+                db.ref("notifications/" + key).remove();
             }
 
             // ── UPOZORNĚNÍ NA SUŠENÍ ──────────────────────────────────────────
@@ -7540,11 +7539,11 @@
                     });
                 });
 
-                renderSusenAlerts(alerts);
+                // renderSusenBanners (Firebase) handles display — no duplicate render
             }
 
             function renderSusenAlerts(alerts) {
-                var containers = ["susen-alert-ser", "susen-alert-prehled"];
+                var containers = []; // disabled: Firebase-based renderSusenBanners handles display
                 containers.forEach(function (id) {
                     var el = document.getElementById(id);
                     if (!el) return;
