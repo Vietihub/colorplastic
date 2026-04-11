@@ -7554,47 +7554,23 @@
             }
 
             function renderSusenAlerts(alerts) {
-                var containers = ["susen-alert-ser"];
+                var containers = ["susen-alert-ser", "susen-alert-prehled"];
                 containers.forEach(function (id) {
                     var el = document.getElementById(id);
                     if (!el) return;
-                    if (!alerts.length) {
-                        el.innerHTML = "";
-                        return;
-                    }
-                    el.innerHTML = alerts
-                        .map(function (a) {
-                            var hoursLeft = Math.floor(a.diff / 60);
-                            var minsLeft = a.diff % 60;
-                            var timeStr =
-                                hoursLeft > 0
-                                    ? hoursLeft + "h " + minsLeft + "min"
-                                    : minsLeft + " min";
-                            return (
-                                '<div class="banner ban-o" style="margin-bottom:10px">' +
-                                '<div style="display:flex;align-items:center;gap:10px;flex:1">' +
-                                '<span style="font-size:22px">🔥</span>' +
-                                "<div>" +
-                                '<div class="ban-title" style="color:var(--orange)">Nutno sušit materiál — výměna zhruba za ' +
-                                timeStr +
-                                "</div>" +
-                                '<div class="ban-body"><strong>' +
-                                (a.mat || "") +
-                                "</strong>" +
-                                (a.forma ? " · " + a.forma : "") +
-                                " · " +
-                                a.mach +
-                                "</div>" +
-                                '<div class="ban-meta">Směna: ' +
-                                a.smena +
-                                (a.cas ? " · výměna v " + a.cas : "") +
-                                "</div>" +
-                                "</div>" +
-                                "</div>" +
-                                "</div>"
-                            );
-                        })
-                        .join("");
+                    if (!alerts.length) { el.innerHTML = ""; return; }
+                    el.innerHTML = alerts.map(function (a) {
+                        var hoursLeft = Math.floor(a.diff / 60);
+                        var minsLeft = a.diff % 60;
+                        var timeStr = hoursLeft > 0 ? hoursLeft + "h " + minsLeft + "min" : minsLeft + " min";
+                        return '<div class="notif warning" style="margin-bottom:10px">' +
+                            '<div class="notif-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" style="width:18px;height:18px;stroke-width:2"><path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10 10-4.5 10-10S17.5 2 12 2"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg></div>' +
+                            '<div class="notif-body">' +
+                            '<div class="notif-title">Nutno sušit materiál — výměna za ' + timeStr + '</div>' +
+                            '<div class="notif-msg"><strong>' + (a.mat || "") + '</strong>' + (a.forma ? ' · ' + a.forma : '') + ' · ' + a.mach + '</div>' +
+                            '<div class="notif-meta"><span class="notif-time">' + (a.cas ? 'výměna v ' + a.cas : a.smena) + '</span><span class="notif-tag">Upozornění</span></div>' +
+                            '</div></div>';
+                    }).join("");
                 });
             }
 
