@@ -184,7 +184,7 @@ tbody td{padding:11px 14px;font-size:13px;}
 .tbadge{font-size:11px;font-weight:700;padding:2px 7px;border-radius:3px;background:rgba(255,255,255,.06);color:var(--text2);font-family:'JetBrains Mono',monospace;}
 
 .fgrid{display:grid;gap:14px;}
-.frow{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+.frow{display:grid;grid-template-columns:1fr 1fr;gap:14px;width:100%;overflow:hidden;}
 .fg{display:flex;flex-direction:column;gap:5px;min-width:0;}
 .fl{font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--text3);}
 .fi,.fs,.fta{background:var(--bg4);border:1px solid rgba(255,255,255,.09);border-radius:var(--radius-sm);padding:10px 13px;font-family:'Barlow',sans-serif;font-size:14px;color:var(--text);outline:none;width:100%;max-width:100%;transition:border-color var(--transition),box-shadow var(--transition);box-sizing:border-box;}
@@ -254,7 +254,7 @@ tbody td{padding:11px 14px;font-size:13px;}
 
 .moverlay{position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:500;display:none;align-items:center;justify-content:center;backdrop-filter:blur(6px);}
 .moverlay.on{display:flex;}
-.modal{background:var(--bg3);border:1px solid var(--border2);border-radius:14px;padding:28px;width:440px;max-width:95vw;max-height:90vh;overflow-y:auto;box-shadow:var(--shadow-lg);}
+.modal{background:var(--bg3);border:1px solid var(--border2);border-radius:14px;padding:28px;width:440px;max-width:95vw;max-height:90vh;overflow-y:auto;overflow-x:hidden;box-shadow:var(--shadow-lg);}
 .mtitle{font-family:'Barlow Condensed',sans-serif;font-size:19px;font-weight:700;letter-spacing:1px;text-transform:uppercase;margin-bottom:3px;}
 .msub{font-size:13px;color:var(--text2);margin-bottom:18px;}
 .mact{display:flex;gap:8px;justify-content:flex-end;margin-top:18px;}
@@ -376,8 +376,8 @@ tbody td{padding:11px 14px;font-size:13px;}
 .plan-today-forma { font-family:'Barlow Condensed',sans-serif; font-size:22px; font-weight:900; color:var(--text); line-height:1; }
 .plan-today-meta { font-size:12px; color:var(--text2); margin-top:5px; display:flex; flex-wrap:wrap; gap:10px; }
 
-input[type="time"] { -webkit-appearance: none; appearance: none; min-height: 42px; color: var(--text); }
-input[type="time"]::-webkit-date-and-time-value { text-align: left; }
+input[type="time"],input[type="date"] { -webkit-appearance: none; appearance: none; min-height: 42px; color: var(--text); width:100%; max-width:100%; box-sizing:border-box; }
+input[type="time"]::-webkit-date-and-time-value,input[type="date"]::-webkit-date-and-time-value { text-align: left; }
 
 .plan-scroll { overflow-x:auto; }
 .plan-scroll::-webkit-scrollbar { height:8px; }
