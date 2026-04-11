@@ -2280,160 +2280,170 @@
                 display: none;
             }
 
-            /* ── KPI Cards ─────────────────────────────────── */
+            /* ── Shift Cards ────────────────────────────────── */
             .kpi-cards {
                 display: grid;
                 grid-template-columns: repeat(3, 1fr);
-                gap: 16px;
+                gap: 14px;
                 margin-bottom: 24px;
+                align-items: start;
             }
-            @media (max-width: 900px) {
-                .kpi-cards { grid-template-columns: 1fr 1fr; }
-            }
-            @media (max-width: 560px) {
+            @media (max-width: 860px) {
                 .kpi-cards { grid-template-columns: 1fr; }
             }
-            .kpi-card {
-                background: linear-gradient(
-                    145deg,
-                    rgba(255,255,255,.055) 0%,
-                    rgba(255,255,255,.018) 50%,
-                    rgba(255,255,255,.032) 100%
-                );
-                border: 1px solid rgba(255,255,255,.08);
-                border-top-color: rgba(255,255,255,.14);
-                border-left-color: rgba(255,255,255,.10);
+            .shift-card {
+                background: linear-gradient(145deg,
+                    rgba(255,255,255,.042) 0%,
+                    rgba(255,255,255,.015) 60%,
+                    rgba(255,255,255,.028) 100%);
+                border: 1px solid rgba(255,255,255,.07);
+                border-top-color: rgba(255,255,255,.12);
                 border-radius: 16px;
-                backdrop-filter: blur(32px) saturate(160%);
-                -webkit-backdrop-filter: blur(32px) saturate(160%);
-                box-shadow:
-                    0 0 0 1px rgba(255,255,255,.03) inset,
-                    0 16px 48px rgba(0,0,0,.45),
-                    0 4px 16px rgba(0,0,0,.3);
-                padding: 22px 22px 18px;
-                position: relative;
+                backdrop-filter: blur(28px) saturate(150%);
+                -webkit-backdrop-filter: blur(28px) saturate(150%);
+                box-shadow: 0 12px 40px rgba(0,0,0,.4), 0 2px 12px rgba(0,0,0,.25);
                 overflow: hidden;
-                cursor: default;
-                transition: transform .35s cubic-bezier(.23,1,.32,1),
-                            box-shadow .35s cubic-bezier(.23,1,.32,1);
-                animation: kpiIn .6s cubic-bezier(.23,1,.32,1) both;
+                animation: scIn .55s cubic-bezier(.23,1,.32,1) both;
             }
-            .kpi-card:nth-child(1) { animation-delay: .05s; }
-            .kpi-card:nth-child(2) { animation-delay: .12s; }
-            .kpi-card:nth-child(3) { animation-delay: .19s; }
-            @keyframes kpiIn {
-                from { opacity: 0; transform: translateY(18px) scale(.97); }
-                to   { opacity: 1; transform: translateY(0) scale(1); }
+            .shift-card:nth-child(1) { animation-delay:.04s; }
+            .shift-card:nth-child(2) { animation-delay:.10s; }
+            .shift-card:nth-child(3) { animation-delay:.16s; }
+            @keyframes scIn {
+                from { opacity:0; transform:translateY(16px) scale(.97); }
+                to   { opacity:1; transform:translateY(0) scale(1); }
             }
-            .kpi-card::before {
-                content: '';
-                position: absolute;
-                top: 0; left: 20px; right: 20px;
-                height: 1px;
-                background: linear-gradient(90deg, transparent, var(--red) 40%, transparent);
-                opacity: .55;
-            }
-            .kpi-card:hover {
-                transform: translateY(-3px);
+            /* aktualní směna — zvýraznění */
+            .shift-card.active {
+                border-color: rgba(255,255,255,.13);
                 box-shadow:
-                    0 0 0 1px rgba(255,255,255,.06) inset,
-                    0 24px 64px rgba(0,0,0,.55),
-                    0 6px 24px rgba(0,0,0,.35);
+                    0 12px 48px rgba(0,0,0,.45),
+                    0 0 0 1px rgba(255,255,255,.05) inset;
             }
-            .kpi-label {
+            .shift-card.active .sc-header { opacity: 1; }
+            .sc-header {
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                padding: 14px 16px 12px;
+                border-bottom: 1px solid rgba(255,255,255,.06);
+                opacity: .82;
+            }
+            .sc-header.nocni  { background: rgba(160,112,255,.08); }
+            .sc-header.ranni  { background: rgba(74,158,255,.08); }
+            .sc-header.odpol  { background: rgba(255,156,0,.08); }
+            .sc-shift-name {
+                font-family: 'Jost', sans-serif;
+                font-size: 11px;
+                font-weight: 600;
+                letter-spacing: .20em;
+                text-transform: uppercase;
+            }
+            .sc-shift-name.nocni  { color: #b08aff; }
+            .sc-shift-name.ranni  { color: #4a9eff; }
+            .sc-shift-name.odpol  { color: #ff9c00; }
+            .sc-hours {
+                font-family: 'Jost', sans-serif;
+                font-size: 10px;
+                font-weight: 400;
+                color: rgba(248,250,252,.35);
+                letter-spacing: .04em;
+            }
+            .sc-now-badge {
+                display: inline-flex;
+                align-items: center;
+                gap: 5px;
                 font-family: 'Jost', sans-serif;
                 font-size: 9px;
-                font-weight: 500;
-                letter-spacing: .30em;
+                font-weight: 600;
+                letter-spacing: .14em;
                 text-transform: uppercase;
-                color: rgba(248,250,252,.32);
-                margin-bottom: 4px;
+                padding: 3px 8px;
+                border-radius: 100px;
+                background: rgba(232,0,30,.15);
+                border: 1px solid rgba(232,0,30,.30);
+                color: #ff6b7a;
             }
-            .kpi-name {
-                font-family: 'Jost', sans-serif;
-                font-size: 12px;
-                font-weight: 500;
-                color: rgba(248,250,252,.65);
-                margin-bottom: 14px;
+            .sc-now-dot {
+                width: 5px; height: 5px;
+                border-radius: 50%;
+                background: #e8001e;
+                box-shadow: 0 0 6px #e8001e;
+                animation: nowPulse 1.8s ease-in-out infinite;
+            }
+            @keyframes nowPulse {
+                0%,100% { opacity:1; }
+                50%      { opacity:.35; }
+            }
+            .sc-body { padding: 10px 8px 12px; }
+            .sc-row {
+                display: flex;
+                align-items: center;
+                gap: 10px;
+                padding: 7px 8px;
+                border-radius: 8px;
+                margin-bottom: 3px;
+                transition: background .2s;
+            }
+            .sc-row:hover { background: rgba(255,255,255,.04); }
+            .sc-mach {
+                font-family: 'Bodoni Moda', Georgia, serif;
+                font-size: 15px;
+                font-weight: 700;
+                color: rgba(248,250,252,.70);
+                min-width: 44px;
+                line-height: 1;
+            }
+            .sc-divider-v {
+                width: 1px;
+                align-self: stretch;
+                background: rgba(255,255,255,.07);
+                flex-shrink: 0;
+            }
+            .sc-plan {
+                flex: 1;
+                min-width: 0;
+            }
+            .sc-forma {
+                font-family: 'Barlow Condensed', sans-serif;
+                font-size: 15px;
+                font-weight: 700;
+                color: var(--text);
+                line-height: 1.1;
                 white-space: nowrap;
                 overflow: hidden;
                 text-overflow: ellipsis;
             }
-            .kpi-value {
-                font-family: 'Bodoni Moda', Georgia, serif;
-                font-size: 48px;
-                font-weight: 700;
-                line-height: .95;
-                letter-spacing: -.02em;
-                background: linear-gradient(135deg, #f8fafc 40%, rgba(248,250,252,.5) 100%);
-                -webkit-background-clip: text;
-                -webkit-text-fill-color: transparent;
-                background-clip: text;
-                display: inline-block;
-                margin-bottom: 4px;
-            }
-            .kpi-unit {
+            .sc-meta {
                 font-family: 'Jost', sans-serif;
-                font-size: 13px;
-                font-weight: 300;
-                color: rgba(248,250,252,.32);
-                letter-spacing: .06em;
-                margin-left: 4px;
-                vertical-align: middle;
-                position: relative;
-                top: -6px;
-            }
-            .kpi-footer {
-                display: flex;
-                align-items: center;
-                justify-content: space-between;
-                margin-top: 12px;
-                padding-top: 10px;
-                border-top: 1px solid rgba(255,255,255,.06);
-            }
-            .kpi-sub {
-                font-size: 11px;
-                font-weight: 400;
-                color: rgba(248,250,252,.30);
-                font-family: 'Jost', sans-serif;
-            }
-            .kpi-badge {
-                display: inline-flex;
-                align-items: center;
-                gap: 5px;
-                border-radius: 100px;
-                padding: 3px 9px 3px 7px;
                 font-size: 10px;
-                font-weight: 500;
+                font-weight: 400;
+                color: var(--text3);
+                margin-top: 1px;
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
+            }
+            .sc-badge {
                 font-family: 'Jost', sans-serif;
-                letter-spacing: .02em;
+                font-size: 9px;
+                font-weight: 700;
+                letter-spacing: .08em;
+                padding: 2px 7px;
+                border-radius: 4px;
+                white-space: nowrap;
+                flex-shrink: 0;
             }
-            .kpi-badge.green {
-                background: rgba(34,197,94,.10);
-                border: 1px solid rgba(34,197,94,.18);
-                color: #4ade80;
-            }
-            .kpi-badge.red {
-                background: rgba(232,0,30,.10);
-                border: 1px solid rgba(232,0,30,.20);
-                color: #ff6b7a;
-            }
-            .kpi-badge.gold {
-                background: rgba(202,138,4,.10);
-                border: 1px solid rgba(202,138,4,.20);
-                color: #fbbf24;
-            }
-            .kpi-dot {
-                width: 5px; height: 5px;
-                border-radius: 50%;
-                background: currentColor;
-            }
-            .kpi-dot.pulse {
-                animation: kpiPulse 2s ease-in-out infinite;
-            }
-            @keyframes kpiPulse {
-                0%,100% { opacity:1; }
-                50%      { opacity:.4; }
+            .sc-badge.vymena { color:#e6b800; background:rgba(230,184,0,.12); border:1px solid rgba(230,184,0,.3); }
+            .sc-badge.test   { color:#e03030; background:rgba(200,40,40,.10); border:1px solid rgba(200,40,40,.28); }
+            .sc-badge.stoji  { color:#4a9eff; background:rgba(74,158,255,.10); border:1px solid rgba(74,158,255,.25); }
+            .sc-badge.susi   { color:#ff9c00; background:rgba(255,156,0,.10); border:1px solid rgba(255,156,0,.25); }
+            .sc-empty {
+                padding: 20px 8px;
+                text-align: center;
+                font-family: 'Jost', sans-serif;
+                font-size: 11px;
+                color: rgba(248,250,252,.20);
+                letter-spacing: .08em;
             }
 
             /* ── FAB – Přidat výměnu ───────────────────────── */
@@ -8228,6 +8238,68 @@
                 return "dtbadge dt-" + (t || "j");
             }
 
+            function renderShiftCards() {
+                var today = dateKey(new Date());
+                var cur = currentShift();
+                var shifts = [
+                    { key: "noční",     cls: "nocni", label: "Noční",     hours: "22:00 – 06:00" },
+                    { key: "ranní",     cls: "ranni", label: "Ranní",     hours: "06:00 – 14:00" },
+                    { key: "odpolední", cls: "odpol", label: "Odpolední", hours: "14:00 – 22:00" },
+                ];
+                return shifts.map(function (s) {
+                    var isCur = s.key === cur;
+                    var rows = "";
+                    var hasAny = false;
+                    MACHINES_LIST.forEach(function (mach) {
+                        var k = mach.replace(/ /g, "_") + "_" + today + "_" + s.key;
+                        var p = D.plan[k];
+                        if (!p || (!p.forma && !p.isStoji)) return;
+                        hasAny = true;
+                        var machShort = mach.replace("Engel duo ", "");
+                        var badge = "";
+                        if (p.isStoji)  badge = '<span class="sc-badge stoji">STOJÍ</span>';
+                        else if (p.bezVyroby) badge = '<span class="sc-badge vymena">VÝMĚNA</span>';
+                        else if (p.isTest)   badge = '<span class="sc-badge test">TEST</span>';
+                        else if (p.susen)    badge = '<span class="sc-badge susi">SUŠIT</span>';
+                        var matLbl = "";
+                        if (!p.isStoji && !p.bezVyroby) {
+                            matLbl = (D.formy && p.forma && D.formy[p.forma] && D.formy[p.forma].matId)
+                                ? D.formy[p.forma].matId
+                                : (p.mat ? p.mat.split("(")[0].trim() : "");
+                        }
+                        var formaHtml = p.isStoji
+                            ? '<span class="sc-forma" style="color:rgba(74,158,255,.7)">Bez výroby</span>'
+                            : p.forma
+                                ? '<span class="sc-forma">' + p.forma + (p.cas ? ' <span style="font-size:12px;color:var(--text3)">· ' + p.cas + '</span>' : '') + '</span>'
+                                : '';
+                        rows +=
+                            '<div class="sc-row">' +
+                                '<div class="sc-mach">' + machShort + '</div>' +
+                                '<div class="sc-divider-v"></div>' +
+                                '<div class="sc-plan">' +
+                                    formaHtml +
+                                    (matLbl ? '<div class="sc-meta">' + matLbl + '</div>' : '') +
+                                    (p.note && !matLbl ? '<div class="sc-meta">' + p.note + '</div>' : '') +
+                                '</div>' +
+                                badge +
+                            '</div>';
+                    });
+                    if (!hasAny) rows = '<div class="sc-empty">Nic naplánováno</div>';
+                    var nowBadge = isCur
+                        ? '<span class="sc-now-badge"><span class="sc-now-dot"></span>Nyní</span>'
+                        : '<span class="sc-hours">' + s.hours + '</span>';
+                    return (
+                        '<div class="shift-card' + (isCur ? " active" : "") + '">' +
+                            '<div class="sc-header ' + s.cls + '">' +
+                                '<span class="sc-shift-name ' + s.cls + '">' + s.label + '</span>' +
+                                nowBadge +
+                            '</div>' +
+                            '<div class="sc-body">' + rows + '</div>' +
+                        '</div>'
+                    );
+                }).join("");
+            }
+
             function renderPrehled() {
                 var totalScrap = D.scrap.reduce(function (a, s) {
                     return a + s.weight;
@@ -8239,38 +8311,9 @@
                     return p.running;
                 }).length;
 
-                // ── KPI Cards ──
+                // ── Shift Cards ──
                 var kpiEl = document.getElementById("kpi-cards");
-                if (kpiEl) {
-                    var scrapBadge = totalScrap > 5
-                        ? '<span class="kpi-badge red"><span class="kpi-dot"></span>' + totalScrap.toFixed(1) + ' kg</span>'
-                        : '<span class="kpi-badge green"><span class="kpi-dot pulse"></span>V normě</span>';
-                    var reqBadge = pendReq > 0
-                        ? '<span class="kpi-badge gold"><span class="kpi-dot"></span>' + pendReq + ' čeká</span>'
-                        : '<span class="kpi-badge green"><span class="kpi-dot"></span>Vše vyřízeno</span>';
-                    var runBadge = running > 0
-                        ? '<span class="kpi-badge green"><span class="kpi-dot pulse"></span>Běží</span>'
-                        : '<span class="kpi-badge red"><span class="kpi-dot"></span>Stojí</span>';
-                    kpiEl.innerHTML =
-                        '<div class="kpi-card">' +
-                            '<div class="kpi-label">Výroba · Live</div>' +
-                            '<div class="kpi-name">Aktivní stroje</div>' +
-                            '<div><span class="kpi-value">' + running + '</span><span class="kpi-unit">/ ' + D.production.length + '</span></div>' +
-                            '<div class="kpi-footer"><span class="kpi-sub">Engel lisovny</span>' + runBadge + '</div>' +
-                        '</div>' +
-                        '<div class="kpi-card">' +
-                            '<div class="kpi-label">Scrap · Dnes</div>' +
-                            '<div class="kpi-name">Celkový odpad</div>' +
-                            '<div><span class="kpi-value">' + totalScrap.toFixed(1) + '</span><span class="kpi-unit">kg</span></div>' +
-                            '<div class="kpi-footer"><span class="kpi-sub">' + D.scrap.length + ' zápisů</span>' + scrapBadge + '</div>' +
-                        '</div>' +
-                        '<div class="kpi-card">' +
-                            '<div class="kpi-label">Materiál · Požadavky</div>' +
-                            '<div class="kpi-name">Čekající požadavky</div>' +
-                            '<div><span class="kpi-value">' + pendReq + '</span><span class="kpi-unit">ks</span></div>' +
-                            '<div class="kpi-footer"><span class="kpi-sub">Celkem ' + D.requests.length + ' dnes</span>' + reqBadge + '</div>' +
-                        '</div>';
-                }
+                if (kpiEl) kpiEl.innerHTML = renderShiftCards();
 
                 var el = document.getElementById("stats-prehled");
                 if (el)
