@@ -6946,18 +6946,6 @@
                                                 '<div style="font-size:9px;color:var(--text3);margin-top:2px;font-style:italic">' +
                                                 p.note +
                                                 "</div>";
-                                        if (p.platido) {
-                                            var pdDisp2 =
-                                                p.platido.slice(8, 10) +
-                                                "." +
-                                                p.platido.slice(5, 7) +
-                                                ". " +
-                                                p.platido.slice(11, 16);
-                                            html +=
-                                                '<div style="font-size:9px;color:var(--orange);font-weight:700;margin-top:4px;letter-spacing:.2px">do ' +
-                                                pdDisp2 +
-                                                "</div>";
-                                        }
                                         html += "</div>";
                                     }
                                 }
@@ -6983,13 +6971,6 @@
                                             '<div style="font-size:10px;font-weight:400;color:rgba(74,158,255,.4);letter-spacing:.2px">Bez výroby</div>';
                                         html += "</div></td>";
                                     } else {
-                                        var pdDisp = spanEntry.platido
-                                            ? spanEntry.platido.slice(8, 10) +
-                                              "." +
-                                              spanEntry.platido.slice(5, 7) +
-                                              ". " +
-                                              spanEntry.platido.slice(11, 16)
-                                            : "";
                                         html +=
                                             '<td style="padding:0;background:' +
                                             smenyBg[si] +
@@ -7014,11 +6995,6 @@
                                             html +=
                                                 '<div class="plan-cell-mat" style="font-size:9px;color:var(--text2);margin-bottom:2px">' +
                                                 spanMatLabel +
-                                                "</div>";
-                                        if (pdDisp)
-                                            html +=
-                                                '<div style="font-size:9px;color:var(--orange);font-weight:700;margin-top:2px">do ' +
-                                                pdDisp +
                                                 "</div>";
                                         html += "</div></td>";
                                     }
