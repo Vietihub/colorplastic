@@ -515,7 +515,7 @@
                 display: flex;
                 flex-direction: column;
                 min-width: 0;
-                overflow-x: hidden;
+                overflow-x: clip; /* clip ≠ hidden: no scroll container, sticky still works */
             }
             .content {
                 padding: 22px;
@@ -6692,12 +6692,13 @@
                                             '<div style="font-size:15px;font-weight:900;color:var(--text);line-height:1.1;margin-bottom:3px">' +
                                             spanEntry.forma +
                                             "</div>";
-                                        if (spanEntry.mat)
+                                        var spanMatLabel = (D.formy && spanEntry.forma && D.formy[spanEntry.forma] && D.formy[spanEntry.forma].matId)
+                                            ? D.formy[spanEntry.forma].matId
+                                            : (spanEntry.mat ? spanEntry.mat.split(' ').slice(0, 2).join(' ') : null);
+                                        if (spanMatLabel)
                                             html +=
                                                 '<div style="font-size:9px;color:var(--text2);margin-bottom:2px">' +
-                                                spanEntry.mat
-                                                    .split("(")[0]
-                                                    .trim() +
+                                                spanMatLabel +
                                                 "</div>";
                                         if (pdDisp)
                                             html +=
