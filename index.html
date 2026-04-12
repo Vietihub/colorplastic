@@ -2235,7 +2235,7 @@
             td.td-mach {
                 padding: 12px 12px; background: var(--bg3);
                 border-right: 2px solid rgba(255,255,255,.07);
-                text-align: left; vertical-align: middle !important;
+                text-align: left; vertical-align: middle;
                 position: sticky; left: 0; z-index: 5;
             }
             .td-mach-n {
@@ -2245,6 +2245,11 @@
             .td-mach-s {
                 font-size: 8px; font-weight: 500; letter-spacing: .22em;
                 text-transform: uppercase; color: var(--text3); margin-top: 3px;
+            }
+            .td-mach-wrap {
+                display: flex; flex-direction: column;
+                align-items: flex-start; justify-content: center;
+                min-height: 82px;
             }
             /* plan cell */
             .pc2l { padding: 9px 10px; min-height: 82px; cursor: pointer; transition: background .18s; }
@@ -6889,7 +6894,7 @@
                 // ── tbody ──
                 MACHINES_LIST.forEach(function (mach, mi) {
                     var machShort = mach.replace("Engel duo ", "");
-                    html += '<tr><td class="td-mach"><div class="td-mach-n">' + machShort + '</div><div class="td-mach-s">Engel duo</div></td>';
+                    html += '<tr><td class="td-mach"><div class="td-mach-wrap"><div class="td-mach-n">' + machShort + '</div><div class="td-mach-s">Engel duo</div></div></td>';
 
                     dates.forEach(function (d, di) {
                         var dk = dateKey(d);
