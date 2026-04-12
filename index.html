@@ -305,250 +305,218 @@
                     opacity: 0.4;
                 }
             }
+            /* ── Sidebar (Obsidian Rail) ─────────────────────── */
             .sidebar {
-                width: 224px;
+                width: 220px;
                 min-height: 100vh;
-                background: var(--bg2);
-                border-right: 1px solid var(--border);
+                background: #060810;
+                border-right: 1px solid rgba(255,255,255,.07);
                 display: flex;
                 flex-direction: column;
                 position: fixed;
-                top: 0;
-                left: 0;
-                bottom: 0;
+                top: 0; left: 0; bottom: 0;
                 z-index: 200;
-                transition: width 0.2s;
-            }
-            .sidebar.collapsed {
-                width: 60px;
-            }
-            .sb-top {
-                padding: 16px 14px 14px;
-                display: flex;
-                align-items: center;
-                justify-content: space-between;
-                border-bottom: 1px solid var(--border);
-                flex-shrink: 0;
-                min-height: 58px;
-            }
-            .sb-logo {
-                display: flex;
-                align-items: baseline;
                 overflow: hidden;
-                white-space: nowrap;
-                transition:
-                    opacity 0.15s,
-                    width 0.15s;
+                transition: width .22s cubic-bezier(.16,1,.3,1);
             }
-            .sidebar.collapsed .sb-logo {
-                opacity: 0;
-                width: 0;
+            .sidebar::before {
+                content: '';
+                position: absolute; top: 0; left: 0; right: 0; height: 180px;
+                background: radial-gradient(ellipse 120% 100% at 50% -10%, rgba(227,6,19,.08) 0%, transparent 70%);
                 pointer-events: none;
             }
-            .sb-lc {
-                font-family: "Fira Sans", sans-serif;
-                font-size: 23px;
-                font-weight: 900;
-                color: var(--red);
+            .sidebar.collapsed {
+                width: 62px;
             }
-            .sb-lr {
-                font-family: "Fira Sans", sans-serif;
-                font-size: 23px;
-                font-weight: 900;
-                color: var(--text);
+            .sb-top {
+                padding: 20px 16px 16px;
+                border-bottom: 1px solid rgba(255,255,255,.07);
+                display: flex; align-items: center; justify-content: space-between;
+                flex-shrink: 0; min-height: 64px;
             }
-            .sb-lp {
-                font-family: "Fira Sans", sans-serif;
-                font-size: 10px;
-                font-weight: 600;
-                color: var(--text2);
-                letter-spacing: 2px;
-                margin-left: 4px;
-                align-self: flex-end;
-                padding-bottom: 2px;
+            .sb-logo {
+                display: flex; flex-direction: column;
+                overflow: hidden; white-space: nowrap;
+                transition: opacity .22s cubic-bezier(.16,1,.3,1), width .22s cubic-bezier(.16,1,.3,1);
+            }
+            .sidebar.collapsed .sb-logo {
+                opacity: 0; width: 0; pointer-events: none;
+            }
+            .sb-logotype { display: flex; flex-direction: column; gap: 4px; }
+            .sb-logotype-l1 {
+                font-family: 'Jost', sans-serif;
+                font-size: 18px; font-weight: 700;
+                letter-spacing: .12em; line-height: 1;
+            }
+            .sb-logo-c    { color: var(--red); }
+            .sb-logo-olor { color: rgba(240,242,245,.90); }
+            .sb-logotype-l2 {
+                font-family: 'Fira Sans', sans-serif;
+                font-size: 8.5px; font-weight: 300;
+                letter-spacing: .28em; text-transform: uppercase;
+                color: rgba(240,242,245,.25); padding-right: .28em;
             }
             .sb-toggle {
-                background: none;
-                border: none;
-                color: var(--text3);
-                cursor: pointer;
-                font-size: 18px;
-                padding: 5px 7px;
-                line-height: 1;
-                flex-shrink: 0;
-                border-radius: 6px;
-                transition: all var(--transition);
+                width: 28px; height: 28px; border-radius: 6px;
+                background: transparent; border: none;
+                display: flex; align-items: center; justify-content: center;
+                cursor: pointer; color: rgba(240,242,245,.28); flex-shrink: 0;
+                font-size: 16px;
+                transition: color .15s, background .15s;
             }
             .sb-toggle:hover {
-                color: var(--text);
-                background: var(--bg4);
+                color: rgba(240,242,245,.7);
+                background: rgba(255,255,255,.05);
             }
             .sidebar.collapsed .sb-toggle {
                 margin: 0 auto;
             }
+            .sb-toggle svg { transition: transform .22s cubic-bezier(.16,1,.3,1); }
+            .sidebar.collapsed .sb-toggle svg { transform: rotate(180deg); }
             .sb-nav {
                 flex: 1;
-                overflow-y: auto;
-                overflow-x: hidden;
-                padding: 10px 8px;
+                overflow-y: auto; overflow-x: hidden;
+                padding: 8px 10px;
             }
-            .sb-nav::-webkit-scrollbar {
-                width: 0;
-            }
+            .sb-nav::-webkit-scrollbar { display: none; }
             .sbn {
-                display: flex;
-                align-items: center;
-                gap: 10px;
+                display: flex; align-items: center; gap: 11px;
                 padding: 10px 10px;
-                color: var(--text2);
-                cursor: pointer;
-                transition: all var(--transition);
-                position: relative;
-                white-space: nowrap;
-                border: none;
-                background: none;
-                width: 100%;
-                text-align: left;
-                font-family: "Fira Sans", sans-serif;
-                font-size: 13px;
-                font-weight: 500;
-                border-radius: var(--radius-sm);
+                border-radius: 9px;
+                border-top: none; border-right: none; border-bottom: none;
+                border-left: 2px solid transparent;
                 margin-bottom: 2px;
+                cursor: pointer; position: relative;
+                white-space: nowrap; overflow: hidden;
+                background: none; width: 100%; text-align: left;
+                color: rgba(240,242,245,.50);
+                transition: background .22s cubic-bezier(.16,1,.3,1),
+                            border-color .22s cubic-bezier(.16,1,.3,1),
+                            color .22s cubic-bezier(.16,1,.3,1);
             }
             .sbn:hover {
-                background: var(--bg4);
-                color: var(--text);
+                background: rgba(255,255,255,.04);
+                color: rgba(240,242,245,.75);
             }
             .sbn.on {
-                background: rgba(232, 0, 30, 0.14);
-                color: #ff6b6b;
-                font-weight: 600;
+                background: rgba(227,6,19,.07);
+                border-left-color: var(--red);
+                color: rgba(240,242,245,.95);
+                padding-left: 8px;
             }
+            .sbn.on::before {
+                content: '';
+                position: absolute; left: -2px; top: 0; bottom: 0; width: 2px;
+                box-shadow: 2px 0 12px rgba(227,6,19,.5);
+                pointer-events: none;
+            }
+            .sbn:active { transform: scale(.97); }
             .sbn-icon {
-                font-size: 16px;
-                flex-shrink: 0;
-                width: 22px;
-                text-align: center;
+                font-size: 16px; flex-shrink: 0; width: 20px;
+                display: flex; align-items: center; justify-content: center;
+                color: rgba(240,242,245,.35);
+                transition: color .22s;
             }
+            .sbn.on .sbn-icon { color: rgba(240,242,245,.80); }
             .sbn-lbl {
+                font-family: 'Jost', sans-serif;
+                font-size: 13px; font-weight: 400;
+                letter-spacing: .01em;
                 overflow: hidden;
-                white-space: nowrap;
-                transition:
-                    opacity 0.15s,
-                    width 0.15s;
+                transition: opacity .22s cubic-bezier(.16,1,.3,1), width .22s cubic-bezier(.16,1,.3,1);
             }
             .sidebar.collapsed .sbn-lbl {
-                opacity: 0;
-                width: 0;
+                opacity: 0; width: 0; pointer-events: none;
             }
             .sbn-bdg {
                 background: var(--red);
-                color: #fff;
-                font-size: 10px;
-                font-weight: 700;
-                border-radius: 10px;
-                padding: 1px 5px;
-                min-width: 16px;
-                text-align: center;
-                margin-left: auto;
+                color: #fff; font-size: 10px; font-weight: 700;
+                border-radius: 10px; padding: 1px 5px;
+                min-width: 16px; text-align: center; margin-left: auto;
             }
             .sidebar.collapsed .sbn-bdg {
-                position: absolute;
-                top: 5px;
-                right: 5px;
+                position: absolute; top: 5px; right: 5px;
             }
+            /* Sidebar bottom section */
             .sb-bot {
-                padding: 12px;
-                border-top: 1px solid var(--border);
-                flex-shrink: 0;
+                padding: 14px;
+                border-top: 1px solid rgba(255,255,255,.055);
+                flex-shrink: 0; overflow: hidden; white-space: nowrap;
             }
             .sb-live {
-                display: flex;
-                align-items: center;
-                gap: 5px;
-                font-size: 11px;
-                font-weight: 700;
-                color: #ff6b6b;
-                margin-bottom: 10px;
+                display: flex; align-items: center; gap: 7px;
+                margin-bottom: 12px;
+                transition: opacity .22s, height .22s;
+                overflow: hidden;
             }
+            .sidebar.collapsed .sb-live { opacity: 0; height: 0; margin: 0; overflow: hidden; }
             .sb-live::before {
-                content: "";
-                width: 6px;
-                height: 6px;
-                border-radius: 50%;
-                background: var(--red);
-                animation: p 1.5s infinite;
+                content: '';
+                width: 5px; height: 5px; border-radius: 50%;
+                flex-shrink: 0;
+                background: var(--red); box-shadow: 0 0 6px var(--red);
+                animation: p 1.8s ease-in-out infinite;
             }
-            .sidebar.collapsed .sb-live-lbl {
-                display: none;
+            .sb-live-lbl {
+                font-family: 'Fira Sans', sans-serif;
+                font-size: 9px; font-weight: 300;
+                letter-spacing: .18em; text-transform: uppercase;
+                color: rgba(240,242,245,.20);
             }
             .sb-info {
-                display: flex;
-                align-items: center;
-                gap: 9px;
-                margin-bottom: 10px;
-                overflow: hidden;
+                display: flex; align-items: center; gap: 10px;
+                margin-bottom: 10px; overflow: hidden;
             }
             .sb-avatar {
-                width: 34px;
-                height: 34px;
-                border-radius: 50%;
-                background: var(--red-dim);
-                border: 1px solid rgba(232, 0, 30, 0.25);
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                font-size: 11px;
-                font-weight: 700;
-                color: #ff6b6b;
-                flex-shrink: 0;
+                width: 32px; height: 32px; border-radius: 8px; flex-shrink: 0;
+                background: rgba(227,6,19,.07);
+                border: 1px solid rgba(227,6,19,.22);
+                display: flex; align-items: center; justify-content: center;
+                font-family: 'Jost', sans-serif; font-size: 13px; font-weight: 600;
+                color: rgba(227,6,19,.9);
             }
             .sb-role-info {
-                overflow: hidden;
-                min-width: 0;
+                overflow: hidden; min-width: 0;
+                transition: opacity .22s, width .22s;
             }
+            .sidebar.collapsed .sb-role-info { opacity: 0; width: 0; }
             .sb-role-name {
-                font-size: 12px;
-                font-weight: 600;
-                color: var(--text);
-                white-space: nowrap;
-                overflow: hidden;
-                text-overflow: ellipsis;
+                font-family: 'Jost', sans-serif;
+                font-size: 12px; font-weight: 500;
+                color: rgba(240,242,245,.82);
+                white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
             }
             .sb-clk-sm {
-                font-family: "Fira Code", monospace;
-                font-size: 10px;
-                color: var(--text3);
-            }
-            .sidebar.collapsed .sb-role-info {
-                display: none;
+                font-family: 'Fira Code', monospace;
+                font-size: 10px; font-weight: 300;
+                color: rgba(240,242,245,.25);
             }
             .lout-btn {
                 width: 100%;
-                background: var(--bg4);
-                border: 1px solid var(--border);
-                border-radius: var(--radius-sm);
-                padding: 8px;
-                font-size: 12px;
-                font-weight: 600;
-                color: var(--text2);
-                cursor: pointer;
-                text-align: center;
-                transition: all var(--transition);
+                background: rgba(255,255,255,.03);
+                border: 1px solid rgba(255,255,255,.07);
+                border-radius: 8px; padding: 8px;
+                font-family: 'Fira Sans', sans-serif;
+                font-size: 11px; font-weight: 400;
+                letter-spacing: .04em;
+                color: rgba(240,242,245,.32);
+                cursor: pointer; text-align: center;
+                transition: background .15s, color .15s, border-color .15s;
             }
             .lout-btn:hover {
-                color: var(--text);
-                background: rgba(255, 255, 255, 0.06);
+                background: rgba(255,255,255,.06);
+                color: rgba(240,242,245,.62);
+                border-color: rgba(255,255,255,.12);
             }
             .main-wrap {
-                margin-left: 224px;
+                margin-left: 220px;
                 display: flex;
                 flex-direction: row;
                 min-height: 100vh;
-                transition: margin-left 0.2s;
+                transition: margin-left .22s cubic-bezier(.16,1,.3,1);
             }
             .main-wrap.collapsed {
-                margin-left: 60px;
+                margin-left: 62px;
             }
             .content-area {
                 flex: 1;
@@ -844,60 +812,71 @@
                 color: var(--text2);
             }
 
-            /* ── Bottom navigation (mobile) ────────────────── */
+            /* ── Bottom navigation (mobile – floating pill) ─── */
             .bottom-nav {
                 display: none;
                 position: fixed;
-                bottom: 0;
-                left: 0;
-                right: 0;
-                height: 64px;
-                background: var(--bg2);
-                border-top: 1px solid var(--border2);
+                bottom: 16px;
+                left: 50%; transform: translateX(-50%);
                 z-index: 300;
-                box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.4);
-                padding-bottom: env(safe-area-inset-bottom, 0px);
+                padding: 8px 10px;
+                background: rgba(8,11,14,.82);
+                backdrop-filter: blur(28px) saturate(180%);
+                -webkit-backdrop-filter: blur(28px) saturate(180%);
+                border: 1px solid rgba(255,255,255,.09);
+                border-top-color: rgba(255,255,255,.14);
+                border-radius: 22px;
+                box-shadow:
+                    0 0 0 1px rgba(255,255,255,.04) inset,
+                    0 20px 60px rgba(0,0,0,.7),
+                    0 4px 16px rgba(0,0,0,.5),
+                    0 0 80px rgba(227,6,19,.05);
+                gap: 2px;
+                align-items: center;
             }
             .bottom-nav.show {
                 display: flex;
+                animation: bnRise .8s cubic-bezier(.16,1,.3,1) both;
+            }
+            @keyframes bnRise {
+                from { opacity:0; transform:translateX(-50%) translateY(20px) scale(.95); }
+                to   { opacity:1; transform:translateX(-50%) translateY(0) scale(1); }
             }
             .bn-item {
-                flex: 1;
-                display: flex;
-                flex-direction: column;
-                align-items: center;
-                justify-content: center;
-                gap: 3px;
-                background: none;
-                border: none;
-                color: var(--text3);
-                cursor: pointer;
-                font-family: "Fira Sans", sans-serif;
-                font-size: 10px;
-                font-weight: 600;
-                letter-spacing: 0.3px;
-                text-transform: uppercase;
-                padding: 8px 4px;
-                transition: color var(--transition);
-                position: relative;
+                flex: none;
+                display: flex; flex-direction: column; align-items: center; gap: 4px;
+                padding: 7px 18px;
+                border-radius: 15px;
+                cursor: pointer; position: relative;
+                background: none; border: none;
+                color: rgba(240,242,245,.50);
+                transition: background .22s cubic-bezier(.16,1,.3,1), transform .15s cubic-bezier(.16,1,.3,1);
+                min-width: 64px;
             }
-            .bn-item.on {
-                color: var(--red);
-            }
+            .bn-item:hover { background: rgba(255,255,255,.05); }
+            .bn-item:active { transform: scale(.93); }
+            .bn-item.on { background: rgba(227,6,19,.10); }
             .bn-item.on::after {
-                content: "";
-                position: absolute;
-                top: 0;
-                left: 20%;
-                right: 20%;
-                height: 2px;
+                content: '';
+                position: absolute; bottom: 4px; left: 50%; transform: translateX(-50%);
+                width: 16px; height: 2px; border-radius: 2px;
                 background: var(--red);
-                border-radius: 0 0 2px 2px;
+                box-shadow: 0 0 8px rgba(227,6,19,.7);
             }
             .bn-icon {
-                font-size: 19px;
-                line-height: 1;
+                font-size: 20px; line-height: 1;
+                transition: transform .2s cubic-bezier(.16,1,.3,1);
             }
+            .bn-item.on .bn-icon { transform: translateY(-1px); }
+            .bn-label {
+                font-family: 'Jost', sans-serif;
+                font-size: 9.5px; font-weight: 500;
+                letter-spacing: .06em;
+                color: rgba(240,242,245,.30);
+                transition: color .22s;
+            }
+            .bn-item.on .bn-label { color: rgba(227,6,19,.9); }
+            .bn-item:hover:not(.on) .bn-label { color: rgba(240,242,245,.55); }
 
             .content {
                 padding: 22px;
@@ -1774,7 +1753,7 @@
                 }
                 .content {
                     padding: 14px;
-                    padding-bottom: 80px;
+                    padding-bottom: calc(96px + env(safe-area-inset-bottom, 0px));
                 }
                 .two {
                     grid-template-columns: 1fr;
@@ -3445,92 +3424,8 @@
                 margin-top: 4px;
                 padding-right: .20em;
             }
-            /* Toggle button */
-            .sb-toggle {
-                color: rgba(255,255,255,.28);
-                border-radius: 6px;
-                transition: color .15s, background .15s;
-            }
-            .sb-toggle:hover {
-                color: rgba(255,255,255,.7);
-                background: rgba(255,255,255,.05);
-            }
-            /* Nav items */
-            .sbn {
-                font-family: 'Fira Sans', sans-serif;
-                font-size: 13px;
-                font-weight: 400;
-                color: rgba(255,255,255,.42);
-                border-radius: 8px;
-                padding: 11px 12px;
-                margin-bottom: 2px;
-                border-left: 2px solid transparent;
-                transition: background .15s, color .15s, border-color .15s;
-            }
-            .sbn-icon { color: rgba(255,255,255,.35); }
-            .sbn:hover {
-                background: rgba(255,255,255,.04);
-                color: rgba(255,255,255,.75);
-                border-left-color: transparent;
-            }
-            .sbn.on {
-                background: rgba(227,6,19,.07);
-                color: rgba(255,255,255,.92);
-                font-weight: 500;
-                border-left-color: #E30613;
-                padding-left: 10px;
-            }
-            .sbn.on .sbn-icon { color: rgba(255,255,255,.75); }
-            /* Bottom section */
-            .sb-bot {
-                border-top: 1px solid rgba(255,255,255,.055);
-                padding: 14px;
-            }
-            .sb-live {
-                font-family: 'Fira Sans', sans-serif;
-                font-size: 9px;
-                font-weight: 300;
-                letter-spacing: .1em;
-                color: rgba(255,107,107,.7);
-                margin-bottom: 12px;
-            }
-            .sb-avatar {
-                background: rgba(227,6,19,.07);
-                border: 1px solid rgba(227,6,19,.18);
-                color: rgba(255,255,255,.7);
-                font-family: 'Fira Sans', sans-serif;
-                font-weight: 500;
-            }
-            .sb-role-name {
-                font-family: 'Fira Sans', sans-serif;
-                font-size: 12px;
-                font-weight: 500;
-                color: rgba(255,255,255,.82);
-            }
-            .sb-clk-sm {
-                font-family: 'Fira Sans', sans-serif;
-                font-size: 10px;
-                font-weight: 300;
-                color: rgba(255,255,255,.28);
-            }
-            .lout-btn {
-                background: rgba(255,255,255,.03);
-                border: 1px solid rgba(255,255,255,.07);
-                border-radius: 8px;
-                font-family: 'Fira Sans', sans-serif;
-                font-size: 11px;
-                font-weight: 400;
-                letter-spacing: .04em;
-                color: rgba(255,255,255,.32);
-                transition: background .15s, color .15s, border-color .15s;
-            }
-            .lout-btn:hover {
-                background: rgba(255,255,255,.06);
-                color: rgba(255,255,255,.62);
-                border-color: rgba(255,255,255,.12);
-            }
             .main-wrap { margin-left: 220px; }
-            .main-wrap.collapsed { margin-left: 60px; }
+            .main-wrap.collapsed { margin-left: 62px; }
 
             /* ── Mobile topbar ────────────────────────────────── */
             .topbar {
@@ -3733,17 +3628,17 @@
                     <div class="sb-logo">
                         <div class="sb-logotype">
                             <div class="sb-logotype-l1"><span class="sb-logo-c">C</span><span class="sb-logo-olor">OLOR</span></div>
-                            <div class="sb-logotype-l2">Plastic</div>
+                            <div class="sb-logotype-l2">Plastic &nbsp;·&nbsp; Automotive</div>
                         </div>
                     </div>
-                    <button class="sb-toggle" onclick="toggleSidebar()">
-                        &#8942;
+                    <button class="sb-toggle" onclick="toggleSidebar()" title="Sbalit">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="15 18 9 12 15 6"/></svg>
                     </button>
                 </div>
                 <div class="sb-nav" id="sb-nav"></div>
                 <div class="sb-bot">
                     <div class="sb-live">
-                        <span class="sb-live-lbl">Live</span>
+                        <span class="sb-live-lbl">Systém online</span>
                     </div>
                     <div class="sb-info">
                         <div class="sb-avatar" id="sb-avatar">–</div>
@@ -5655,7 +5550,7 @@
                     btn.innerHTML =
                         '<span class="bn-icon">' +
                         item.ic +
-                        "</span><span>" +
+                        '</span><span class="bn-label">' +
                         item.lbl +
                         "</span>";
                     btn.onclick = function () {
@@ -5692,8 +5587,8 @@
                     sb.classList.toggle("collapsed", sidebarCollapsed);
                     if (mw)
                         mw.style.marginLeft = sidebarCollapsed
-                            ? "60px"
-                            : "224px";
+                            ? "62px"
+                            : "220px";
                 }
             }
 
