@@ -64,193 +64,233 @@
                 display: flex;
                 align-items: center;
                 justify-content: center;
-                background: #080a0d;
-                background-image:
-                    radial-gradient(ellipse 90% 50% at 50% -5%, rgba(227,6,19,.09) 0%, transparent 65%),
-                    radial-gradient(ellipse 50% 40% at 15% 110%, rgba(255,255,255,.015) 0%, transparent 60%);
+                background: #020406;
                 position: relative;
                 overflow: hidden;
             }
+
+            /* Grid texture */
             #login::before {
                 content: '';
-                position: absolute;
-                inset: 0;
+                position: absolute; inset: 0; pointer-events: none;
                 background-image:
-                    linear-gradient(rgba(255,255,255,.018) 1px, transparent 1px),
-                    linear-gradient(90deg, rgba(255,255,255,.018) 1px, transparent 1px);
-                background-size: 48px 48px;
-                -webkit-mask-image: radial-gradient(ellipse 80% 70% at 50% 50%, black 20%, transparent 75%);
-                mask-image: radial-gradient(ellipse 80% 70% at 50% 50%, black 20%, transparent 75%);
-                pointer-events: none;
+                    linear-gradient(rgba(255,255,255,.014) 1px, transparent 1px),
+                    linear-gradient(90deg, rgba(255,255,255,.014) 1px, transparent 1px);
+                background-size: 52px 52px;
+                -webkit-mask-image: radial-gradient(ellipse 72% 72% at 50% 50%, black 15%, transparent 80%);
+                mask-image: radial-gradient(ellipse 72% 72% at 50% 50%, black 15%, transparent 80%);
             }
+
+            /* Ambient blobs */
+            .l-blob {
+                position: absolute; border-radius: 50%;
+                filter: blur(90px); pointer-events: none; will-change: transform;
+            }
+            .l-blob-1 {
+                width: 560px; height: 420px;
+                top: -140px; left: 50%; transform: translateX(-50%);
+                background: radial-gradient(ellipse, rgba(227,6,19,.13) 0%, transparent 70%);
+                animation: lBlob1 14s ease-in-out infinite alternate;
+            }
+            .l-blob-2 {
+                width: 300px; height: 260px;
+                bottom: -60px; right: 8%;
+                background: radial-gradient(ellipse, rgba(74,90,200,.08) 0%, transparent 65%);
+                animation: lBlob2 18s ease-in-out infinite alternate;
+            }
+            .l-blob-3 {
+                width: 180px; height: 160px;
+                bottom: 14%; left: 7%;
+                background: radial-gradient(ellipse, rgba(227,6,19,.06) 0%, transparent 70%);
+                animation: lBlob3 22s ease-in-out infinite alternate;
+            }
+            @keyframes lBlob1 {
+                from { transform: translateX(-52%) translateY(0); }
+                to   { transform: translateX(-48%) translateY(26px); }
+            }
+            @keyframes lBlob2 {
+                from { transform: translate(0,0) scale(1); }
+                to   { transform: translate(-22px,-16px) scale(1.07); }
+            }
+            @keyframes lBlob3 {
+                from { transform: translate(0,0); }
+                to   { transform: translate(14px,-22px); }
+            }
+
+            /* Card wrapper */
             .lw {
-                width: 400px;
+                width: 380px;
                 max-width: calc(100vw - 32px);
-                text-align: center;
-                position: relative;
-                z-index: 1;
+                position: relative; z-index: 1;
             }
-            .login-logo {
-                margin-bottom: 56px;
-                user-select: none;
-                display: flex;
-                flex-direction: column;
-                align-items: center;
-                text-align: center;
-            }
-            .login-logo-l1 {
-                font-family: 'Inter', sans-serif;
-                font-weight: 700;
-                font-size: 46px;
-                letter-spacing: .10em;
-                text-transform: uppercase;
-                line-height: 1;
-                padding-right: .10em;
-            }
-            .login-logo-c { color: #E30613; }
-            .login-logo-olor { color: rgba(255,255,255,.88); }
-            .login-logo-l2 {
-                font-family: 'Inter', sans-serif;
-                font-weight: 500;
-                font-size: 13px;
-                letter-spacing: .20em;
-                text-transform: uppercase;
-                color: rgba(255,255,255,.82);
-                margin-top: 10px;
-                padding-right: .20em;
-            }
+
+            /* Card */
             .lcard {
-                background: rgba(255,255,255,.028);
+                background: rgba(255,255,255,.038);
                 border: 1px solid rgba(255,255,255,.07);
                 border-top-color: rgba(255,255,255,.11);
                 border-radius: 20px;
-                padding: 40px 36px;
+                overflow: hidden;
+                backdrop-filter: blur(48px) saturate(160%);
+                -webkit-backdrop-filter: blur(48px) saturate(160%);
                 box-shadow:
-                    0 32px 80px rgba(0,0,0,.6),
-                    0 8px 32px rgba(0,0,0,.4),
-                    inset 0 1px 0 rgba(255,255,255,.06);
-                backdrop-filter: blur(32px) saturate(160%);
-                -webkit-backdrop-filter: blur(32px) saturate(160%);
+                    0 0 0 1px rgba(255,255,255,.04) inset,
+                    0 32px 80px rgba(0,0,0,.65),
+                    0 8px 24px rgba(0,0,0,.4),
+                    0 0 120px rgba(227,6,19,.06);
+                animation: lCardRise .9s cubic-bezier(.16,1,.3,1) both;
+            }
+            @keyframes lCardRise {
+                from { opacity:0; transform: translateY(28px) scale(.97); }
+                to   { opacity:1; transform: translateY(0) scale(1); }
+            }
+            /* Top accent line */
+            .lcard::before {
+                content: '';
+                position: absolute; top: 0; left: 0; right: 0; height: 1px;
+                background: linear-gradient(90deg,
+                    transparent 0%, rgba(227,6,19,.6) 30%,
+                    rgba(255,255,255,.22) 50%,
+                    rgba(227,6,19,.4) 70%, transparent 100%);
+                pointer-events: none;
+            }
+
+            /* Card header — logo */
+            .lcard-head {
+                padding: 32px 36px 26px;
+                border-bottom: 1px solid rgba(255,255,255,.06);
+                animation: lFadeUp .7s cubic-bezier(.16,1,.3,1) .12s both;
+            }
+            .login-logo-l1 {
+                font-family: 'Jost', sans-serif;
+                font-weight: 700; font-size: 34px;
+                letter-spacing: .12em; line-height: 1;
+                padding-right: .12em;
+            }
+            .login-logo-c    { color: #E30613; }
+            .login-logo-olor { color: rgba(255,255,255,.92); }
+            .login-logo-l2 {
+                font-family: 'Fira Sans', sans-serif;
+                font-weight: 300; font-size: 9.5px;
+                letter-spacing: .34em; text-transform: uppercase;
+                color: rgba(255,255,255,.30);
+                margin-top: 7px; padding-right: .34em;
+            }
+
+            /* Card body */
+            .lcard-body {
+                padding: 26px 36px 32px;
+                animation: lFadeUp .7s cubic-bezier(.16,1,.3,1) .22s both;
             }
             .login-label {
-                font-family: 'Inter', sans-serif;
-                font-size: 9px;
-                font-weight: 400;
-                letter-spacing: .5em;
-                text-transform: uppercase;
+                font-family: 'Jost', sans-serif;
+                font-size: 9px; font-weight: 600;
+                letter-spacing: .32em; text-transform: uppercase;
                 color: rgba(255,255,255,.28);
-                margin-bottom: 8px;
-                padding-right: .5em;
+                margin-bottom: 20px; padding-right: .32em;
             }
-            .login-title {
-                font-family: 'Inter', sans-serif;
-                font-size: 18px;
-                font-weight: 500;
-                color: rgba(255,255,255,.85);
-                letter-spacing: .02em;
-                margin-bottom: 28px;
-            }
-            .login-divider {
-                height: 1px;
-                background: rgba(255,255,255,.06);
-                margin-bottom: 28px;
-            }
-            .ll {
-                font-size: 11px;
-                font-weight: 700;
-                letter-spacing: 2px;
-                text-transform: uppercase;
-                color: var(--text2);
-                margin-bottom: 16px;
-            }
-            .roles {
-                display: grid;
-                grid-template-columns: 1fr 1fr 1fr;
-                gap: 8px;
-                margin-bottom: 22px;
-            }
-            .rb {
-                background: var(--bg4);
-                border: 1px solid var(--border);
-                border-radius: var(--radius-sm);
-                padding: 13px 8px;
-                cursor: pointer;
-                transition: all var(--transition);
-                text-align: center;
-            }
-            .rb:hover { border-color: var(--red2); }
-            .rb.on {
-                border-color: var(--red);
-                background: var(--red-dim);
-            }
-            .ri { font-size: 20px; margin-bottom: 5px; }
-            .rn { font-size: 12px; font-weight: 600; display: block; }
-            .rp {
-                font-family: "Fira Code", monospace;
-                font-size: 11px;
-                color: var(--text2);
-                margin-top: 2px;
-                display: block;
-            }
+
+            /* PIN input */
             .pin {
                 width: 100%;
                 background: rgba(255,255,255,.04);
                 border: 1px solid rgba(255,255,255,.08);
-                border-radius: 12px;
+                border-radius: 10px;
                 padding: 18px 15px;
-                font-family: "Fira Code", monospace;
-                font-size: 24px;
-                letter-spacing: 14px;
+                font-family: 'Fira Code', monospace;
+                font-size: 24px; letter-spacing: 14px;
                 color: rgba(255,255,255,.9);
-                outline: none;
-                text-align: center;
-                margin-bottom: 14px;
+                outline: none; text-align: center;
+                margin-bottom: 16px;
                 box-sizing: border-box;
-                transition: border-color .2s, box-shadow .2s;
+                transition: border-color .2s, box-shadow .2s, background .2s;
             }
-            .pin::placeholder { color: rgba(255,255,255,.18); letter-spacing: 10px; }
+            .pin::placeholder { color: rgba(255,255,255,.15); letter-spacing: 10px; font-size: 16px; }
             .pin:focus {
                 border-color: rgba(227,6,19,.55);
-                box-shadow: 0 0 0 3px rgba(227,6,19,.08), 0 0 24px rgba(227,6,19,.07);
+                background: rgba(227,6,19,.04);
+                box-shadow: 0 0 0 3px rgba(227,6,19,.10), 0 0 20px rgba(227,6,19,.07);
             }
+
+            /* Submit button */
             .lbtn {
-                width: 100%;
-                background: linear-gradient(135deg, #E30613 0%, #b8000f 100%);
-                color: #fff;
-                border: none;
-                border-radius: 12px;
-                padding: 17px;
-                font-family: 'Inter', sans-serif;
-                font-size: 11px;
-                font-weight: 600;
-                letter-spacing: .28em;
-                text-transform: uppercase;
-                cursor: pointer;
-                transition: all .2s;
+                width: 100%; border: none; border-radius: 10px;
+                padding: 16px;
+                background: #E30613;
+                font-family: 'Jost', sans-serif;
+                font-size: 11px; font-weight: 600;
+                letter-spacing: .22em; text-transform: uppercase;
+                color: #fff; cursor: pointer;
+                position: relative; overflow: hidden;
+                transition: background .2s, box-shadow .2s, transform .15s cubic-bezier(.16,1,.3,1);
                 box-shadow: 0 4px 20px rgba(227,6,19,.25);
-                position: relative;
-                overflow: hidden;
             }
             .lbtn::after {
                 content: '';
-                position: absolute;
-                inset: 0;
-                background: linear-gradient(135deg, rgba(255,255,255,.12) 0%, transparent 60%);
+                position: absolute; inset: 0;
+                background: linear-gradient(105deg, transparent 30%, rgba(255,255,255,.18) 50%, transparent 70%);
+                transform: translateX(-100%);
+                transition: transform .5s cubic-bezier(.16,1,.3,1);
                 pointer-events: none;
             }
             .lbtn:hover {
-                transform: translateY(-2px);
-                box-shadow: 0 8px 36px rgba(227,6,19,.45);
+                background: #c8000f;
+                box-shadow: 0 8px 32px rgba(227,6,19,.42), 0 2px 8px rgba(0,0,0,.4);
+                transform: translateY(-1px);
             }
+            .lbtn:hover::after { transform: translateX(100%); }
             .lbtn:active { transform: translateY(0); }
+
+            /* Error */
             .lerr {
-                font-family: 'Inter', sans-serif;
+                font-family: 'Fira Sans', sans-serif;
                 color: rgba(255,107,107,.85);
-                font-size: 12px;
-                letter-spacing: .04em;
-                margin-top: 12px;
-                display: none;
+                font-size: 12px; letter-spacing: .04em;
+                margin-top: 12px; display: none;
+                text-align: center;
             }
+
+            /* Card footer */
+            .lcard-foot {
+                border-top: 1px solid rgba(255,255,255,.06);
+                padding: 13px 36px;
+                display: flex; align-items: center; justify-content: space-between;
+                animation: lFadeUp .7s cubic-bezier(.16,1,.3,1) .32s both;
+            }
+            .l-sys {
+                font-family: 'Fira Code', monospace;
+                font-size: 9px; font-weight: 300;
+                color: rgba(255,255,255,.16); letter-spacing: .04em;
+            }
+            .l-live {
+                display: flex; align-items: center; gap: 7px;
+            }
+            .l-live-dot {
+                width: 5px; height: 5px; border-radius: 50%;
+                background: #E30613; box-shadow: 0 0 6px #E30613;
+                animation: lPulse 1.8s ease-in-out infinite;
+            }
+            .l-live-lbl {
+                font-family: 'Fira Sans', sans-serif;
+                font-size: 9px; font-weight: 400;
+                letter-spacing: .18em; text-transform: uppercase;
+                color: rgba(255,255,255,.20);
+            }
+            @keyframes lPulse {
+                0%,100% { opacity:1; transform:scale(1); }
+                50%      { opacity:.35; transform:scale(.75); }
+            }
+            @keyframes lFadeUp {
+                from { opacity:0; transform:translateY(12px); }
+                to   { opacity:1; transform:translateY(0); }
+            }
+
+            /* Legacy helpers (unused but keep for safety) */
+            .ll { display: none; }
+            .roles { display: none; }
+            .login-logo { display: none; }
+            .login-title { display: none; }
+            .login-divider { display: none; }
 
             #app {
                 display: none;
@@ -3611,30 +3651,47 @@
     <body>
         <!-- LOGIN -->
         <div id="login">
+            <!-- Ambient blobs -->
+            <div class="l-blob l-blob-1"></div>
+            <div class="l-blob l-blob-2"></div>
+            <div class="l-blob l-blob-3"></div>
+
             <div class="lw">
-                <div class="login-logo">
-                    <div class="login-logo-l1">
-                        <span class="login-logo-c">C</span><span class="login-logo-olor">OLOR</span>
-                    </div>
-                    <div class="login-logo-l2">Plastic &nbsp;·&nbsp; Automotive</div>
-                </div>
                 <div class="lcard">
-                    <div class="login-label">Přihlášení</div>
-                    <div class="login-title">Seřizovač</div>
-                    <div class="login-divider"></div>
-                    <input
-                        type="password"
-                        class="pin"
-                        id="pin"
-                        maxlength="6"
-                        placeholder="· · · ·"
-                        onfocus="this.placeholder = ''"
-                        onblur="if (!this.value) this.placeholder = '· · · ·';"
-                        autocomplete="off"
-                        onkeydown="if (event.key === 'Enter') doLogin();"
-                    />
-                    <button class="lbtn" onclick="doLogin()">Přihlásit se</button>
-                    <div class="lerr" id="lerr">Nesprávný PIN</div>
+                    <!-- Logo header -->
+                    <div class="lcard-head">
+                        <div class="login-logo-l1">
+                            <span class="login-logo-c">C</span><span class="login-logo-olor">OLOR</span>
+                        </div>
+                        <div class="login-logo-l2">Plastic &nbsp;·&nbsp; Automotive</div>
+                    </div>
+
+                    <!-- PIN body -->
+                    <div class="lcard-body">
+                        <div class="login-label">Přihlášení</div>
+                        <input
+                            type="password"
+                            class="pin"
+                            id="pin"
+                            maxlength="6"
+                            placeholder="· · · ·"
+                            onfocus="this.placeholder=''"
+                            onblur="if(!this.value)this.placeholder='· · · ·';"
+                            autocomplete="off"
+                            onkeydown="if(event.key==='Enter')doLogin();"
+                        />
+                        <button class="lbtn" onclick="doLogin()">Vstoupit</button>
+                        <div class="lerr" id="lerr">Nesprávný PIN</div>
+                    </div>
+
+                    <!-- Footer -->
+                    <div class="lcard-foot">
+                        <span class="l-sys">Lisovna C7 &nbsp;·&nbsp; 2026</span>
+                        <div class="l-live">
+                            <div class="l-live-dot"></div>
+                            <span class="l-live-lbl">Online</span>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
