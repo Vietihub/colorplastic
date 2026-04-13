@@ -15,7 +15,7 @@
         <link rel="shortcut icon" href="favicon.ico" />
         <link rel="apple-touch-icon" href="favicon.ico" />
         <link
-            href="https://fonts.googleapis.com/css2?family=Fira+Sans:wght@300;400;500;600;700&family=Fira+Code:wght@400;500;600;700&family=Bodoni+Moda:wght@400;600;700&family=Jost:wght@300;400;500;600&family=Cormorant:ital,wght@0,400;0,600;0,700;1,400&display=swap"
+            href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@400;500;600;700&family=Fira+Sans:wght@300;400;500;600;700&family=Fira+Code:wght@400;500;600;700&family=Bodoni+Moda:wght@400;600;700&family=Jost:wght@300;400;500;600&family=Cormorant:ital,wght@0,400;0,600;0,700;1,400&display=swap"
             rel="stylesheet"
         />
         <style>
@@ -46,6 +46,16 @@
                 --shadow-lg: 0 8px 40px rgba(0, 0, 0, 0.6);
                 --transition: 0.15s ease;
                 --ease: cubic-bezier(.16, 1, .3, 1);
+
+                /* ── Production module ────────────────────────────── */
+                --prod-run:         #22C55E;
+                --prod-exchange:     #F59E0B;
+                --prod-idle:         #4B5563;
+                --prod-dry:          #F97316;
+                --prod-surface:      #0c0c14;
+                --prod-border:       rgba(255,255,255,.05);
+                --prod-glow-run:     0 0 20px rgba(34,197,94,.15);
+                --prod-glow-exc:     0 0 20px rgba(245,158,11,.15);
             }
             * {
                 box-sizing: border-box;
@@ -1548,6 +1558,491 @@
                 color: var(--text3);
                 padding: 4px 0 8px;
                 font-family: "Fira Sans", sans-serif;
+            }
+
+            /* ── Machine Wall ─────────────────────────────────── */
+            .mw-grid {
+                display: grid;
+                grid-template-columns: repeat(3, 1fr);
+                gap: 14px;
+                margin-bottom: 28px;
+            }
+            @media (max-width: 1100px) { .mw-grid { grid-template-columns: repeat(2, 1fr); } }
+            @media (max-width: 680px)  { .mw-grid { grid-template-columns: 1fr; } }
+
+            .mw-card {
+                position: relative;
+                background: var(--prod-surface);
+                border: 1px solid var(--prod-border);
+                border-radius: var(--radius);
+                padding: 0;
+                overflow: hidden;
+                transition: transform var(--ease) .22s, box-shadow var(--ease) .22s;
+            }
+            .mw-card:hover {
+                transform: translateY(-3px);
+                box-shadow: 0 16px 48px rgba(0,0,0,.45);
+            }
+
+            /* Status bar left */
+            .mw-card::before {
+                content: "";
+                position: absolute;
+                left: 0; top: 0; bottom: 0;
+                width: 4px;
+                background: var(--prod-idle);
+                border-radius: var(--radius) 0 0 var(--radius);
+                transition: background var(--ease) .3s;
+            }
+            .mw-card.mw-run::before     { background: var(--prod-run); }
+            .mw-card.mw-exc::before      { background: var(--prod-exchange); }
+            .mw-card.mw-err::before      { background: var(--red); }
+
+            /* Glow for active states */
+            .mw-card.mw-run { box-shadow: var(--prod-glow-run); }
+            .mw-card.mw-exc { box-shadow: var(--prod-glow-exc); }
+
+            .mw-inner { padding: 16px 16px 14px 22px; }
+
+            /* Header row: machine name + status dot */
+            .mw-head {
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                margin-bottom: 10px;
+            }
+            .mw-machine {
+                font-family: "Chakra Petch", sans-serif;
+                font-size: 12px;
+                font-weight: 600;
+                letter-spacing: .8px;
+                text-transform: uppercase;
+                color: var(--text3);
+            }
+            .mw-status {
+                display: flex;
+                align-items: center;
+                gap: 6px;
+                font-family: "Fira Sans", sans-serif;
+                font-size: 10px;
+                font-weight: 500;
+                letter-spacing: .4px;
+                text-transform: uppercase;
+                padding: 3px 8px;
+                border-radius: 4px;
+            }
+            .mw-status.mw-s-run {
+                background: rgba(34,197,94,.12);
+                color: var(--prod-run);
+            }
+            .mw-status.mw-s-exc {
+                background: rgba(245,158,11,.12);
+                color: var(--prod-exchange);
+            }
+            .mw-status.mw-s-idle {
+                background: rgba(75,85,99,.15);
+                color: var(--text3);
+            }
+            .mw-status.mw-s-err {
+                background: rgba(232,0,30,.1);
+                color: #ff6070;
+            }
+            .mw-dot {
+                width: 7px; height: 7px;
+                border-radius: 50%;
+                background: currentColor;
+            }
+            .mw-run .mw-dot  { animation: p 1.5s ease-in-out infinite; box-shadow: 0 0 6px currentColor; }
+
+            /* Forma + label */
+            .mw-forma {
+                font-family: "Fira Code", monospace;
+                font-size: 26px;
+                font-weight: 700;
+                line-height: 1.1;
+                color: var(--text);
+                letter-spacing: -.02em;
+            }
+            .mw-forma-label {
+                font-size: 12px;
+                color: var(--text2);
+                margin-top: 2px;
+                line-height: 1.35;
+            }
+            .mw-idle-text {
+                font-family: "Chakra Petch", sans-serif;
+                font-size: 15px;
+                font-weight: 500;
+                color: var(--text3);
+                letter-spacing: .3px;
+                padding: 6px 0;
+            }
+
+            /* Material row */
+            .mw-mat {
+                margin-top: 10px;
+                padding-top: 10px;
+                border-top: 1px solid var(--prod-border);
+                display: flex;
+                align-items: center;
+                gap: 7px;
+                font-size: 12px;
+                color: var(--text2);
+            }
+            .mw-mat-ico {
+                width: 14px; height: 14px;
+                opacity: .45;
+                flex-shrink: 0;
+            }
+            .mw-mat-name { font-weight: 500; color: var(--text); }
+            .mw-mat-type { opacity: .6; font-size: 11px; }
+            .mw-color-swatch {
+                width: 12px; height: 12px;
+                border-radius: 3px;
+                border: 1px solid rgba(255,255,255,.12);
+                flex-shrink: 0;
+            }
+
+            /* Plan badge */
+            .mw-badge {
+                margin-top: 10px;
+                padding: 5px 10px;
+                border-radius: 5px;
+                font-size: 11px;
+                font-weight: 600;
+                letter-spacing: .3px;
+                display: flex;
+                align-items: center;
+                gap: 6px;
+            }
+            .mw-badge-plan {
+                background: rgba(57,211,83,.08);
+                border: 1px solid rgba(57,211,83,.2);
+                color: var(--green-text);
+            }
+            .mw-badge-mismatch {
+                background: rgba(74,158,255,.08);
+                border: 1px solid rgba(74,158,255,.2);
+                color: #4a9eff;
+            }
+            .mw-badge-exc {
+                background: rgba(245,158,11,.1);
+                border: 1px solid rgba(245,158,11,.35);
+                color: #e6b800;
+            }
+            .mw-badge-test {
+                background: rgba(232,0,30,.08);
+                border: 1px solid rgba(232,0,30,.3);
+                color: #e03030;
+            }
+            .mw-badge-stoji {
+                background: rgba(74,158,255,.07);
+                border: 1px solid rgba(74,158,255,.2);
+                color: rgba(74,158,255,.75);
+            }
+            .mw-badge-detail {
+                font-weight: 400;
+                font-size: 10px;
+                opacity: .6;
+            }
+
+            /* Countdown row */
+            .mw-countdown {
+                margin-top: 8px;
+                padding: 5px 10px;
+                border-radius: 5px;
+                font-size: 11px;
+                font-weight: 700;
+                letter-spacing: .3px;
+                display: flex;
+                align-items: center;
+                gap: 6px;
+                background: rgba(245,158,11,.1);
+                border: 1px solid rgba(245,158,11,.4);
+                color: #e6b800;
+            }
+            .mw-countdown-ico { font-size: 13px; }
+
+            /* Drying progress */
+            .mw-dry {
+                margin-top: 8px;
+                padding: 6px 10px;
+                border-radius: 5px;
+                background: rgba(249,115,22,.08);
+                border: 1px solid rgba(249,115,22,.25);
+            }
+            .mw-dry-head {
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                font-size: 11px;
+                font-weight: 600;
+                color: var(--prod-dry);
+                margin-bottom: 5px;
+            }
+            .mw-dry-bar {
+                height: 4px;
+                border-radius: 2px;
+                background: rgba(255,255,255,.06);
+                overflow: hidden;
+            }
+            .mw-dry-fill {
+                height: 100%;
+                border-radius: 2px;
+                background: var(--prod-dry);
+                transition: width 60s linear;
+            }
+            .mw-dry-fill.mw-dry-ready { background: var(--prod-run); }
+            .mw-dry-time {
+                font-family: "Fira Code", monospace;
+                font-size: 10px;
+                color: var(--text3);
+                margin-top: 3px;
+            }
+
+            /* Edit button */
+            .mw-edit {
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                gap: 5px;
+                width: 100%;
+                background: rgba(255,255,255,.04);
+                border: 1px solid var(--prod-border);
+                border-top: none;
+                border-radius: 0 0 var(--radius) var(--radius);
+                color: var(--text2);
+                font-size: 11px;
+                font-weight: 500;
+                font-family: "Fira Sans", sans-serif;
+                letter-spacing: .3px;
+                padding: 8px 10px;
+                cursor: pointer;
+                transition: all var(--ease) .18s;
+            }
+            .mw-edit:hover {
+                background: rgba(232,0,30,.08);
+                border-color: rgba(232,0,30,.2);
+                color: #ff8090;
+            }
+
+            .mw-upd {
+                font-family: "Fira Code", monospace;
+                font-size: 10px;
+                color: var(--text3);
+                margin-top: 6px;
+                letter-spacing: .02em;
+            }
+
+            /* ── Exchange Timeline ─────────────────────────────── */
+            .et-section {
+                margin-top: 32px;
+            }
+            .et-title {
+                font-family: "Chakra Petch", sans-serif;
+                font-size: 13px;
+                font-weight: 600;
+                letter-spacing: 1px;
+                text-transform: uppercase;
+                color: var(--text3);
+                margin-bottom: 14px;
+                display: flex;
+                align-items: center;
+                gap: 8px;
+            }
+            .et-title-ico {
+                width: 18px; height: 18px;
+                opacity: .5;
+            }
+            .et-empty {
+                font-family: "Fira Sans", sans-serif;
+                font-size: 13px;
+                color: var(--text3);
+                padding: 24px 0;
+                text-align: center;
+            }
+            .et-track {
+                position: relative;
+                padding: 0 0 0 0;
+                overflow-x: auto;
+                -webkit-overflow-scrolling: touch;
+            }
+            .et-track::-webkit-scrollbar { height: 4px; }
+            .et-track::-webkit-scrollbar-track { background: transparent; }
+            .et-track::-webkit-scrollbar-thumb { background: var(--bg4); border-radius: 2px; }
+            .et-lane {
+                position: relative;
+                min-width: 100%;
+                display: flex;
+                flex-direction: column;
+                gap: 0;
+            }
+            /* Horizontal rail */
+            .et-rail {
+                position: relative;
+                height: 2px;
+                background: var(--bg4);
+                margin: 0 20px 0 80px;
+            }
+            /* Now marker */
+            .et-now {
+                position: absolute;
+                top: -8px;
+                width: 2px;
+                height: 18px;
+                background: var(--red);
+                z-index: 5;
+            }
+            .et-now::after {
+                content: attr(data-time);
+                position: absolute;
+                top: -18px;
+                left: 50%;
+                transform: translateX(-50%);
+                font-family: "Fira Code", monospace;
+                font-size: 10px;
+                font-weight: 600;
+                color: var(--red);
+                white-space: nowrap;
+            }
+            /* Exchange point */
+            .et-point {
+                position: absolute;
+                top: -10px;
+                width: 20px; height: 20px;
+                background: var(--bg2);
+                border: 2px solid var(--prod-exchange);
+                border-radius: 50%;
+                transform: translateX(-50%);
+                z-index: 3;
+                transition: all var(--ease) .2s;
+            }
+            .et-point:hover {
+                transform: translateX(-50%) scale(1.3);
+                box-shadow: 0 0 12px rgba(245,158,11,.3);
+            }
+            .et-point.mw-passed {
+                border-color: var(--prod-idle);
+                background: var(--bg4);
+                opacity: .5;
+            }
+            .et-point.mw-next {
+                border-color: var(--prod-exchange);
+                background: var(--prod-exchange);
+                box-shadow: 0 0 14px rgba(245,158,11,.35);
+            }
+
+            /* Cards below timeline */
+            .et-cards {
+                display: flex;
+                gap: 12px;
+                margin-top: 20px;
+                padding-bottom: 4px;
+                overflow-x: auto;
+                -webkit-overflow-scrolling: touch;
+            }
+            .et-cards::-webkit-scrollbar { height: 3px; }
+            .et-cards::-webkit-scrollbar-thumb { background: var(--bg4); border-radius: 2px; }
+            .et-card {
+                flex-shrink: 0;
+                min-width: 180px;
+                background: var(--prod-surface);
+                border: 1px solid var(--prod-border);
+                border-radius: var(--radius);
+                padding: 14px 16px;
+                position: relative;
+                overflow: hidden;
+            }
+            .et-card::before {
+                content: "";
+                position: absolute;
+                left: 0; top: 0; bottom: 0;
+                width: 3px;
+                background: var(--prod-exchange);
+                border-radius: var(--radius) 0 0 var(--radius);
+            }
+            .et-card.mw-passed::before { background: var(--prod-idle); opacity: .5; }
+            .et-card.mw-passed { opacity: .5; }
+            .et-card.mw-next { border-color: rgba(245,158,11,.25); }
+
+            .et-card-time {
+                font-family: "Fira Code", monospace;
+                font-size: 11px;
+                font-weight: 600;
+                color: var(--prod-exchange);
+                margin-bottom: 4px;
+            }
+            .et-card.mw-passed .et-card-time { color: var(--text3); }
+            .et-card-machine {
+                font-family: "Chakra Petch", sans-serif;
+                font-size: 11px;
+                font-weight: 600;
+                letter-spacing: .6px;
+                text-transform: uppercase;
+                color: var(--text3);
+                margin-bottom: 6px;
+            }
+            .et-card-forma {
+                font-family: "Fira Code", monospace;
+                font-size: 15px;
+                font-weight: 700;
+                color: var(--text);
+            }
+            .et-card-arrow {
+                font-size: 10px;
+                color: var(--text3);
+                margin: 2px 0;
+            }
+            .et-card-to {
+                font-family: "Fira Code", monospace;
+                font-size: 15px;
+                font-weight: 700;
+                color: var(--prod-exchange);
+            }
+            .et-card.mw-passed .et-card-to { color: var(--text3); }
+            .et-card-countdown {
+                font-family: "Fira Code", monospace;
+                font-size: 11px;
+                font-weight: 600;
+                color: #e6b800;
+                margin-top: 6px;
+                padding: 3px 7px;
+                background: rgba(245,158,11,.08);
+                border-radius: 4px;
+                display: inline-block;
+            }
+            .et-card.mw-passed .et-card-countdown { color: var(--text3); background: rgba(255,255,255,.03); }
+
+            /* Section header */
+            .vyroba-header {
+                display: flex;
+                align-items: baseline;
+                justify-content: space-between;
+                margin-bottom: 18px;
+            }
+            .vyroba-title {
+                font-family: "Chakra Petch", sans-serif;
+                font-size: 22px;
+                font-weight: 700;
+                letter-spacing: -.01em;
+                color: var(--text);
+            }
+            .vyroba-shift {
+                font-family: "Fira Sans", sans-serif;
+                font-size: 12px;
+                font-weight: 500;
+                color: var(--text3);
+                letter-spacing: .3px;
+            }
+
+            /* Mobile: compact list mode */
+            @media (max-width: 680px) {
+                .mw-card::before { width: 3px; }
+                .mw-forma { font-size: 22px; }
+                .mw-machine { font-size: 11px; }
+                .vyroba-title { font-size: 18px; }
+                .et-cards { flex-wrap: nowrap; }
+                .et-card { min-width: 160px; }
             }
 
             .moverlay {
@@ -4215,13 +4710,14 @@
                             </div>
                         </div>
 
-                        <!-- AKTUÁLNÍ VÝROBA (edit) -->
+                        <!-- VÝROBA — Machine Wall + Exchange Timeline -->
                         <div class="page" id="page-vyroba">
-                            <div class="ptitle">Aktuální výroba</div>
-                            <div class="psub">
-                                Stav lisů a nasazených forem – Lisovna C7
+                            <div class="vyroba-header">
+                                <div class="vyroba-title">Výroba</div>
+                                <div class="vyroba-shift" id="vyroba-shift-label"></div>
                             </div>
-                            <div class="pgrid" id="prod-edit"></div>
+                            <div id="mw-wall"></div>
+                            <div class="et-section" id="et-section"></div>
                         </div>
 
                         <!-- OBJEDNÁVKY MATERIÁLU (mistr) -->
@@ -5673,7 +6169,7 @@
                         renderFormy();
                         break;
                     case "vyroba":
-                        renderProd("prod-edit");
+                        renderVyroba();
                         break;
                     case "objednavky":
                         renderObjednavky();
@@ -8254,6 +8750,345 @@
                     }
                 }
                 return null;
+            }
+
+            /* ── VÝROBA: Machine Wall + Exchange Timeline ──────── */
+            function renderVyroba() {
+                var shiftLabel = { ranní: "Ranní směna", odpolední: "Odpolední směna", noční: "Noční směna" };
+                var cs = currentShift();
+                var sl = document.getElementById("vyroba-shift-label");
+                if (sl) sl.textContent = shiftLabel[cs] || cs;
+
+                renderMachineWall();
+                renderExchangeTimeline();
+            }
+
+            function renderMachineWall() {
+                var el = document.getElementById("mw-wall");
+                if (!el) return;
+
+                el.innerHTML = '<div class="mw-grid">' +
+                    D.production.map(function (p, idx) {
+                        var planned = getPlanForMachineNow(p.machine);
+                        var upcoming = getUpcomingVymena(p.machine);
+                        var formaData = p.forma && D.formy && D.formy[p.forma];
+
+                        // Determine card state class
+                        var stateClass = "mw-idle";
+                        var statusClass = "mw-s-idle";
+                        var statusText = "Volný";
+                        if (planned && planned.isStoji) {
+                            stateClass = "mw-err";
+                            statusClass = "mw-s-err";
+                            statusText = "Stojí";
+                        } else if (planned && planned.bezVyroby) {
+                            stateClass = "mw-exc";
+                            statusClass = "mw-s-exc";
+                            statusText = "Výměna";
+                        } else if (p.running) {
+                            stateClass = "mw-run";
+                            statusClass = "mw-s-run";
+                            statusText = "Běží";
+                        }
+
+                        // Forma block
+                        var formaBlock = "";
+                        if (p.forma) {
+                            formaBlock = '<div class="mw-forma">' + p.forma + '</div>' +
+                                '<div class="mw-forma-label">' +
+                                    (formaData ? formaData.nazev : "Nasazená forma") +
+                                '</div>';
+                        } else {
+                            formaBlock = '<div class="mw-idle-text">Bez výroby</div>';
+                        }
+
+                        // Material block
+                        var matBlock = "";
+                        if (p.mat) {
+                            var matType = formaData ? formaData.dru : "";
+                            var colorSwatch = "";
+                            if (planned && planned.barva) {
+                                colorSwatch = '<div class="mw-color-swatch" style="background:' + planned.barva + '"></div>';
+                            }
+                            matBlock = '<div class="mw-mat">' +
+                                '<svg class="mw-mat-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg>' +
+                                '<span class="mw-mat-name">' + p.mat + '</span>' +
+                                (matType ? '<span class="mw-mat-type">· ' + matType + '</span>' : '') +
+                                colorSwatch +
+                            '</div>';
+                        }
+
+                        // Plan badge
+                        var planBadge = "";
+                        if (planned) {
+                            if (planned.isStoji) {
+                                planBadge = '<div class="mw-badge mw-badge-stoji">Bez výroby' +
+                                    (planned.note ? '<span class="mw-badge-detail"> · ' + planned.note + '</span>' : '') +
+                                '</div>';
+                            } else if (planned.bezVyroby) {
+                                planBadge = '<div class="mw-badge mw-badge-exc">' +
+                                    '<span>🟡</span><span>VÝMĚNA</span>' +
+                                    '<span class="mw-badge-detail">č. ' + (planned.forma || "") +
+                                    (planned.cas ? " v " + planned.cas : "") + '</span>' +
+                                '</div>';
+                            } else if (planned.isTest) {
+                                planBadge = '<div class="mw-badge mw-badge-test">' +
+                                    '<span>🔴</span><span>TEST</span>' +
+                                    (planned.forma ? '<span class="mw-badge-detail">č. ' + planned.forma + '</span>' : '') +
+                                '</div>';
+                            } else if (planned.forma) {
+                                var match = p.forma && p.forma.toString() === planned.forma.toString();
+                                var platidoLabel = "";
+                                if (planned.platido) {
+                                    var pd = new Date(planned.platido.replace(" ", "T"));
+                                    platidoLabel = " do " +
+                                        String(pd.getDate()).padStart(2, "0") + "." +
+                                        String(pd.getMonth() + 1).padStart(2, "0") + ". " +
+                                        planned.platido.slice(11, 16);
+                                }
+                                planBadge = '<div class="mw-badge ' +
+                                    (match ? "mw-badge-plan" : "mw-badge-mismatch") + '">' +
+                                    '<span style="opacity:.7;font-size:10px">PLÁN:</span>' +
+                                    '<span>č. ' + planned.forma + '</span>' +
+                                    (platidoLabel ? '<span class="mw-badge-detail">' + platidoLabel + '</span>' : '') +
+                                    (match ? '<span style="font-size:13px">✓</span>' : '') +
+                                '</div>';
+                            }
+                        }
+
+                        // Upcoming exchange countdown
+                        var countdownBlock = "";
+                        if (upcoming) {
+                            countdownBlock = '<div class="mw-countdown">' +
+                                '<span class="mw-countdown-ico">⏰</span>' +
+                                '<span>VÝMĚNA za ' + upcoming.diffMin + ' min</span>' +
+                                (upcoming.plan.forma ? '<span class="mw-badge-detail">č. ' + upcoming.plan.forma + '</span>' : '') +
+                            '</div>';
+                        }
+
+                        // Drying status
+                        var dryBlock = "";
+                        if (planned && planned.susen && formaData && formaData.suseni) {
+                            var dryProgress = calcDryingProgress(planned, formaData);
+                            var pct = Math.min(100, Math.max(0, dryProgress.pct));
+                            var ready = pct >= 100;
+                            dryBlock = '<div class="mw-dry">' +
+                                '<div class="mw-dry-head">' +
+                                    '<span>🔥 Sušení · ' + formaData.suseni + '</span>' +
+                                    '<span style="font-family:Fira Code,monospace;font-size:10px">' + Math.round(pct) + '%</span>' +
+                                '</div>' +
+                                '<div class="mw-dry-bar">' +
+                                    '<div class="mw-dry-fill' + (ready ? " mw-dry-ready" : "") + '" style="width:' + pct + '%"></div>' +
+                                '</div>' +
+                                '<div class="mw-dry-time">' +
+                                    (ready ? "✓ Usušeno" : "Zbývá ~" + dryProgress.remaining) +
+                                '</div>' +
+                            '</div>';
+                        }
+
+                        // Updated timestamp
+                        var updBlock = "";
+                        if (p.updated) {
+                            updBlock = '<div class="mw-upd">Aktualizováno v ' + p.updated + '</div>';
+                        }
+
+                        return '<div class="mw-card ' + stateClass + '">' +
+                            '<div class="mw-inner">' +
+                                '<div class="mw-head">' +
+                                    '<span class="mw-machine">' + p.machine + '</span>' +
+                                    '<span class="mw-status ' + statusClass + '">' +
+                                        '<span class="mw-dot"></span>' +
+                                        statusText +
+                                    '</span>' +
+                                '</div>' +
+                                formaBlock +
+                                matBlock +
+                                planBadge +
+                                countdownBlock +
+                                dryBlock +
+                                updBlock +
+                            '</div>' +
+                            '<button class="mw-edit" data-m="' + p.machine + '" onclick="openProdModal(this.dataset.m)">' +
+                                '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>' +
+                                'Upravit' +
+                            '</button>' +
+                        '</div>';
+                    }).join("") +
+                '</div>';
+            }
+
+            function calcDryingProgress(plan, formaData) {
+                var susStr = formaData.suseni || "";
+                var match = susStr.match(/(\d+)\s*h/);
+                var reqHours = match ? parseInt(match[1], 10) : 2;
+                var reqMs = reqHours * 3600 * 1000;
+
+                var startMs = 0;
+                if (plan.updatedAt) {
+                    startMs = new Date(plan.updatedAt.replace(" ", "T")).getTime();
+                } else if (plan.cas) {
+                    var today = dateKey(new Date());
+                    startMs = new Date(today + "T" + plan.cas + ":00").getTime();
+                }
+
+                if (!startMs) return { pct: 0, remaining: "?" };
+
+                var nowMs = new Date().getTime();
+                var elapsed = nowMs - startMs;
+                var pct = (elapsed / reqMs) * 100;
+                var remainingMs = Math.max(0, reqMs - elapsed);
+                var remMin = Math.ceil(remainingMs / 60000);
+                var remaining = "";
+                if (remMin >= 60) {
+                    remaining = Math.floor(remMin / 60) + "h " + (remMin % 60) + "min";
+                } else {
+                    remaining = remMin + " min";
+                }
+                return { pct: pct, remaining: remaining };
+            }
+
+            function renderExchangeTimeline() {
+                var el = document.getElementById("et-section");
+                if (!el) return;
+
+                var exchanges = gatherExchanges();
+                if (exchanges.length === 0) {
+                    el.innerHTML = '<div class="et-title">' +
+                        '<svg class="et-title-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>' +
+                        'Časová osa výměn' +
+                    '</div>' +
+                    '<div class="et-empty">Žádné plánované výměny pro tuto směnu</div>';
+                    return;
+                }
+
+                var nowMs = new Date().getTime();
+                var nowMin = new Date().getHours() * 60 + new Date().getMinutes();
+
+                // Find time range for the rail
+                var allTimes = exchanges.map(function (e) { return e.timeMin; });
+                var minTime = Math.min.apply(null, allTimes);
+                var maxTime = Math.max.apply(null, allTimes);
+                // Add some padding
+                var rangeStart = Math.max(0, minTime - 60);
+                var rangeEnd = maxTime + 60;
+                var range = rangeEnd - rangeStart || 120;
+
+                // Position function: timeMin -> percentage
+                function posPct(t) {
+                    return ((t - rangeStart) / range) * 100;
+                }
+
+                // Build rail points
+                var pointsHtml = exchanges.map(function (e) {
+                    var isPassed = e.timeMin < nowMin;
+                    var isNext = !isPassed && (!e._laterThan || e._laterThan);
+                    return '<div class="et-point' +
+                        (isPassed ? " mw-passed" : "") +
+                        '" style="left:' + posPct(e.timeMin) + '%" title="' + e.machine + ': ' + e.forma + ' → ' + e.nextForma + '"></div>';
+                }).join("");
+
+                // Now marker
+                var nowPct = posPct(nowMin);
+                var nowLabel = String(new Date().getHours()).padStart(2, "0") + ":" +
+                    String(new Date().getMinutes()).padStart(2, "0");
+                var nowMarker = '<div class="et-now" style="left:' + nowPct + '%" data-time="' + nowLabel + '"></div>';
+
+                // Build exchange cards
+                var nextFound = false;
+                var cardsHtml = exchanges.map(function (e) {
+                    var isPassed = e.timeMin < nowMin;
+                    var isNext = !isPassed && !nextFound;
+                    if (isNext) nextFound = true;
+                    var cardClass = isPassed ? "mw-passed" : (isNext ? "mw-next" : "");
+
+                    var countdown = "";
+                    if (!isPassed) {
+                        var diffMin = e.timeMin - nowMin;
+                        var cdText = diffMin >= 60
+                            ? Math.floor(diffMin / 60) + "h " + (diffMin % 60) + "min"
+                            : diffMin + " min";
+                        countdown = '<div class="et-card-countdown">⏳ ' + cdText + '</div>';
+                    } else {
+                        countdown = '<div class="et-card-countdown">✓ Prošlo</div>';
+                    }
+
+                    var timeLabel = e.cas || (String(Math.floor(e.timeMin / 60)).padStart(2, "0") + ":" +
+                        String(e.timeMin % 60).padStart(2, "0"));
+
+                    return '<div class="et-card ' + cardClass + '">' +
+                        '<div class="et-card-time">' + timeLabel + '</div>' +
+                        '<div class="et-card-machine">' + e.machine + '</div>' +
+                        '<div class="et-card-forma">' + (e.currentForma || "—") + '</div>' +
+                        '<div class="et-card-arrow">↓ výměna</div>' +
+                        '<div class="et-card-to">' + e.nextForma + '</div>' +
+                        countdown +
+                    '</div>';
+                }).join("");
+
+                el.innerHTML = '<div class="et-title">' +
+                    '<svg class="et-title-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>' +
+                    'Časová osa výměn' +
+                '</div>' +
+                '<div class="et-track">' +
+                    '<div class="et-lane">' +
+                        '<div class="et-rail">' +
+                            nowMarker +
+                            pointsHtml +
+                        '</div>' +
+                    '</div>' +
+                '</div>' +
+                '<div class="et-cards">' + cardsHtml + '</div>';
+            }
+
+            function gatherExchanges() {
+                var now = new Date();
+                var today = dateKey(now);
+                var shift = currentShift();
+                var shiftStartH = { ranní: 6, odpolední: 14, noční: 22 };
+                var results = [];
+
+                MACHINES_LIST.forEach(function (machine) {
+                    var keyPrefix = machine.replace(/ /g, "_") + "_";
+
+                    // Check current shift + next shift
+                    var shifts = [shift];
+                    var nextShiftMap = { ranní: "odpolední", odpolední: "noční", noční: "ranní" };
+                    shifts.push(nextShiftMap[shift]);
+
+                    shifts.forEach(function (s) {
+                        var key = keyPrefix + today + "_" + s;
+                        var entry = D.plan[key];
+                        if (!entry || !entry.bezVyroby) return;
+
+                        // Parse exchange time
+                        var casMin = 0;
+                        if (entry.cas) {
+                            var parts = entry.cas.split(":");
+                            casMin = (parseInt(parts[0], 10) || 0) * 60 + (parseInt(parts[1], 10) || 0);
+                        } else if (entry.platido) {
+                            var pd = new Date(entry.platido.replace(" ", "T"));
+                            casMin = pd.getHours() * 60 + pd.getMinutes();
+                        }
+                        if (!casMin) return;
+
+                        // Get current forma on this machine
+                        var prod = D.production.find(function (p) { return p.machine === machine; });
+                        var currentForma = prod && prod.forma ? prod.forma : "—";
+
+                        results.push({
+                            machine: machine,
+                            currentForma: currentForma,
+                            nextForma: entry.forma || "?",
+                            cas: entry.cas || "",
+                            timeMin: casMin,
+                            plan: entry
+                        });
+                    });
+                });
+
+                // Sort by time
+                results.sort(function (a, b) { return a.timeMin - b.timeMin; });
+                return results;
             }
 
             function renderProd(containerId) {
