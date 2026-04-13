@@ -7343,21 +7343,80 @@
 
             function renderSusenBanners() {
                 if (role !== "serizovac") return;
+                var _now = new Date();
+                var _nowMins = _now.getHours() * 60 + _now.getMinutes();
+                var _todayStr = dateKey(_now);
+                var _tomorrowD = new Date(_now);
+                _tomorrowD.setDate(_tomorrowD.getDate() + 1);
+                var _tomorrowStr = dateKey(_tomorrowD);
+                var _shiftH = { ranní: 6 * 60, odpolední: 14 * 60, noční: 22 * 60 };
+
                 var susenNotifs = D.notifications.filter(function (n) {
                     return n.typ === "susen";
                 });
+
+                // Compute countdown and filter by actual drying window
+                var activeAlerts = susenNotifs.map(function (n) {
+                    var planKey = n.planKey || "";
+                    var rm = planKey.match(/^(.+)_(\d{4}-\d{2}-\d{2})_(ranní|odpolední|noční)$/);
+                    var diff = null;
+                    var advanceMins = 120; // fallback 2h
+
+                    if (rm) {
+                        var planDate = rm[2], smena = rm[3];
+                        var isToday2 = planDate === _todayStr;
+                        var isTomorrow2 = planDate === _tomorrowStr;
+
+                        if (isToday2 || isTomorrow2) {
+                            var planEntry = D.plan && D.plan[planKey];
+                            var shiftStart = _shiftH[smena] || 0;
+                            if (planEntry && planEntry.cas) {
+                                var pts = planEntry.cas.split(":");
+                                shiftStart = parseInt(pts[0]) * 60 + parseInt(pts[1]);
+                            }
+                            diff = shiftStart - _nowMins + (isTomorrow2 ? 24 * 60 : 0);
+                        }
+
+                        // Look up actual drying time from forma data
+                        var formaNum = (D.plan && D.plan[planKey] && D.plan[planKey].forma) || n.forma;
+                        if (formaNum && D.formy && D.formy[formaNum]) {
+                            var sus = parseSuseni(D.formy[formaNum].suseni);
+                            var dryH = parseFloat(sus.cas);
+                            if (!isNaN(dryH) && dryH > 0) advanceMins = Math.ceil(dryH * 60);
+                        }
+                    }
+
+                    return { n: n, diff: diff, advanceMins: advanceMins };
+                }).filter(function (a) {
+                    // Show only when within the drying advance window
+                    if (a.diff === null) return true; // unknown timing → show always
+                    return a.diff > 0 && a.diff <= a.advanceMins;
+                });
+
                 var containers = ["susen-alert-ser", "susen-alert-prehled"];
                 containers.forEach(function (id) {
                     var el = document.getElementById(id);
                     if (!el) return;
-                    if (!susenNotifs.length) { el.innerHTML = ""; return; }
-                    el.innerHTML = susenNotifs.map(function (n) {
+                    if (!activeAlerts.length) { el.innerHTML = ""; return; }
+                    el.innerHTML = activeAlerts.map(function (a) {
+                        var n = a.n;
+                        var timeStr = "";
+                        if (a.diff !== null && a.diff > 0) {
+                            var hh = Math.floor(a.diff / 60);
+                            var mm = a.diff % 60;
+                            timeStr = hh > 0
+                                ? hh + "h" + (mm > 0 ? " " + mm + "min" : "")
+                                : mm + " min";
+                        }
+                        var titleHtml = timeStr
+                            ? "Nutno sušit materiál &mdash; výměna za <strong>" + timeStr + "</strong>"
+                            : "Nutno sušit materiál";
                         return '<div class="notif warning" style="margin-bottom:10px">' +
                             '<div class="notif-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" style="width:18px;height:18px;stroke-width:2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></div>' +
                             '<div class="notif-body">' +
-                            '<div class="notif-title">Nutno sušit materiál</div>' +
+                            '<div class="notif-title">' + titleHtml + '</div>' +
                             '<div class="notif-msg">' + n.msg + '</div>' +
-                            '<div class="notif-meta"><span class="notif-time">' + n.time + '</span><span class="notif-tag">Upozornění</span></div>' +
+                            '<div class="notif-meta"><span class="notif-time">' + n.time + '</span><span class="notif-tag">Sušení</span></div>' +
                             '</div>' +
                             '<button class="notif-close" data-k="' + n.fbKey + '" onclick="dismissSusen(this.dataset.k)">' +
                             '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>' +
@@ -7375,74 +7434,16 @@
 
             function startSusenCheck() {
                 if (role !== "serizovac") return;
-                checkSusenAlerts();
-                susenCheckInterval = setInterval(checkSusenAlerts, 60000); // každou minutu
+                renderSusenBanners();
+                susenCheckInterval = setInterval(renderSusenBanners, 60000); // každou minutu aktualizuj odpočet
             }
 
             function checkSusenAlerts() {
-                if (role !== "serizovac") return;
-                var now = new Date();
-                var today = dateKey(now);
-                var nowMins = now.getHours() * 60 + now.getMinutes();
-                var ADVANCE = 120; // 2 hodiny = 120 minut
-
-                // Shift start times in minutes from midnight
-                var smenyStartMins = {
-                    ranní: 6 * 60,
-                    odpolední: 14 * 60,
-                    noční: 22 * 60,
-                }; // R:06-14, O:14-22, N:22-06
-
-                var alerts = [];
-                MACHINES_LIST.forEach(function (mach) {
-                    Object.keys(smenyStartMins).forEach(function (smena) {
-                        var k =
-                            mach.replace(/ /g, "_") + "_" + today + "_" + smena;
-                        var p = D.plan[k];
-                        if (!p || !p.susen) return;
-                        var shiftStart = smenyStartMins[smena];
-                        // Also consider custom cas if set
-                        if (p.cas) {
-                            var parts = p.cas.split(":");
-                            shiftStart =
-                                parseInt(parts[0]) * 60 + parseInt(parts[1]);
-                        }
-                        var diff = shiftStart - nowMins;
-                        if (diff > 0 && diff <= ADVANCE) {
-                            alerts.push({
-                                mach: mach,
-                                smena: smena,
-                                forma: p.forma,
-                                mat: p.mat,
-                                cas: p.cas,
-                                diff: diff,
-                            });
-                        }
-                    });
-                });
-
-                // renderSusenBanners (Firebase) handles display — no duplicate render
+                renderSusenBanners(); // deleguj na unified renderer
             }
 
-            function renderSusenAlerts(alerts) {
-                var containers = []; // disabled: Firebase-based renderSusenBanners handles display
-                containers.forEach(function (id) {
-                    var el = document.getElementById(id);
-                    if (!el) return;
-                    if (!alerts.length) { el.innerHTML = ""; return; }
-                    el.innerHTML = alerts.map(function (a) {
-                        var hoursLeft = Math.floor(a.diff / 60);
-                        var minsLeft = a.diff % 60;
-                        var timeStr = hoursLeft > 0 ? hoursLeft + "h " + minsLeft + "min" : minsLeft + " min";
-                        return '<div class="notif warning" style="margin-bottom:10px">' +
-                            '<div class="notif-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" style="width:18px;height:18px;stroke-width:2"><path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10 10-4.5 10-10S17.5 2 12 2"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg></div>' +
-                            '<div class="notif-body">' +
-                            '<div class="notif-title">Nutno sušit materiál — výměna za ' + timeStr + '</div>' +
-                            '<div class="notif-msg"><strong>' + (a.mat || "") + '</strong>' + (a.forma ? ' · ' + a.forma : '') + ' · ' + a.mach + '</div>' +
-                            '<div class="notif-meta"><span class="notif-time">' + (a.cas ? 'výměna v ' + a.cas : a.smena) + '</span><span class="notif-tag">Upozornění</span></div>' +
-                            '</div></div>';
-                    }).join("");
-                });
+            function renderSusenAlerts() {
+                // Rendering přesunuto do renderSusenBanners()
             }
 
             // ═══════════════════════════════════════════════
